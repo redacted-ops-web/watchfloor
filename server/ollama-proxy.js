@@ -206,7 +206,7 @@ async function ytId(s) {
   const h = String(s.handle || '').replace(/^@/, ''); if (!h) throw new Error('no channel');
   if (ytIds[h]) return ytIds[h];
   const page = await getText('https://www.youtube.com/@' + encodeURIComponent(h));
-  const m = page.match(/"(?:externalId|channelId|browseId)":"(UC[\w-]{22})"/) || page.match(/channel\/(UC[\w-]{22})/);
+  const m = page.match(/<link rel="canonical" href="https:\/\/www\.youtube\.com\/channel\/(UC[\w-]{22})"/) || page.match(/"externalId":"(UC[\w-]{22})"/) || page.match(/"canonicalBaseUrl":"\/@[^"]+"[^}]{0,300}?"channelId":"(UC[\w-]{22})"/);
   if (!m) throw new Error('channel id not found');
   return (ytIds[h] = m[1]);
 }

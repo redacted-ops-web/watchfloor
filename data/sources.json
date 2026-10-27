@@ -3,7 +3,7 @@
     "id": "s2g",
     "name": "S2 Underground",
     "type": "youtube",
-    "channelId": "UCYmtpjXT22tAWGIlg_xDDPA"
+    "handle": "s2underground"
   },
   {
     "id": "dirtycivilian",
@@ -15,7 +15,7 @@
     "id": "techprepper",
     "name": "The Tech Prepper",
     "type": "youtube",
-    "channelId": "UCqO2enRDIhg1PXahSxpoVHw"
+    "handle": "TheTechPrepper"
   },
   {
     "id": "enforcer",
