@@ -1,7 +1,15 @@
 {
-  "generatedAt": "2026-10-27T16:20:00Z",
+  "generatedAt": "2026-10-27T20:02:21Z",
   "meta": {
-    "brief": "**Bottom line.** The Gulf remains the center of gravity. On day 242 of the Iran–US war, Hormuz carries roughly 30% of pre-war traffic and Brent is near $116 (one tracker, Oct 26).\n\n**What changed since the last refresh**\n- Saudi, Pakistani and Turkish officials met Iran in Tehran on Oct 26; no deal, but talks continue. Iran asked for a two-week regional pause in exchange for a gradual Hormuz reopening.\n- Hours later the Houthis fired missiles and drones at Saudi Arabia, including at Riyadh (intercepted). Iran says it lacks leverage over them.\n- Iran reported a tanker hit a mine east of Hormuz on Oct 27.\n- Russia hit Kyiv with two ballistic-missile waves; Moscow says it will resume talks after Nov 4.\n- PHP2Shell flaws joined CISA's exploited list on Oct 26.\n- Haiti's gangs struck the UN-backed force on Oct 18–19.\n\n**Watch next**\n- A US strike decision or a published Iran framework.\n- Houthi attacks on the Yanbu–Suez tanker route.\n- Ukraine talks timing after Nov 4.\n\nThis is an assessment from headline-level reporting, not verified intelligence.",
+    "brief": "**Bottom line**\nThree theaters matter today, and they are linked. In Ukraine, Russia hit Kyiv again overnight while a narrow American-brokered truce began around Oleshky, and trilateral talks are planned for early November. In the Black Sea, drone strikes on merchant ships off Bulgaria and Romania have killed more than two dozen sailors this month. In the Gulf, Hormuz shipping remains far below normal and oil is near one hundred seventeen dollars. Confidence in these judgments: moderate.\n\n**Russia and Ukraine**\n- The front is largely static. The Institute for the Study of War reported no confirmed Russian advances on October 26 near Lyman, Dobropillia, Huliaipole or Kupyansk. Ukraine holds positions south of Kostiantynivka, while Russian infiltration continues to the north-east. Russian claims of new villages remain unconfirmed.\n- The air war is the main story. Overnight into October 27, Russia sent about two hundred eighty drones at Kyiv, and Ukraine's Air Force says it downed or suppressed about two hundred fifty-five of them. A university dormitory was hit and the Southern Bridge over the Dnipro is closed. Sources differ on missiles: Zelensky said sixteen ballistic missiles, while the Air Force counted two. Earlier, on October 19, twenty-eight substations were hit, and on October 26 six regions were still without power.\n- Ukraine keeps striking deep. It reports hits on an aircraft plant and a chemical plant in Voronezh, a microchip plant in Yelets, the Ryazan refinery, and at least three Yandex data centers. Most claims come from Ukraine's General Staff.\n- A local ceasefire around occupied Oleshky began on October 27 and runs to November 1, to let aid in and residents out. It covers nothing else.\n- Talks are planned for the first half of November in Abu Dhabi. A source close to the Kremlin says Putin told Nordic leaders Russia will not compromise on taking all of Donbas. That is one source. Zelensky is still waiting for promised Patriot interceptors, and US lawmakers are pushing back on the easing of limits on Russian energy imports. Confidence that fighting continues through winter: high.\n\n**Europe and NATO**\n- Seven commercial ships have been hit by drones off Bulgaria and Romania since early October. On October 13 the cargo ship HS Dignity sank with eleven crew missing. Both governments blame Russia, which denies it. No clear public evidence on the attacker was found.\n- On October 18 a drone exploded on a car in Lithuania. Lithuania says it was Ukrainian and came via Poland, which disputes the route. Ukraine cited Russian jamming.\n- On October 21 Germany's armed forces raised the Russian sabotage threat to significant, a first. On October 22 Germany arrested a man suspected of spying for Russia. Explosive-laden drones were found near an airbase in September and at Leipzig airport in August.\n- Belarus's leader said on October 22 he is preparing for war but trying to avoid it. I could not verify troop moves. No new Baltic cable incident was found. Confidence that spillover risk is rising: moderate.\n\n**Gulf and Hormuz**\n- About two hundred fifty-four ships crossed Hormuz in the latest week, and about four hundred ninety-two vessels were waiting outside on October 25. The Washington Institute counted twenty-eight ship attacks in October, the worst month this year.\n- Brent crude settled at one hundred sixteen dollars seventy-two cents on October 23, according to one tracker. Saudi, Pakistani and Turkish officials met Iranian officials on October 26 with no deal. Whether the United States orders new strikes is unknown.\n- High oil prices raise Russia's export income and Europe's costs. Confidence: moderate.\n\n**Levant and Red Sea**\n- The Houthis fired missiles and drones at Saudi Arabia on October 26 and 27, and the coalition says it intercepted them. Egypt's parliament authorized military support for Saudi Arabia. This raises risk for Red Sea and Suez shipping.\n- Gaza's ceasefire is nominal, with strikes continuing. Lebanon is tense but quiet.\n\n**Africa and Asia**\n- Sudan has a new famine risk and attacks on hospitals. Congo faces a new rebel front and an Ebola spread. Haiti saw its largest gang attack on the international force. Myanmar's junta airstrikes continue, and the Afghanistan and Pakistan border stays closed. These were not refreshed today.\n\n**Cyber and infrastructure**\n- Two PHP server flaws, called PHP2Shell, were added to the United States exploited-vulnerability list on October 26, with a federal patch deadline of October 29. Researchers saw thousands of exploit attempts, but the number of real compromises is unknown.\n- Hospitals remain targets, including a Nebraska hospital and the University of New Mexico health system. Ransomware leak-site claims against utilities are unverified.\n- If Russia and NATO tension rises, expect more hostile cyber activity in Europe. That is an inference, not a reported fact.\n\n**What to watch next**\n- Next seven days: more Russian strikes on the grid and Kyiv, how the Oleshky truce holds through November 1, further ship attacks in the Black Sea, and PHP2Shell patching by October 29.\n- Next thirty days: whether the Abu Dhabi talks happen and what they produce, findings on the Lithuania drone and the Black Sea attacks, any American order to strike Iran, and Hormuz transit counts.\n- Main uncertainty: who is behind the Black Sea strikes, and whether Ukraine's deep strikes change Russian fuel supply.\n\nThis is an assessment from headline-level reporting and not verified intelligence.",
+    "questions": [
+      "Write a situation brief from this data.",
+      "Who is likely behind the drone strikes on ships off Bulgaria and Romania, and what could NATO do?",
+      "What do the Oleshky truce, Putin's Donbas stance and the November Abu Dhabi talks imply for a ceasefire?",
+      "Do the Lithuania drone and Germany's raised sabotage alert signal rising Russia–NATO escalation risk?",
+      "How do Hormuz disruption and $117 oil spill over into Europe's energy costs and Russia's revenue?",
+      "Which cyber or infrastructure incidents pose the biggest risk to energy, health or transport in the next 30 days?"
+    ],
     "feeds": [
       {
         "name": "Pentagon Pizza Index (PizzINT)",
@@ -17,39 +25,31 @@
     "indicators": [
       {
         "label": "Brent crude",
-        "note": "One tracker's 26 Oct settle. Its dates are inconsistent.",
+        "note": "One tracker's Oct 23 settle, a 7-month high",
         "tone": "crit",
-        "value": "$115.81"
+        "value": "$116.72"
       },
       {
         "label": "Hormuz transits",
-        "note": "UKMTO weekly ≈254. Pre-war ~130/day.",
+        "note": "UKMTO latest week; 28 ship attacks in Oct",
         "tone": "crit",
-        "value": "~36/day"
+        "value": "~254/week"
       },
       {
-        "label": "Vessels waiting",
-        "note": "JMIC count, 25 Oct",
+        "label": "Kyiv strike, Oct 27",
+        "note": "Air Force: 255-257 downed; missile count disputed",
         "tone": "sev",
-        "value": "~492"
+        "value": "~280 drones"
       },
       {
-        "label": "Iran–US war",
-        "note": "Since 28 Feb 2026",
-        "tone": "",
-        "value": "Day 242"
+        "label": "Black Sea ships hit",
+        "note": "Off Bulgaria and Romania; 11 missing from HS Dignity",
+        "tone": "sev",
+        "value": "7 since Oct"
       }
     ],
-    "updatedAt": "2026-10-27T16:05:00Z",
-    "updatedBy": "Scheduled task",
-    "questions": [
-      "Write a situation brief from this data.",
-      "Which hotspots are most likely to escalate in the next 30 days, and why?",
-      "How might a prolonged Hormuz closure cascade into the other theaters and into cyber risk?",
-      "What are the biggest risks to global shipping and energy prices this month?",
-      "Which cyber incidents matter most for critical infrastructure, and what should operators watch for?",
-      "What would change this assessment, and which indicators should I watch over the next two weeks?"
-    ]
+    "updatedAt": "2026-10-27T20:00:00Z",
+    "updatedBy": "Scheduled task (light)"
   },
   "hotspots": [
     {
@@ -76,6 +76,56 @@
       "summary": "Tension persists: border crossings remain closed and bilateral trade has fallen sharply (VOA, Oct 23). Pakistan rejected Kabul's position on militants as 'diversionary' (Dawn, Oct 24), and the NYT (Oct 22) describes an 'open war'.",
       "trend": "up",
       "id": "af-pak"
+    },
+    {
+      "asof": "2026-10-22",
+      "bullets": [
+        "The Sep drone shot down near Kaunas had come from Belarus."
+      ],
+      "lat": 53.9,
+      "lon": 27.6,
+      "name": "Belarus and the Russia–Belarus western grouping",
+      "region": "Eastern Europe",
+      "sev": 2,
+      "sources": [
+        {
+          "t": "Izvestia, 22 Oct",
+          "u": "https://en.iz.ru/en/2188634/2026-10-22/lukashenko-pointed-out-need-russia-and-belarus-be-ready-war"
+        },
+        {
+          "t": "Wikipedia: 2026 drone incursions",
+          "u": "https://en.wikipedia.org/wiki/2026_drone_incursions_into_the_Baltic_states_and_Finland"
+        }
+      ],
+      "summary": "Meeting Russian Defence Minister Belousov on Oct 22, Lukashenko said 'we are preparing for war, but we are trying to avoid it', and that the joint Russian-Belarusian force in the western direction is in order. Only this one statement was read this run; troop numbers and border incidents beyond the Sep 14-15 drone are unverified.",
+      "trend": "flat",
+      "id": "belarus"
+    },
+    {
+      "asof": "2026-10-22",
+      "bullets": [
+        "Oct 15: a ship caught fire inside Romanian territorial waters.",
+        "Days later a ship was hit just outside Romanian waters; 7 of 12 sailors were still missing almost a week on.",
+        "Sofia said it would summon the Russian ambassador; the EU Commission president condemned the attacks."
+      ],
+      "lat": 43.7,
+      "lon": 28.9,
+      "name": "Black Sea drone attacks on shipping (Bulgaria, Romania)",
+      "region": "Black Sea / EU coast",
+      "sev": 4,
+      "sources": [
+        {
+          "t": "Al Jazeera, Oct 13",
+          "u": "https://www.aljazeera.com/amp/news/2026/10/13/drone-attack-sinks-ship-off-bulgarias-black-sea-coast-pm-says"
+        },
+        {
+          "t": "Insurance Journal, Oct 22",
+          "u": "https://www.insurancejournal.com/news/international/2026/10/22/889958.htm"
+        }
+      ],
+      "summary": "Seven commercial ships have been hit by drones off Bulgaria and Romania since early October, killing more than two dozen sailors per authorities (Insurance Journal, Oct 22). On Oct 13 the Guinea-Bissau-flagged HS Dignity sank about 18 nautical miles off Bulgaria with 11 crew missing and 5 rescued; the Ukrainian-owned Chelsea 3 was damaged and all 15 crew rescued. Bulgaria and Romania blame Russia, which denies it; no clear evidence on the attacker was published in the Oct 13 report.",
+      "trend": "up",
+      "id": "black-sea-ship-attacks"
     },
     {
       "asof": "2026-10-20",
@@ -127,11 +177,12 @@
       "id": "ethiopia-eritrea"
     },
     {
-      "asof": "2026-10-25",
+      "asof": "2026-10-27",
       "bullets": [
         "Gazan health officials counted more than 1,300 killed since the ceasefire as of 31 Aug (Asharq Al-Awsat).",
         "UNICEF counts 340 children killed since the ceasefire began (as of mid-Oct).",
-        "Only headlines were read for Oct 25 events; details are unverified."
+        "Only headlines were read for Oct 25 events; details are unverified.",
+        "Israel voted in a general election on Oct 27 with turnout at multi-decade highs; the race was described as neck and neck (Gulf News). Result not yet known."
       ],
       "lat": 31.4,
       "lon": 34.4,
@@ -139,6 +190,10 @@
       "region": "Eastern Mediterranean",
       "sev": 3,
       "sources": [
+        {
+          "t": "Gulf News live blog, 27 Oct",
+          "u": "https://gulfnews.com/world/mena/middle-east-war-saudi-arabia-intercepts-houthi-missiles-drones-as-iran-talks-continue-1.500724842"
+        },
         {
           "t": "armedconflicts.org weekly digest, 19–25 Oct (headlines)",
           "u": "https://armedconflicts.org/weekly/2026-w43.html"
@@ -181,10 +236,11 @@
     {
       "asof": "2026-10-27",
       "bullets": [
-        "The conflict began 28 Feb 2026. A June truce brokered by Pakistan did not last.",
-        "Oct 27: Iran's navy said a tanker caught fire after hitting a mine east of Hormuz. Vessel and casualties were not identified. CENTCOM rejected an IRGC claim that US forces had withdrawn from the strait.",
-        "Qatar says mediation needs Iran to show good faith, stop threatening Arab states and reopen the strait.",
-        "Iran holds a reported 440 kg of 60%-enriched uranium and refuses to ship it abroad. No deal is reported."
+        "The war began 28 Feb 2026. A June Pakistan/Qatar-brokered memorandum collapsed; US strikes ran for several weeks in July.",
+        "Oct 27: Iran's army said a tanker hit mines and caught fire outside authorised routes. CENTCOM rejected an IRGC claim that US forces had left the strait.",
+        "Trump earlier said no attacks before the Nov 3 US midterms; a Reuters/Ipsos poll puts approval of his handling of the conflict at 34%.",
+        "Oct 27: China said it would send an envoy to regional states; Oman proposed a regional non-aggression pact.",
+        "The US State Department ordered non-emergency staff out of Saudi Arabia effective Oct 23."
       ],
       "lat": 27,
       "lon": 55,
@@ -192,6 +248,14 @@
       "region": "Persian Gulf",
       "sev": 5,
       "sources": [
+        {
+          "t": "Al Jazeera, 27 Oct: Iran's calculations as US escalation looms",
+          "u": "https://www.aljazeera.com/news/2026/10/27/irans-calculations-as-us-escalation-looms-trust-midterms-hormuz"
+        },
+        {
+          "t": "Gulf News live blog, 27 Oct",
+          "u": "https://gulfnews.com/world/mena/middle-east-war-saudi-arabia-intercepts-houthi-missiles-drones-as-iran-talks-continue-1.500724842"
+        },
         {
           "t": "The National, 27 Oct: inside Tehran talks",
           "u": "https://www.thenationalnews.com/news/gulf/2026/10/27/exclusive-iran-saudi-arabia-inside-tehran-talks/"
@@ -209,7 +273,7 @@
           "u": "https://global-energy-flow.com/hormuz/"
         }
       ],
-      "summary": "War day 242. Saudi, Pakistani and Turkish officials held talks in Tehran on Oct 26 with no deal; Iran asked them to press Washington for a two-week regional pause, in exchange for a gradual reopening of Hormuz. The US blockade continues and Trump raised possible strikes on Oct 24–25.",
+      "summary": "War day 242. Saudi, Pakistani and Turkish officials met Iranian officials in Tehran on Oct 26 and agreed to keep talking; no deal. Iran lists seven conditions for new talks and has offered a gradual Hormuz reopening for a two-week regional pause. The US blockade continues; Trump said on Oct 25 he must decide whether to 'make a deal or finish them off', and CNN reports forces could act within 96 hours of an order (no decision reported).",
       "trend": "up",
       "id": "iran-gulf"
     },
@@ -239,8 +303,114 @@
       "id": "lebanon"
     },
     {
+      "asof": "2026-10-24",
+      "bullets": [
+        "Oct 21-22: junta troops burned homes and detained at least 10 civilians in Seikphyu Township, Magway.",
+        "Earlier (Aug): the army pushed into KIA-held areas of northern Shan State near Mongmit and Mabein (Irrawaddy).",
+        "Only AAPP's daily briefing was read for October; other outlets' headlines were not opened."
+      ],
+      "lat": 21.9,
+      "lon": 96.1,
+      "name": "Myanmar civil war",
+      "region": "South-East Asia",
+      "sev": 3,
+      "sources": [
+        {
+          "t": "AAPP daily briefing, 27 Oct",
+          "u": "https://aappb.org/daily-27-10-26/"
+        },
+        {
+          "t": "Irrawaddy, 13 Aug",
+          "u": "https://www.irrawaddy.com/news/war-against-the-junta/myanmar-military-pushes-into-kia-held-northern-shan-as-fighting-escalates.html"
+        }
+      ],
+      "summary": "Junta airstrikes continue against civilians: AAPP logs strikes on Oct 18 (nine killed at a Chin State port), Oct 23 (five in Sagaing, at least five in Sittwe) and Oct 24 (three in Magway). AAPP counts 8,614 killed by the junta since the 2021 coup; true totals are likely higher.",
+      "trend": "flat",
+      "id": "myanmar"
+    },
+    {
+      "asof": "2026-10-22",
+      "bullets": [
+        "Oct 21: two smuggling balloons hit power lines in Lithuania (launch site not stated).",
+        "Oct 21: Polish aircraft scrambled and an alert issued in Podkarpackie; no airspace violation reported.",
+        "Oct 21: Russian Su-30 crashed in Kaliningrad region during training; cause not given.",
+        "Sep 14-15: NATO Typhoon shot down a Russian Gerbera-2 drone from Belarus near Kaunas.",
+        "Oct 22: Germany arrested a man suspected of spying for Russia.",
+        "Seven commercial ships hit by drones off Bulgaria and Romania since early October (see Black Sea hotspot); both governments blame Russia, which denies it.",
+        "NATO's Rutte said on Oct 13 the alliance would adjust defences as needed."
+      ],
+      "lat": 54.9,
+      "lon": 23.9,
+      "name": "NATO eastern flank and Baltic",
+      "region": "Baltic / Eastern Europe",
+      "sev": 3,
+      "sources": [
+        {
+          "t": "Insurance Journal: Russia drones killing people within EU territory, Oct 22",
+          "u": "https://www.insurancejournal.com/news/international/2026/10/22/889958.htm"
+        },
+        {
+          "t": "Al Jazeera: ship sunk off Bulgaria, Oct 13",
+          "u": "https://www.aljazeera.com/amp/news/2026/10/13/drone-attack-sinks-ship-off-bulgarias-black-sea-coast-pm-says"
+        },
+        {
+          "t": "Notes from Poland, 19 Oct",
+          "u": "https://notesfrompoland.com/2026/10/19/lithuania-says-ukrainian-drone-that-struck-car-entered-its-airspace-from-poland/"
+        },
+        {
+          "t": "Baltic Monitor, 22 Oct",
+          "u": "https://baltic-monitor.com/en/issues/2026-10-22/"
+        },
+        {
+          "t": "Al Jazeera, 22 Oct: Germany arrest",
+          "u": "https://www.aljazeera.com/news/2026/10/22/germany-arrests-ukrainian-man-accused-of-spying-for-russia"
+        },
+        {
+          "t": "Wikipedia: 2026 drone incursions",
+          "u": "https://en.wikipedia.org/wiki/2026_drone_incursions_into_the_Baltic_states_and_Finland"
+        }
+      ],
+      "summary": "On Oct 18 a drone exploded on a moving car in Lithuania; Lithuania says it entered from Poland and was Ukrainian, Poland disputes the entry route, and Ukraine apologised citing Russian jamming. On Oct 21 Germany's armed forces raised the Russian sabotage threat level to 'significant' for the first time. Lithuania's prime minister said Russia is testing how far it can go without triggering Article 5.",
+      "trend": "up",
+      "id": "nato-eastern-flank"
+    },
+    {
+      "asof": "2026-10-26",
+      "bullets": [
+        "ISW says Ukraine struck at least three Yandex data centres in October.",
+        "Oct 18: about 1,000 drones launched at Russia in one attack (CBS, earlier run, headline-level).",
+        "Trump has criticised Ukraine's energy strikes, eased some sanctions and agreed to buy 300,000 tonnes of Russian diesel (Al Jazeera)."
+      ],
+      "lat": 51.67,
+      "lon": 39.18,
+      "name": "Ukrainian strikes inside Russia",
+      "region": "Russia",
+      "sev": 3,
+      "sources": [
+        {
+          "t": "ISW/CTP assessment, 26 Oct",
+          "u": "https://www.criticalthreats.org/analysis/russian-offensive-campaign-assessment-october-26-2026"
+        },
+        {
+          "t": "AP via NY1, 15 Oct: Ryazan refinery",
+          "u": "https://mynews13.com/fl/orlando/ap-top-news/2026/10/15/ukraine-resumes-attacks-on-russian-oil-refineries-officials-say-after-brief-truce"
+        },
+        {
+          "t": "Al Jazeera, 23 Oct",
+          "u": "https://www.aljazeera.com/news/2026/10/23/russia-ukraine-talks-planned-for-november-in-uae-kremlin"
+        }
+      ],
+      "summary": "Ukraine hit the Voronezh aircraft plant, a Voronezh chemical plant and the Severny Bridge, and says it destroyed a microchip centre at the Energiya plant in Yelets (ISW, Oct 26). Ukraine struck the Ryazan refinery on Oct 15 hours after Zelensky declared a short energy truce over, saying Moscow had rejected it. Claims come mainly from Ukraine's General Staff.",
+      "trend": "up",
+      "id": "russia-deep-strikes"
+    },
+    {
       "asof": "2026-10-16",
-      "bullets": [],
+      "bullets": [
+        "Internal displacement in Mali has passed 400,000 (UN estimate cited by CommandEleven).",
+        "Sep 7: JNIM posted footage of an attack that killed several Russian soldiers (same source).",
+        "Single-source analytic dossier; casualty totals unverified. No Oct-dated Sahel event was confirmed this run."
+      ],
       "lat": 13,
       "lon": -2,
       "name": "Sahel: JNIM vs Islamic State",
@@ -248,11 +418,15 @@
       "sev": 3,
       "sources": [
         {
+          "t": "CommandEleven Intel: Mali six months after the April offensive",
+          "u": "https://commandelevenintel.substack.com/p/mali-siege-that-held-april-offensive-six-months-on"
+        },
+        {
           "t": "armedconflicts.org weekly digest, 12–18 Oct (headlines)",
           "u": "https://armedconflicts.org/weekly/2026-w42.html"
         }
       ],
-      "summary": "Al-Qaeda's affiliate and Islamic State are fighting intensely across the Sahel, including a clash in Burkina Faso.",
+      "summary": "Mali remains the core: JNIM and the FLA hit Kati, Bamako, Kidal and other cities on Apr 25 and killed the defence minister; Kidal has been under FLA control since Apr 27. JNIM declared a blockade of Bamako on Apr 28; over 900 escorted fuel tankers reached the capital on Sep 14. A single analyst dossier (CommandEleven, one source) sees continued attrition. Separately, JNIM and Islamic State are fighting each other, including in Burkina Faso.",
       "trend": "flat",
       "id": "sahel"
     },
@@ -289,32 +463,62 @@
     {
       "asof": "2026-10-27",
       "bullets": [
-        "A local ceasefire began Oct 27 in occupied Oleshky so aid can enter (announced by Budanov).",
-        "A UN inquiry found Russian attacks on Ukraine's energy grid amount to war crimes.",
-        "Norway and Finland called Putin ahead of possible Abu Dhabi talks.",
-        "Oct 18: Ukraine launched about 1,000 drones at Russia in one attack (CBS). Syrskyi says Russian gains slowed by more than half in 2026."
+        "UN Commission of Inquiry (Oct 26) found Russian attacks on Ukraine's energy infrastructure amount to war crimes and crimes against humanity.",
+        "Zelensky says agreed Patriot interceptor deliveries are still awaited.",
+        "Reports of Starlink/Starshield disruption affecting Ukrainian operations; speeds reportedly restored, cause unclear."
       ],
-      "lat": 48.5,
-      "lon": 36.5,
-      "name": "Ukraine–Russia",
+      "lat": 50.45,
+      "lon": 30.52,
+      "name": "Russian strikes on Ukrainian energy and cities",
       "region": "Eastern Europe",
       "sev": 4,
       "sources": [
         {
-          "t": "Kyiv Independent, 27 Oct (homepage headlines)",
-          "u": "https://kyivindependent.com/"
+          "t": "RFE/RL, Oct 27",
+          "u": "https://www.rferl.org/a/ukraine-russia-strike-kyiv-dormitory-us-zelenskyy/33884968.html"
         },
         {
-          "t": "armedconflicts.org weekly digest, 19–25 Oct (headlines)",
-          "u": "https://armedconflicts.org/weekly/2026-w43.html"
-        },
-        {
-          "t": "Kyiv Independent: Syrskyi on slowed advances",
-          "u": "https://kyivindependent.com/ukraine-war-latest-russian-territorial-advances-slowed-by-more-than-half-in-2026-syrskyi-says/"
+          "t": "Russo-Ukraine War Brief (Oct 27)",
+          "u": "https://peregrin11.substack.com/p/the-russo-ukraine-war-brief-313"
         }
       ],
-      "summary": "Russia fired two waves of ballistic missiles at Kyiv overnight into Oct 27, reportedly hitting a major bridge, metro stations and a university campus; Ukraine reports 4 killed and 57 injured in Russian attacks over the past day. Moscow says it is ready to resume trilateral talks after Nov 4.",
+      "summary": "Overnight into Oct 27 Russia hit Kyiv with 280 drones and ballistic missiles; Ukraine's Air Force says 255-257 targets were downed or suppressed and hits were recorded at 25 locations. Sources differ on missiles: Zelensky said 16 ballistic missiles, the Air Force counted 2. A university dormitory was struck, the Southern Bridge over the Dnipro is closed for assessment, and at least 4 people were killed and 55-57 injured nationwide in the past day. Earlier, on Oct 19, 28 substations were hit and by Oct 26 six regions were still without power.",
       "trend": "up",
+      "id": "ukraine-energy"
+    },
+    {
+      "asof": "2026-10-27",
+      "bullets": [
+        "Russian claims of gains at Rozkishne and Obshche are disputed or unconfirmed by ISW.",
+        "Oleshky humanitarian truce from 3 a.m. Oct 27; evacuation convoy planned Oct 30; it does not cover other areas.",
+        "Trilateral US-Russia-Ukraine talks planned for the first half of November in Abu Dhabi (Peskov, Oct 23).",
+        "270 prisoners of war exchanged on each side (Russian MoD, via Al Jazeera, Oct 23)."
+      ],
+      "lat": 48.5,
+      "lon": 36.5,
+      "name": "Ukraine–Russia front lines",
+      "region": "Eastern Europe",
+      "sev": 4,
+      "sources": [
+        {
+          "t": "ISW/CTP assessment, 26 Oct",
+          "u": "https://www.criticalthreats.org/analysis/russian-offensive-campaign-assessment-october-26-2026"
+        },
+        {
+          "t": "RFE/RL: Kyiv struck as Oleshky ceasefire takes effect",
+          "u": "https://www.rferl.org/a/ukraine-russia-strike-kyiv-dormitory-us-zelenskyy/33884968.html"
+        },
+        {
+          "t": "Russo-Ukraine War Brief (Oct 27)",
+          "u": "https://peregrin11.substack.com/p/the-russo-ukraine-war-brief-313"
+        },
+        {
+          "t": "Al Jazeera, 23 Oct",
+          "u": "https://www.aljazeera.com/news/2026/10/23/russia-ukraine-talks-planned-for-november-in-uae-kremlin"
+        }
+      ],
+      "summary": "ISW's Oct 26 assessment reports no confirmed Russian advances around Lyman, Dobropillia, Huliaipole or Kupyansk; Ukraine holds positions south of Kostiantynivka while Russian infiltration continues to the north-east. Ukraine's General Staff counted 196 combat engagements in the 24 hours to Oct 27. A Kremlin-linked source says Putin told Nordic leaders Russia will not compromise on taking all of Donbas (single source). A US-brokered local ceasefire around occupied Oleshky began Oct 27 and runs to Nov 1.",
+      "trend": "flat",
       "id": "ukraine"
     },
     {
@@ -322,7 +526,8 @@
       "bullets": [
         "Saudi, Pakistani and Turkish envoys asked Iran to press the Houthis to stop; Iran said it lacks leverage.",
         "Oct 18: the Houthis struck Aden, and the UAE reportedly agreed with Saudi Arabia to re-enter the fight.",
-        "The Houthi embargo on Saudi tankers continues. See Bab el-Mandeb."
+        "The Houthi embargo on Saudi tankers continues. See Bab el-Mandeb.",
+        "Egypt's parliament authorised military support for Saudi Arabia; a Houthi official called it a declaration of war (Gulf News, Oct 27)."
       ],
       "lat": 14.5,
       "lon": 45.5,
@@ -330,6 +535,10 @@
       "region": "Arabian Peninsula",
       "sev": 4,
       "sources": [
+        {
+          "t": "Gulf News live blog, 27 Oct",
+          "u": "https://gulfnews.com/world/mena/middle-east-war-saudi-arabia-intercepts-houthi-missiles-drones-as-iran-talks-continue-1.500724842"
+        },
         {
           "t": "The National, 27 Oct: inside Tehran talks",
           "u": "https://www.thenationalnews.com/news/gulf/2026/10/27/exclusive-iran-saudi-arabia-inside-tehran-talks/"
@@ -362,6 +571,10 @@
       "sev": 4,
       "sources": [
         {
+          "t": "Gulf News live blog, 27 Oct",
+          "u": "https://gulfnews.com/world/mena/middle-east-war-saudi-arabia-intercepts-houthi-missiles-drones-as-iran-talks-continue-1.500724842"
+        },
+        {
           "t": "The National, 27 Oct",
           "u": "https://www.thenationalnews.com/news/gulf/2026/10/27/exclusive-iran-saudi-arabia-inside-tehran-talks/"
         },
@@ -374,17 +587,80 @@
           "u": "https://www.hellenicshippingnews.com/?p=1145759"
         }
       ],
-      "summary": "The Houthis keep an embargo on Saudi tankers and fired missiles and drones at Saudi Arabia again on Oct 26–27 (coalition says intercepted). Some carriers moved services back to Suez this summer, but a full return is unlikely while attacks continue.",
+      "summary": "The Houthis keep an embargo on Saudi tankers and fired ballistic missiles and drones at Saudi Arabia again on Oct 26-27 (coalition says intercepted, including two missiles over Riyadh). Egypt's parliament authorised military support for Saudi Arabia. Some carriers moved services back to Suez this summer, but a full return is unlikely while attacks continue.",
       "trend": "up",
       "id": "bab-el-mandeb"
     },
     {
+      "asof": "2026-10-22",
+      "bullets": [
+        "An Estonian MP called the satellite approach a deliberate provocation; this is an opinion."
+      ],
+      "lat": 57,
+      "lon": 19,
+      "metric": "No current transit count found",
+      "metricNote": "No transit or incident count for the Baltic was found this run.",
+      "name": "Baltic Sea and Danish Straits",
+      "region": "Baltic Sea",
+      "sev": 3,
+      "sources": [
+        {
+          "t": "Baltic Monitor, 22 Oct",
+          "u": "https://baltic-monitor.com/en/issues/2026-10-22/"
+        },
+        {
+          "t": "Qatar Tribune, 1 Apr: Ust-Luga",
+          "u": "https://www.qatar-tribune.com/article/226633/world/ukrainian-drones-hit-russian-energy-export-centres-again"
+        }
+      ],
+      "summary": "Russia restricted civilian vessel traffic near the Kaliningrad port for naval training on Oct 22. On Oct 18-19 a Russian military satellite approached a Finnish ICEYE satellite; LeoLabs saw no interference. Russia says Ukrainian drones were downed over Leningrad and Pskov oblasts on Oct 21-22 (unverified Russian figures); Ukraine struck Ust-Luga port as recently as March. No new cable incident was found this run.",
+      "trend": "flat",
+      "id": "baltic"
+    },
+    {
+      "asof": "2026-10-26",
+      "bullets": [
+        "Ukraine's July claims of vessel strikes come from its drone-force commander and are unverified."
+      ],
+      "lat": 43.5,
+      "lon": 34,
+      "metric": "No current transit count found",
+      "metricNote": "Grain-corridor and Straits traffic figures were not found this run.",
+      "name": "Black Sea and Turkish Straits",
+      "region": "Black Sea",
+      "sev": 4,
+      "sources": [
+        {
+          "t": "Insurance Journal, Oct 22",
+          "u": "https://www.insurancejournal.com/news/international/2026/10/22/889958.htm"
+        },
+        {
+          "t": "Al Jazeera, Oct 13",
+          "u": "https://www.aljazeera.com/amp/news/2026/10/13/drone-attack-sinks-ship-off-bulgarias-black-sea-coast-pm-says"
+        },
+        {
+          "t": "ISW/CTP assessment, 26 Oct",
+          "u": "https://www.criticalthreats.org/analysis/russian-offensive-campaign-assessment-october-26-2026"
+        },
+        {
+          "t": "Al Jazeera, 15 Jul",
+          "u": "https://aljazeera.com/news/2026/7/15/russian-attack-on-odesa-kills-three-as-ukraine-targets-vessels-in-black-sea"
+        }
+      ],
+      "summary": "Seven commercial ships were hit by drones off Bulgaria and Romania since early October, including the sinking of HS Dignity on Oct 13 (11 crew missing); both governments blame Russia, which denies it. Zelensky again offered to halt Black Sea strikes and the Kremlin rejects ceasefire offers (ISW, Oct 26). No current grain-corridor or Turkish Straits transit counts were found, so traffic effects are unquantified.",
+      "trend": "up",
+      "id": "black-sea"
+    },
+    {
       "asof": "2026-10-27",
       "bullets": [
-        "Counts are floors. Many ships no longer broadcast AIS.",
-        "Oil flow estimates vary widely, from 3.7–8 million b/d (independent) to 11.6–14 million b/d (Kpler, week to Oct 13).",
-        "Brent settled $115.81 and WTI $101.76 on Oct 26 per one tracker; its page is internally inconsistent on dates, so check a market source.",
-        "Iran has offered a gradual reopening in return for a two-week regional pause; no agreement reported."
+        "Counts are floors. Many ships no longer broadcast AIS; the tracker's latest daily count (Windward, 16 on Sep 30) is over three weeks old.",
+        "Oil flow estimates vary from 3.7-8 million b/d (independent) to 11.6 million b/d (Kpler, week to Oct 13).",
+        "Brent $115.81 and WTI $101.76 (December contracts) settled Oct 26 per one tracker, though it also labels that Brent figure as the Oct 23 settle. Al Jazeera put Brent above $117 the prior week versus about $72 pre-war.",
+        "JMIC vessel-waiting figures differ: about 492 outside the strait (Oct 25) versus about 217 at anchor off Fujairah and Khor Fakkan; not reconciled.",
+        "Washington Institute says October saw the most attacks on commercial ships near Hormuz (via Al Jazeera).",
+        "Kpler: 10 tankers struck Sep 28-Oct 4; UKMTO logged 15 more attacks Oct 6-14.",
+        "Crude flows through the strait swung from ~20.8 million barrels on Oct 8 to 2.9 million on Oct 11 (Al Jazeera)."
       ],
       "lat": 26.5,
       "lon": 56.3,
@@ -394,6 +670,18 @@
       "region": "Persian Gulf",
       "sev": 5,
       "sources": [
+        {
+          "t": "Al Jazeera, Oct 14",
+          "u": "https://www.aljazeera.com/news/2026/10/14/iran-steps-up-hormuz-surveillance-attacks-soar-oil-flows-crash-again"
+        },
+        {
+          "t": "BigGo Finance, Oct 24",
+          "u": "https://finance.biggo.com/news/272d1567-06e5-4e1a-bba8-dd4ed18b7e9f"
+        },
+        {
+          "t": "Al Jazeera, 27 Oct: Iran's calculations as US escalation looms",
+          "u": "https://www.aljazeera.com/news/2026/10/27/irans-calculations-as-us-escalation-looms-trust-midterms-hormuz"
+        },
         {
           "t": "Global Energy Flow: Hormuz tracker, 27 Oct",
           "u": "https://global-energy-flow.com/hormuz/"
@@ -411,7 +699,7 @@
           "u": "https://news.usni.org/2026/07/31/hormuz-traffic-levels-continue-decreasing-houthis-in-yemen-threaten-saudi-tankers"
         }
       ],
-      "summary": "Effectively closed to normal shipping since the war began. UKMTO counts about 254 transits in its latest week. JMIC counted about 492 vessels waiting outside on Oct 25. On Oct 27 Iran's navy said a tanker hit a mine east of the strait.",
+      "summary": "Effectively closed to normal shipping since the war began Feb 28 (about 125 large vessels a day pre-war). UKMTO counts about 254 transits in its latest week; JMIC counted about 492 vessels waiting on Oct 25. The Washington Institute confirmed 28 ship attacks in October, the worst month of the year, and JMIC rates the threat 'severe'. On Oct 27 Iran's navy said a tanker hit a mine east of the strait. Brent settled at $116.72 on Oct 23, a seven-month high (one tracker).",
       "trend": "flat",
       "id": "hormuz"
     },
@@ -516,6 +804,65 @@
       "id": "bitget"
     },
     {
+      "actor": "Not attributed",
+      "asof": "2026-10-24",
+      "bullets": [
+        "Separately, Microsoft and others issued emergency patches on Oct 26 for a critical Brotli flaw; exploitation was not stated."
+      ],
+      "sector": "Enterprise / endpoint",
+      "sev": 3,
+      "sources": [
+        {
+          "t": "BleepingComputer security news, Oct 22-26",
+          "u": "https://www.bleepingcomputer.com/news/security/"
+        }
+      ],
+      "summary": "The BlackX UEFI bootkit reportedly used the older Baton Drop flaw to bypass Secure Boot in an espionage campaign. Only the headline summary was read; targets and scale are unknown.",
+      "title": "BlackX UEFI bootkit bypasses Secure Boot",
+      "when": "Reported 24 Oct",
+      "id": "blackx-bootkit"
+    },
+    {
+      "actor": "Not attributed",
+      "asof": "2026-10-21",
+      "bullets": [],
+      "lat": 34,
+      "lon": -81.03,
+      "sector": "Government",
+      "sev": 2,
+      "sources": [
+        {
+          "t": "Security Boulevard: Top 10 breaches of the week",
+          "u": "https://securityboulevard.com/2026/10/top-10-breaches-of-the-week-14/"
+        }
+      ],
+      "summary": "City services including MyColaSC, GIS and animal services were disrupted; state law enforcement is investigating. Ransomware is not confirmed and no data exposure has been reported.",
+      "title": "City of Columbia, South Carolina systems outage",
+      "when": "Oct 21",
+      "id": "columbia-sc"
+    },
+    {
+      "actor": "Not attributed",
+      "asof": "2026-10-26",
+      "bullets": [
+        "Headline-level report only."
+      ],
+      "lat": 55.68,
+      "lon": 12.57,
+      "sector": "Education",
+      "sev": 2,
+      "sources": [
+        {
+          "t": "BleepingComputer security news, Oct 22-26",
+          "u": "https://www.bleepingcomputer.com/news/security/"
+        }
+      ],
+      "summary": "Hackers accessed a University of Copenhagen test environment holding data on 525,000 people, per BleepingComputer's headline listing. Only the headline was read; the data types involved are unverified.",
+      "title": "University of Copenhagen test environment accessed",
+      "when": "Reported 26 Oct",
+      "id": "copenhagen-univ"
+    },
+    {
       "actor": "Not stated",
       "asof": "2026-10-03",
       "bullets": [],
@@ -573,6 +920,27 @@
       "id": "fbi-shinyhunters"
     },
     {
+      "actor": "Russia suspected (Moscow denies)",
+      "asof": "2026-10-22",
+      "bullets": [
+        "Bundeswehr raised its sabotage threat level to 'significant' on Oct 21, a first."
+      ],
+      "lat": 52.4,
+      "lon": 9.4,
+      "sector": "Government / transport",
+      "sev": 3,
+      "sources": [
+        {
+          "t": "Al Jazeera, 22 Oct",
+          "u": "https://www.aljazeera.com/news/2026/10/22/germany-arrests-ukrainian-man-accused-of-spying-for-russia"
+        }
+      ],
+      "summary": "Germany arrested a Ukrainian man on Oct 22 on suspicion of spying for Russia on defence sites. Prosecutors link a mid-September crashed explosive-laden drone near Wunstorf airbase and an August failed drone attack at Leipzig/Halle airport to the wider picture; attribution of those drones is not stated in what was read. The BND chief says Russia's covert campaign is escalating.",
+      "title": "Germany: sabotage threat raised, explosive drones found",
+      "when": "Aug to 22 Oct",
+      "id": "german-sabotage-drones"
+    },
+    {
       "actor": "Not stated",
       "asof": "2026-10-03",
       "bullets": [],
@@ -612,6 +980,59 @@
     },
     {
       "actor": "Not attributed",
+      "asof": "2026-10-21",
+      "bullets": [],
+      "sector": "Software supply chain",
+      "sev": 3,
+      "sources": [
+        {
+          "t": "Security Boulevard: Top 10 breaches of the week",
+          "u": "https://securityboulevard.com/2026/10/top-10-breaches-of-the-week-14/"
+        }
+      ],
+      "summary": "A malicious LiteLLM release (1.107.0) appeared on PyPI, Docker Hub and GHCR for about two hours using stolen GitHub OAuth tokens from three engineers. The project sees about 23 million downloads a week; it is described as the second such compromise this year.",
+      "title": "LiteLLM poisoned package release",
+      "when": "Oct 21",
+      "id": "litellm-supply-chain"
+    },
+    {
+      "actor": "n0n (ransomware/extortion group)",
+      "asof": "2026-10-19",
+      "bullets": [],
+      "sector": "Maritime / shipping",
+      "sev": 3,
+      "sources": [
+        {
+          "t": "Security Boulevard: Top 10 breaches of the week",
+          "u": "https://securityboulevard.com/2026/10/top-10-breaches-of-the-week-14/"
+        }
+      ],
+      "summary": "The group listed 40+ victims in 18 countries, including ports, operators and ship managers, demanding about $1.2 billion combined; about half are known CyberLogitec customers. Claims come from the group and are unverified.",
+      "title": "n0n extortion of CyberLogitec shipping customers",
+      "when": "Leak site Oct 12; deadline Oct 19",
+      "id": "n0n-cyberlogitec"
+    },
+    {
+      "actor": "Likely Qilin (per Becker's)",
+      "asof": "2026-10-18",
+      "bullets": [],
+      "lat": 40.06,
+      "lon": -95.6,
+      "sector": "Healthcare",
+      "sev": 3,
+      "sources": [
+        {
+          "t": "Security Boulevard: Top 10 breaches of the week",
+          "u": "https://securityboulevard.com/2026/10/top-10-breaches-of-the-week-14/"
+        }
+      ],
+      "summary": "A rural Nebraska hospital was hit by a suspected ransomware attack and ambulances diverted critical patients. No data-loss count reported.",
+      "title": "Community Medical Center, Falls City hospital attack",
+      "when": "Weekend of 17-18 Oct",
+      "id": "nebraska-hospital"
+    },
+    {
+      "actor": "Not attributed",
       "asof": "2026-10-27",
       "bullets": [
         "Federal agencies must patch by Oct 29.",
@@ -637,22 +1058,44 @@
     },
     {
       "actor": "Not stated",
-      "asof": "2026-10-21",
+      "asof": "2026-10-23",
       "bullets": [
-        "Single-source report; details not checked against the 8-K."
+        "Earlier single-source tracker report from Oct 21; confirmation now from BleepingComputer's listing.",
+        "Details not checked against the 8-K."
       ],
       "sector": "Healthcare",
       "sev": 3,
       "sources": [
         {
+          "t": "BleepingComputer security news, Oct 22-26",
+          "u": "https://www.bleepingcomputer.com/news/security/"
+        },
+        {
           "t": "explainx.ai October 2026 cyberattack tracker",
           "u": "https://explainx.ai/blog/october-2026-cyberattacks-list-breaches-exploits-ai-run-attacks-tracker-2026"
         }
       ],
-      "summary": "Quest Diagnostics' Quanum LSM ordering system was accessed and taken offline, and the company filed an SEC 8-K, per one tracker. Patient impact is believed but not confirmed.",
+      "summary": "Quest Diagnostics' Quanum LSM ordering system was accessed without authorization and taken offline, and the company filed an SEC 8-K. BleepingComputer's Oct 22-26 roundup (Oct 23 entry) says Quest confirmed patient records were exposed; the number affected was not given in what I read.",
       "title": "Quest Diagnostics ordering system accessed",
-      "when": "Reported 21 Oct",
+      "when": "Confirmed 23 Oct",
       "id": "quest-quanum"
+    },
+    {
+      "actor": "Qilin, Booba Project, Dragonforce, Rhysida, Everest and others (claims)",
+      "asof": "2026-10-27",
+      "bullets": [],
+      "sector": "Multiple",
+      "sev": 2,
+      "sources": [
+        {
+          "t": "Ransomware.live",
+          "u": "https://www.ransomware.live/"
+        }
+      ],
+      "summary": "Leak sites listed US electric cooperatives (Inside Passage, Delta Electric), Bristol City Council (UK), Malaysian shipping firm MISC, a Singapore energy storage terminal and multiple medical practices. All are unverified group claims aggregated by ransomware.live; dates are listing dates.",
+      "title": "Ransomware leak-site claims against utilities, councils and clinics",
+      "when": "Oct 24-27",
+      "id": "ransomware-claims-oct27"
     },
     {
       "actor": "Star Blizzard (Russian state)",
@@ -725,6 +1168,25 @@
       "title": "Warlock ransomware hits utilities and government",
       "when": "Week of 27 Sep–3 Oct",
       "id": "warlock"
+    },
+    {
+      "actor": "Ukraine (claimed)",
+      "asof": "2026-10-26",
+      "bullets": [],
+      "lat": 54.4,
+      "lon": 41.9,
+      "sector": "Technology",
+      "sev": 2,
+      "sources": [
+        {
+          "t": "ISW/CTP assessment, 26 Oct",
+          "u": "https://www.criticalthreats.org/analysis/russian-offensive-campaign-assessment-october-26-2026"
+        }
+      ],
+      "summary": "ISW reports Ukraine struck at least three Yandex data centres in October, including one at Sasovo in Ryazan Oblast, and that Yandex moved three supercomputers. Physical strikes, not a cyber attack; details rest on ISW's summary of Ukrainian and Russian reporting.",
+      "title": "Ukrainian strikes on Russian data centres",
+      "when": "October",
+      "id": "yandex-datacenters"
     }
   ]
 }
