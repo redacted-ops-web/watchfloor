@@ -1,0 +1,20 @@
+[
+  {
+    "id": "s2g",
+    "name": "S2 Underground",
+    "type": "youtube",
+    "channelId": "UCYmtpjXT22tAWGIlg_xDDPA"
+  },
+  {
+    "id": "dirtycivilian",
+    "name": "Dirty Civilian",
+    "type": "youtube",
+    "handle": "DirtyCivilian"
+  },
+  {
+    "id": "techprepper",
+    "name": "The Tech Prepper",
+    "type": "youtube",
+    "channelId": "UCqO2enRDIhg1PXahSxpoVHw"
+  }
+]

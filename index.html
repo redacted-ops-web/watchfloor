@@ -130,6 +130,9 @@ svg.labels .lbl, .mk.on .lbl, .mk:hover .lbl, .mk:focus-visible .lbl { display: 
 .pz-r .n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .pz-r .v { font: 600 13px var(--font-mono, monospace); text-align: right; } .pz-r .v small { color: var(--muted); font-weight: 400; margin-left: 4px; }
 .pz-r.spike .v { color: var(--sev); } .pz-r .na { color: var(--faint); } .pz-r svg { width: 96px; height: 24px; } .pz-r path { fill: none; stroke: var(--accent); stroke-width: 1.4; vector-effect: non-scaling-stroke; }
 .lsn { font: 600 11px var(--font-body); background: transparent; color: var(--accent); border: 1px solid var(--line); border-radius: 5px; padding: 2px 9px; cursor: pointer; margin: 2px 0 4px 8px; } .lsn.on { background: var(--panel-2); border-color: var(--accent); } .lsn:hover { border-color: var(--accent); }
+.fd { display: grid; margin-top: 8px; } .fd a { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; padding: 9px 0; border-bottom: 1px solid var(--line); color: inherit; text-decoration: none; }
+.fd a:hover .t { text-decoration: underline; } .fd img { width: 120px; aspect-ratio: 16/9; object-fit: cover; border-radius: 5px; background: var(--panel-2); grid-row: span 2; }
+.fd .t { font-size: 13.5px; line-height: 1.35; overflow-wrap: anywhere; } .fd .m { font-size: 11.5px; color: var(--muted); } .fd a.post { grid-template-columns: 1fr; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 8px 14px 10px; font-size: 11.5px; color: var(--muted); border-top: 1px solid var(--line); }
 .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; background: var(--c); }
 
@@ -283,6 +286,11 @@ body { margin: 0; }
         <p class="fine" id="p-hint" style="margin:6px 0 0"></p>
       </div>
       <p class="fine" style="padding:0 14px 12px;margin:0">Pick a channel to play it here. Star channels to keep them first. Stars stay in this browser.</p>
+    </section>
+    <section class="card feeds" aria-label="Live feeds">
+      <div class="card-h"><h2>Live feeds</h2><span class="count" id="fd-meta">Loading…</span></div>
+      <div class="vbody"><div class="seg" id="fd-chips"></div><div id="fd-list" class="fd"></div>
+      <p class="fine">Latest posts and videos from channels the site owner follows. Content belongs to its authors and is not verified by this dashboard.</p></div>
     </section>
     <section class="card views" aria-label="Pentagon Pizza Index">
       <div class="card-h"><h2>Pentagon Pizza Index</h2><span class="pz-lv" id="pz-lv" hidden></span><span class="count" id="pz-meta">Loading…</span></div>
@@ -1052,6 +1060,41 @@ body { margin: 0; }
     }).catch(function () { meta.textContent = 'Unavailable'; list.innerHTML = '<p class="fine">The pizza data could not be loaded right now.</p>'; });
   }
 
+  /* ---------- live feeds (collected by the server from public sources) ---------- */
+  var feedSel = 'all', feedItems = [];
+  function agoText(ts) {
+    if (!ts) return ''; var m = Math.max(0, Math.round((Date.now() - ts) / 60000));
+    if (m < 60) return m + ' min ago'; if (m < 1440) return Math.round(m / 60) + ' h ago'; return Math.round(m / 1440) + ' d ago';
+  }
+  function renderFeeds() {
+    var chips = $('#fd-chips'), list = $('#fd-list'), names = {}, order = [];
+    feedItems.forEach(function (i) { if (!names[i.src]) { names[i.src] = i.name; order.push(i.src); } });
+    if (feedSel !== 'all' && !names[feedSel]) feedSel = 'all';
+    chips.textContent = '';
+    [['all', 'All']].concat(order.map(function (k) { return [k, names[k]]; })).forEach(function (p) {
+      var b = document.createElement('button'); b.textContent = p[1]; b.setAttribute('aria-pressed', feedSel === p[0] ? 'true' : 'false');
+      b.addEventListener('click', function () { feedSel = p[0]; renderFeeds(); }); chips.appendChild(b);
+    });
+    list.textContent = '';
+    feedItems.filter(function (i) { return feedSel === 'all' || i.src === feedSel; }).slice(0, 30).forEach(function (i) {
+      var u = safeUrl(i.url); if (!u) return;
+      var a = document.createElement('a'); a.href = u; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.className = i.kind === 'video' ? 'video' : 'post';
+      if (i.kind === 'video' && /^https:\/\/i\.ytimg\.com\//.test(i.thumb || '')) { var im = document.createElement('img'); im.src = i.thumb; im.alt = ''; im.loading = 'lazy'; im.referrerPolicy = 'no-referrer'; a.appendChild(im); }
+      var t = document.createElement('div'); t.className = 't'; t.textContent = i.title || i.text || ''; a.appendChild(t);
+      var m = document.createElement('div'); m.className = 'm'; m.textContent = i.name + (i.ts ? ' · ' + agoText(i.ts) : '') + (i.kind === 'video' ? ' · video' : ''); a.appendChild(m);
+      if (i.kind === 'post' && i.title && i.text) { var x = document.createElement('div'); x.className = 'm'; x.textContent = i.text; a.insertBefore(x, m); }
+      list.appendChild(a);
+    });
+    if (!list.children.length) list.innerHTML = '<p class="fine">Nothing to show yet.</p>';
+  }
+  function loadFeeds() {
+    fetch('/api/feeds', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) {
+      feedItems = j.items || []; renderFeeds();
+      var bad = Object.keys(j.errors || {}).length;
+      $('#fd-meta').textContent = feedItems.length ? feedItems.length + ' items' + (j.at ? ' · updated ' + agoText(Date.parse(j.at)) : '') + (bad ? ' · ' + bad + ' source' + (bad > 1 ? 's' : '') + ' unavailable' : '') : 'No items yet';
+    }).catch(function () { $('#fd-meta').textContent = 'Unavailable'; $('#fd-list').innerHTML = '<p class="fine">Feeds could not be loaded right now.</p>'; });
+  }
+
   /* ---------- other live views (iframes) ---------- */
   var VIEWS = {
     pizza: { name: 'Pentagon Pizza Index', url: 'https://www.pizzint.watch/' }
@@ -1092,7 +1135,7 @@ body { margin: 0; }
 
   /* ---------- boot ---------- */
   function tickClock() { var d = new Date(); $('#clock').textContent = 'UTC ' + d.toISOString().slice(11, 19); }
-  buildGrid(); buildRegions(); S2.init(); setupAnalyst(); setupPlayer(); loadPizza(); setInterval(loadPizza, 600000);
+  buildGrid(); buildRegions(); S2.init(); setupAnalyst(); setupPlayer(); loadPizza(); setInterval(loadPizza, 600000); loadFeeds(); setInterval(loadFeeds, 300000);
   tickClock(); setInterval(tickClock, 1000); setInterval(renderMeta, 60000);
   $('#layers').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;

@@ -187,6 +187,78 @@ async function prepare() {
 }
 setTimeout(prepare, 5000); setInterval(prepare, 10 * 60 * 1000);
 
+// ---- live feeds: YouTube channels, RSS/Atom, Bluesky, Telegram. The list of sources lives in data/sources.json on the site ----
+const SRC_URL = process.env.SOURCES_URL || SITE.replace(/data\.json$/, 'sources.json');
+const FFILE = process.env.FEEDS_FILE || path.join(__dirname, 'feeds.json');
+let feeds = { at: null, items: [], errors: {} };
+try { feeds = JSON.parse(fs.readFileSync(FFILE, 'utf8')); } catch (e) { /* none yet */ }
+const dec = s => String(s || '').replace(/<!\[CDATA\[|\]\]>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#0?39;|&apos;/g, "'").replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');
+const strip = s => dec(String(s || '').replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]*>/g, ' ')).replace(/\s+/g, ' ').trim();
+const tagOf = (x, t) => { const m = x.match(new RegExp('<' + t + '[^>]*>([\\s\\S]*?)</' + t + '>')); return m ? dec(m[1]).trim() : ''; };
+async function getText(url) {
+  const r = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; watchfloor-dashboard/1.0)', 'Accept-Language': 'en-US,en' }, signal: AbortSignal.timeout(20000) });
+  if (!r.ok) throw new Error('http ' + r.status);
+  return r.text();
+}
+const ytIds = {};
+async function ytId(s) {
+  if (s.channelId) return s.channelId;
+  const h = String(s.handle || '').replace(/^@/, ''); if (!h) throw new Error('no channel');
+  if (ytIds[h]) return ytIds[h];
+  const page = await getText('https://www.youtube.com/@' + encodeURIComponent(h));
+  const m = page.match(/"(?:externalId|channelId|browseId)":"(UC[\w-]{22})"/) || page.match(/channel\/(UC[\w-]{22})/);
+  if (!m) throw new Error('channel id not found');
+  return (ytIds[h] = m[1]);
+}
+const short = (s, n) => s.length > n ? s.slice(0, n - 1) + '\u2026' : s;
+async function readSource(s) {
+  const out = [];
+  if (s.type === 'youtube') {
+    const xml = await getText('https://www.youtube.com/feeds/videos.xml?channel_id=' + await ytId(s));
+    xml.split('<entry>').slice(1, 9).forEach(e => {
+      const id = tagOf(e, 'yt:videoId'); if (!id) return;
+      out.push({ kind: 'video', title: short(strip(tagOf(e, 'title')), 160), url: 'https://www.youtube.com/watch?v=' + id, thumb: 'https://i.ytimg.com/vi/' + id + '/mqdefault.jpg', ts: Date.parse(tagOf(e, 'published')) });
+    });
+  } else if (s.type === 'rss') {
+    const xml = await getText(s.url);
+    xml.split(/<item[\s>]|<entry[\s>]/).slice(1, 9).forEach(e => {
+      const link = tagOf(e, 'link') || ((e.match(/<link[^>]*href="([^"]+)"/) || [])[1] || '');
+      out.push({ kind: 'post', title: short(strip(tagOf(e, 'title')), 200), text: short(strip(tagOf(e, 'description') || tagOf(e, 'summary')), 280), url: dec(link), ts: Date.parse(tagOf(e, 'pubDate') || tagOf(e, 'published') || tagOf(e, 'updated')) });
+    });
+  } else if (s.type === 'bluesky') {
+    const j = JSON.parse(await getText('https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?filter=posts_no_replies&limit=10&actor=' + encodeURIComponent(s.handle)));
+    (j.feed || []).slice(0, 8).forEach(f => {
+      const p = f.post || {}, rec = p.record || {}, rk = String(p.uri || '').split('/').pop();
+      out.push({ kind: 'post', text: short(strip(rec.text), 400), url: 'https://bsky.app/profile/' + s.handle + '/post/' + rk, ts: Date.parse(rec.createdAt) });
+    });
+  } else if (s.type === 'telegram') {
+    const html = await getText('https://t.me/s/' + encodeURIComponent(s.channel));
+    html.split('tgme_widget_message_wrap').slice(1).slice(-8).forEach(b => {
+      const post = (b.match(/data-post="([^"]+)"/) || [])[1], tx = (b.match(/tgme_widget_message_text[^>]*>([\s\S]*?)<\/div>/) || [])[1];
+      if (!post || !tx) return;
+      out.push({ kind: 'post', text: short(strip(tx), 400), url: 'https://t.me/' + post, ts: Date.parse((b.match(/datetime="([^"]+)"/) || [])[1]) });
+    });
+  } else throw new Error('unknown type');
+  return out.filter(i => i.url && /^https?:/.test(i.url)).map(i => Object.assign({ src: s.id, name: s.name }, i));
+}
+let fetching = false;
+async function refreshFeeds() {
+  if (fetching) return; fetching = true;
+  try {
+    const list = JSON.parse(await getText(SRC_URL));
+    const items = [], errors = {};
+    for (const s of (Array.isArray(list) ? list : []).slice(0, 40)) {
+      if (!s || !s.id || !s.name) continue;
+      try { items.push(...await readSource(s)); } catch (e) { errors[s.id] = String(e.message || e).slice(0, 80); }
+    }
+    items.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+    feeds = { at: new Date().toISOString(), items: items.slice(0, 120), errors };
+    fs.writeFileSync(FFILE + '.tmp', JSON.stringify(feeds)); fs.renameSync(FFILE + '.tmp', FFILE);
+    console.log('Feeds: ' + items.length + ' items, ' + Object.keys(errors).length + ' source errors');
+  } catch (e) { /* site unreachable; keep old */ } finally { fetching = false; }
+}
+setTimeout(refreshFeeds, 8000); setInterval(refreshFeeds, 10 * 60 * 1000);
+
 const server = http.createServer(async (req, res) => {
   const { sock, ip } = clientIp(req);
   if (!ALLOW.includes(sock)) { res.writeHead(403); return res.end(); }
@@ -197,6 +269,7 @@ const server = http.createServer(async (req, res) => {
       return send(res, r.ok ? 200 : 503, { ok: r.ok });
     } catch (e) { return send(res, 503, { ok: false }); }
   }
+  if (req.method === 'GET' && path === '/feeds') return send(res, 200, feeds);
   if (req.method === 'GET' && path === '/answers') return send(res, 200, { dataAsOf: cache.dataAsOf, at: cache.at, items: cache.items || [] });
   if (req.method === 'POST' && path === '/ask') return ask(req, res, ip);
   res.writeHead(404); res.end();
