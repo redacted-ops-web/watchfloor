@@ -1,0 +1,24 @@
+# Add this block to the Caddyfile on your Linux server.
+# Replace the DuckDNS name and the gaming PC address (192.168.1.64) with yours.
+# The site files live in /srv/watchfloor (see pull-data.sh).
+
+yourname.duckdns.org {
+	# AI questions go to the proxy on the gaming PC. The /api prefix is removed.
+	handle_path /api/* {
+		reverse_proxy 192.168.1.64:8787 {
+			flush_interval -1
+			transport http {
+				dial_timeout 3s
+				response_header_timeout 180s
+			}
+		}
+	}
+
+	# Everything else is the static dashboard.
+	handle {
+		root * /srv/watchfloor
+		encode zstd gzip
+		header /data/* Cache-Control "no-cache"
+		file_server
+	}
+}

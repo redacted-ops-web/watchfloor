@@ -1,0 +1,47 @@
+{
+ "_note": "Edit this list to change the channels. channelId is the YouTube channel ID (starts with UC). url is the channel's live page. Verify each ID: open https://www.youtube.com/channel/<ID>/live.",
+ "channels": [
+  {
+   "id": "aljazeera",
+   "name": "Al Jazeera English",
+   "note": "Doha",
+   "channelId": "UCNye-wNBqNL5ZzHSJj3l8Bg",
+   "url": "https://www.youtube.com/@aljazeeraenglish/live"
+  },
+  {
+   "id": "sky",
+   "name": "Sky News",
+   "note": "UK",
+   "channelId": "UCoMdktPbSTixAyNGwb-UYkQ",
+   "url": "https://www.youtube.com/@SkyNews/live"
+  },
+  {
+   "id": "dw",
+   "name": "DW News",
+   "note": "Germany",
+   "channelId": "UCknLrEdhRCp1aegoMqRaCZg",
+   "url": "https://www.youtube.com/@DWNews/live"
+  },
+  {
+   "id": "france24",
+   "name": "France 24 English",
+   "note": "France",
+   "channelId": "UCQfwfsi5VrQ8yKZ-UWmAEFg",
+   "url": "https://www.youtube.com/@FRANCE24English/live"
+  },
+  {
+   "id": "euronews",
+   "name": "Euronews",
+   "note": "Europe",
+   "channelId": "UCSrZ3UV4jOidv8ppoVuvW9Q",
+   "url": "https://www.youtube.com/@euronews/live"
+  },
+  {
+   "id": "abc",
+   "name": "ABC News Live",
+   "note": "US",
+   "channelId": "UCBi2mrWuNuyYy4gbM6fU18Q",
+   "url": "https://www.youtube.com/@ABCNews/live"
+  }
+ ]
+}

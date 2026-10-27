@@ -1,0 +1,722 @@
+{
+ "generatedAt": "2026-10-27T16:20:00Z",
+ "meta": {
+  "brief": "**Bottom line.** The Gulf remains the center of gravity. On day 242 of the Iran–US war, Hormuz carries roughly 30% of pre-war traffic and Brent is near $116 (one tracker, Oct 26).\n\n**What changed since the last refresh**\n- Saudi, Pakistani and Turkish officials met Iran in Tehran on Oct 26; no deal, but talks continue. Iran asked for a two-week regional pause in exchange for a gradual Hormuz reopening.\n- Hours later the Houthis fired missiles and drones at Saudi Arabia, including at Riyadh (intercepted). Iran says it lacks leverage over them.\n- Iran reported a tanker hit a mine east of Hormuz on Oct 27.\n- Russia hit Kyiv with two ballistic-missile waves; Moscow says it will resume talks after Nov 4.\n- PHP2Shell flaws joined CISA's exploited list on Oct 26.\n- Haiti's gangs struck the UN-backed force on Oct 18–19.\n\n**Watch next**\n- A US strike decision or a published Iran framework.\n- Houthi attacks on the Yanbu–Suez tanker route.\n- Ukraine talks timing after Nov 4.\n\nThis is an assessment from headline-level reporting, not verified intelligence.",
+  "feeds": [
+   {
+    "name": "Pentagon Pizza Index (PizzINT)",
+    "note": "Tracks how busy pizza shops near the Pentagon are, as a rough signal of late-night activity. A novelty indicator, not intelligence. I could not read it from here, so it is a link only.",
+    "url": "https://www.pizzint.watch/"
+   },
+   {
+    "name": "S2 Underground Common Intelligence Picture",
+    "note": "Community incident map on ArcGIS Hub. Opens in a new tab. Its layers could not be read from here, so nothing from it is mixed into the panels yet.",
+    "url": "https://nexus-s2underground.hub.arcgis.com/maps/204a59b01f4443cd96718796fd102c00/explore?location=33.435818%2C-117.349034%2C7"
+   }
+  ],
+  "indicators": [
+   {
+    "label": "Brent crude",
+    "note": "One tracker's 26 Oct settle. Its dates are inconsistent.",
+    "tone": "crit",
+    "value": "$115.81"
+   },
+   {
+    "label": "Hormuz transits",
+    "note": "UKMTO weekly ≈254. Pre-war ~130/day.",
+    "tone": "crit",
+    "value": "~36/day"
+   },
+   {
+    "label": "Vessels waiting",
+    "note": "JMIC count, 25 Oct",
+    "tone": "sev",
+    "value": "~492"
+   },
+   {
+    "label": "Iran–US war",
+    "note": "Since 28 Feb 2026",
+    "tone": "",
+    "value": "Day 242"
+   }
+  ],
+  "updatedAt": "2026-10-27T16:05:00Z",
+  "updatedBy": "Scheduled task"
+ },
+ "hotspots": [
+  {
+   "asof": "2026-10-24",
+   "bullets": [
+    "Earlier in October, Pakistani forces and Taliban fighters exchanged fire in Kurram.",
+    "Only headlines were read."
+   ],
+   "lat": 33.5,
+   "lon": 69.8,
+   "name": "Afghanistan–Pakistan border",
+   "region": "South Asia",
+   "sev": 3,
+   "sources": [
+    {
+     "t": "armedconflicts.org weekly digest, 19–25 Oct (headlines)",
+     "u": "https://armedconflicts.org/weekly/2026-w43.html"
+    },
+    {
+     "t": "armedconflicts.org weekly digest, 12–18 Oct (headlines)",
+     "u": "https://armedconflicts.org/weekly/2026-w42.html"
+    }
+   ],
+   "summary": "Tension persists: border crossings remain closed and bilateral trade has fallen sharply (VOA, Oct 23). Pakistan rejected Kabul's position on militants as 'diversionary' (Dawn, Oct 24), and the NYT (Oct 22) describes an 'open war'.",
+   "trend": "up",
+   "id": "af-pak"
+  },
+  {
+   "asof": "2026-10-20",
+   "bullets": [
+    "The US CDC extended its entry ban on foreign nationals recently in DR Congo, Uganda or South Sudan for 30 days (Oct 14)."
+   ],
+   "lat": -1.7,
+   "lon": 29.2,
+   "name": "DR Congo: M23 and Ebola",
+   "region": "Great Lakes",
+   "sev": 4,
+   "sources": [
+    {
+     "t": "armedconflicts.org weekly digest, 12–18 Oct (headlines)",
+     "u": "https://armedconflicts.org/weekly/2026-w42.html"
+    },
+    {
+     "t": "armedconflicts.org weekly digest, 19–25 Oct (headlines)",
+     "u": "https://armedconflicts.org/weekly/2026-w43.html"
+    }
+   ],
+   "summary": "Former president Joseph Kabila joined the AFC/M23 rebel coalition and launched a new politico-military front. Ebola has spread to an eighth province, one that borders the Central African Republic.",
+   "trend": "up",
+   "id": "drc"
+  },
+  {
+   "asof": "2026-10-23",
+   "bullets": [
+    "Crisis Group and others urge both governments to step back (headlines).",
+    "Only headlines were read."
+   ],
+   "lat": 14,
+   "lon": 39.5,
+   "name": "Ethiopia–Eritrea tension",
+   "region": "Horn of Africa",
+   "sev": 3,
+   "sources": [
+    {
+     "t": "armedconflicts.org weekly digest, 19–25 Oct (headlines)",
+     "u": "https://armedconflicts.org/weekly/2026-w43.html"
+    },
+    {
+     "t": "armedconflicts.org weekly digest, 12–18 Oct (headlines)",
+     "u": "https://armedconflicts.org/weekly/2026-w42.html"
+    }
+   ],
+   "summary": "Wider-war fears persist. Tigray rebels were urged to disarm while a commander vowed to fight Ethiopia's government (Al Jazeera, Oct 23), and hundreds of Ethiopians crossed into Kenya to flee regional fighting (Oct 22). Tigray has a new administration.",
+   "trend": "up",
+   "id": "ethiopia-eritrea"
+  },
+  {
+   "asof": "2026-10-25",
+   "bullets": [
+    "Gazan health officials counted more than 1,300 killed since the ceasefire as of 31 Aug (Asharq Al-Awsat).",
+    "UNICEF counts 340 children killed since the ceasefire began (as of mid-Oct).",
+    "Only headlines were read for Oct 25 events; details are unverified."
+   ],
+   "lat": 31.4,
+   "lon": 34.4,
+   "name": "Gaza ceasefire",
+   "region": "Eastern Mediterranean",
+   "sev": 3,
+   "sources": [
+    {
+     "t": "armedconflicts.org weekly digest, 19–25 Oct (headlines)",
+     "u": "https://armedconflicts.org/weekly/2026-w43.html"
+    },
+    {
+     "t": "armedconflicts.org weekly digest, 12–18 Oct (headlines)",
+     "u": "https://armedconflicts.org/weekly/2026-w42.html"
+    },
+    {
+     "t": "Asharq Al-Awsat, 31 Aug",
+     "u": "https://english.aawsat.com/node/5313002"
+    }
+   ],
+   "summary": "The Oct 2025 ceasefire is nominally in place but strikes continue; headlines on Oct 25 report eight killed in Gaza, including at a university campus (Al Jazeera, Haaretz). Israel is in an election campaign. Earlier: commercial goods stopped entering after merchants suspended coordination (Reuters, Oct 15).",
+   "trend": "flat",
+   "id": "gaza"
+  },
+  {
+   "asof": "2026-10-19",
+   "bullets": [
+    "Hostile incidents against the force rose from two to fifteen in a month, per its special representative.",
+    "Gangs control an estimated 70% of Port-au-Prince; about 1.5 million are displaced.",
+    "No group has claimed the attack. Haiti is preparing its first general election in over a decade."
+   ],
+   "lat": 18.58,
+   "lon": -72.22,
+   "name": "Haiti: gangs vs Gang Suppression Force",
+   "region": "Caribbean",
+   "sev": 4,
+   "sources": [
+    {
+     "t": "Africanews, 20 Oct",
+     "u": "https://www.africanews.com/amp/2026/10/20/haitian-gangs-target-foreign-troops-in-biggest-attack-on-new-force/"
+    }
+   ],
+   "summary": "Gangs attacked a UN-backed Gang Suppression Force armoured vehicle in Croix-des-Bouquets on Oct 18–19, the force's biggest attack since it began operating nearly six months ago. Four Salvadoran soldiers were unaccounted for and rescue helicopters came under fire.",
+   "trend": "up",
+   "id": "haiti"
+  },
+  {
+   "asof": "2026-10-27",
+   "bullets": [
+    "The conflict began 28 Feb 2026. A June truce brokered by Pakistan did not last.",
+    "Oct 27: Iran's navy said a tanker caught fire after hitting a mine east of Hormuz. Vessel and casualties were not identified. CENTCOM rejected an IRGC claim that US forces had withdrawn from the strait.",
+    "Qatar says mediation needs Iran to show good faith, stop threatening Arab states and reopen the strait.",
+    "Iran holds a reported 440 kg of 60%-enriched uranium and refuses to ship it abroad. No deal is reported."
+   ],
+   "lat": 27,
+   "lon": 55,
+   "name": "Iran–US war and the Gulf",
+   "region": "Persian Gulf",
+   "sev": 5,
+   "sources": [
+    {
+     "t": "The National, 27 Oct: inside Tehran talks",
+     "u": "https://www.thenationalnews.com/news/gulf/2026/10/27/exclusive-iran-saudi-arabia-inside-tehran-talks/"
+    },
+    {
+     "t": "Iran International live blog, 27 Oct",
+     "u": "https://www.iranintl.com/en/liveblog/202610244311"
+    },
+    {
+     "t": "Iran International, 25 Oct",
+     "u": "https://iranintl.com/en/202610252197"
+    },
+    {
+     "t": "Global Energy Flow: Hormuz tracker",
+     "u": "https://global-energy-flow.com/hormuz/"
+    }
+   ],
+   "summary": "War day 242. Saudi, Pakistani and Turkish officials held talks in Tehran on Oct 26 with no deal; Iran asked them to press Washington for a two-week regional pause, in exchange for a gradual reopening of Hormuz. The US blockade continues and Trump raised possible strikes on Oct 24–25.",
+   "trend": "up",
+   "id": "iran-gulf"
+  },
+  {
+   "asof": "2026-10-24",
+   "bullets": [
+    "Polls and commentary report rising Shiite discontent with Hezbollah (headlines).",
+    "Only headlines were read."
+   ],
+   "lat": 33.9,
+   "lon": 35.8,
+   "name": "Lebanon and Hezbollah",
+   "region": "Eastern Mediterranean",
+   "sev": 3,
+   "sources": [
+    {
+     "t": "armedconflicts.org weekly digest, 19–25 Oct (headlines)",
+     "u": "https://armedconflicts.org/weekly/2026-w43.html"
+    },
+    {
+     "t": "armedconflicts.org weekly digest, 12–18 Oct (headlines)",
+     "u": "https://armedconflicts.org/weekly/2026-w42.html"
+    }
+   ],
+   "summary": "Hezbollah has renewed a pledge not to join a new war in support of Tehran (Asharq Al-Awsat, Oct 24, headline). Lebanon is pressing to end Hezbollah arms shipments; a truck was reportedly seized at Dahr al-Baidar on Oct 23 while seven others passed (Naharnet, headline).",
+   "trend": "flat",
+   "id": "lebanon"
+  },
+  {
+   "asof": "2026-10-16",
+   "bullets": [],
+   "lat": 13,
+   "lon": -2,
+   "name": "Sahel: JNIM vs Islamic State",
+   "region": "West Africa",
+   "sev": 3,
+   "sources": [
+    {
+     "t": "armedconflicts.org weekly digest, 12–18 Oct (headlines)",
+     "u": "https://armedconflicts.org/weekly/2026-w42.html"
+    }
+   ],
+   "summary": "Al-Qaeda's affiliate and Islamic State are fighting intensely across the Sahel, including a clash in Burkina Faso.",
+   "trend": "flat",
+   "id": "sahel"
+  },
+  {
+   "asof": "2026-10-23",
+   "bullets": [
+    "Drone warfare is an increasing feature of the fighting; Reuters (Oct 23) reports a drone strike on a market town.",
+    "Gulf shipping disruption cut off medical supplies to an estimated 20,000 people (Chatham House).",
+    "Only headlines were read."
+   ],
+   "lat": 12.5,
+   "lon": 25.5,
+   "name": "Sudan: army vs RSF",
+   "region": "North-East Africa",
+   "sev": 4,
+   "sources": [
+    {
+     "t": "armedconflicts.org weekly digest, 19–25 Oct (headlines)",
+     "u": "https://armedconflicts.org/weekly/2026-w43.html"
+    },
+    {
+     "t": "armedconflicts.org weekly digest, 12–18 Oct (headlines)",
+     "u": "https://armedconflicts.org/weekly/2026-w42.html"
+    },
+    {
+     "t": "Chatham House, June 2026",
+     "u": "https://www.chathamhouse.org/publications/the-world-today/2026-06/maritime-chokepoints-could-be-worse-hormuz"
+    }
+   ],
+   "summary": "Reuters reports a new famine risk from El Niño-driven drought, and BBC found RSF fighters deliberately targeted hospitals in el-Fasher. UN-backed peace efforts to curb the drone war resumed on Oct 21. Earlier: the army claimed dozens of RSF fighters killed at Nyala.",
+   "trend": "up",
+   "id": "sudan"
+  },
+  {
+   "asof": "2026-10-27",
+   "bullets": [
+    "A local ceasefire began Oct 27 in occupied Oleshky so aid can enter (announced by Budanov).",
+    "A UN inquiry found Russian attacks on Ukraine's energy grid amount to war crimes.",
+    "Norway and Finland called Putin ahead of possible Abu Dhabi talks.",
+    "Oct 18: Ukraine launched about 1,000 drones at Russia in one attack (CBS). Syrskyi says Russian gains slowed by more than half in 2026."
+   ],
+   "lat": 48.5,
+   "lon": 36.5,
+   "name": "Ukraine–Russia",
+   "region": "Eastern Europe",
+   "sev": 4,
+   "sources": [
+    {
+     "t": "Kyiv Independent, 27 Oct (homepage headlines)",
+     "u": "https://kyivindependent.com/"
+    },
+    {
+     "t": "armedconflicts.org weekly digest, 19–25 Oct (headlines)",
+     "u": "https://armedconflicts.org/weekly/2026-w43.html"
+    },
+    {
+     "t": "Kyiv Independent: Syrskyi on slowed advances",
+     "u": "https://kyivindependent.com/ukraine-war-latest-russian-territorial-advances-slowed-by-more-than-half-in-2026-syrskyi-says/"
+    }
+   ],
+   "summary": "Russia fired two waves of ballistic missiles at Kyiv overnight into Oct 27, reportedly hitting a major bridge, metro stations and a university campus; Ukraine reports 4 killed and 57 injured in Russian attacks over the past day. Moscow says it is ready to resume trilateral talks after Nov 4.",
+   "trend": "up",
+   "id": "ukraine"
+  },
+  {
+   "asof": "2026-10-27",
+   "bullets": [
+    "Saudi, Pakistani and Turkish envoys asked Iran to press the Houthis to stop; Iran said it lacks leverage.",
+    "Oct 18: the Houthis struck Aden, and the UAE reportedly agreed with Saudi Arabia to re-enter the fight.",
+    "The Houthi embargo on Saudi tankers continues. See Bab el-Mandeb."
+   ],
+   "lat": 14.5,
+   "lon": 45.5,
+   "name": "Yemen: Houthi–Saudi front",
+   "region": "Arabian Peninsula",
+   "sev": 4,
+   "sources": [
+    {
+     "t": "The National, 27 Oct: inside Tehran talks",
+     "u": "https://www.thenationalnews.com/news/gulf/2026/10/27/exclusive-iran-saudi-arabia-inside-tehran-talks/"
+    },
+    {
+     "t": "armedconflicts.org weekly digest, 12–18 Oct (headlines)",
+     "u": "https://armedconflicts.org/weekly/2026-w42.html"
+    },
+    {
+     "t": "USNI News, 31 Jul",
+     "u": "https://news.usni.org/2026/07/31/hormuz-traffic-levels-continue-decreasing-houthis-in-yemen-threaten-saudi-tankers"
+    }
+   ],
+   "summary": "After the Tehran talks on Oct 26, the Saudi-led coalition said it intercepted three ballistic missiles and four drones fired by the Houthis, then two more missiles aimed at Riyadh. The Houthis say fighting ends only if Saudi Arabia lifts its air blockade on Yemen.",
+   "trend": "up",
+   "id": "yemen"
+  }
+ ],
+ "chokepoints": [
+  {
+   "asof": "2026-10-27",
+   "bullets": [
+    "Tankers loading at Yanbu run lighter loads and route via Suez to avoid the strait (Jul).",
+    "Analysts warn that cheap below-waterline attacks can be more damaging than missiles."
+   ],
+   "lat": 12.6,
+   "lon": 43.3,
+   "name": "Bab el-Mandeb / Red Sea",
+   "region": "Red Sea",
+   "sev": 4,
+   "sources": [
+    {
+     "t": "The National, 27 Oct",
+     "u": "https://www.thenationalnews.com/news/gulf/2026/10/27/exclusive-iran-saudi-arabia-inside-tehran-talks/"
+    },
+    {
+     "t": "USNI News, 31 Jul",
+     "u": "https://news.usni.org/2026/07/31/hormuz-traffic-levels-continue-decreasing-houthis-in-yemen-threaten-saudi-tankers"
+    },
+    {
+     "t": "Hellenic Shipping News",
+     "u": "https://www.hellenicshippingnews.com/?p=1145759"
+    }
+   ],
+   "summary": "The Houthis keep an embargo on Saudi tankers and fired missiles and drones at Saudi Arabia again on Oct 26–27 (coalition says intercepted). Some carriers moved services back to Suez this summer, but a full return is unlikely while attacks continue.",
+   "trend": "up",
+   "id": "bab-el-mandeb"
+  },
+  {
+   "asof": "2026-10-27",
+   "bullets": [
+    "Counts are floors. Many ships no longer broadcast AIS.",
+    "Oil flow estimates vary widely, from 3.7–8 million b/d (independent) to 11.6–14 million b/d (Kpler, week to Oct 13).",
+    "Brent settled $115.81 and WTI $101.76 on Oct 26 per one tracker; its page is internally inconsistent on dates, so check a market source.",
+    "Iran has offered a gradual reopening in return for a two-week regional pause; no agreement reported."
+   ],
+   "lat": 26.5,
+   "lon": 56.3,
+   "metric": "About 254 transits per week",
+   "metricNote": "roughly 70% below pre-war",
+   "name": "Strait of Hormuz",
+   "region": "Persian Gulf",
+   "sev": 5,
+   "sources": [
+    {
+     "t": "Global Energy Flow: Hormuz tracker, 27 Oct",
+     "u": "https://global-energy-flow.com/hormuz/"
+    },
+    {
+     "t": "Iran International live blog, 27 Oct",
+     "u": "https://www.iranintl.com/en/liveblog/202610244311"
+    },
+    {
+     "t": "The National, 27 Oct",
+     "u": "https://www.thenationalnews.com/news/gulf/2026/10/27/exclusive-iran-saudi-arabia-inside-tehran-talks/"
+    },
+    {
+     "t": "USNI News, 31 Jul",
+     "u": "https://news.usni.org/2026/07/31/hormuz-traffic-levels-continue-decreasing-houthis-in-yemen-threaten-saudi-tankers"
+    }
+   ],
+   "summary": "Effectively closed to normal shipping since the war began. UKMTO counts about 254 transits in its latest week. JMIC counted about 492 vessels waiting outside on Oct 25. On Oct 27 Iran's navy said a tanker hit a mine east of the strait.",
+   "trend": "flat",
+   "id": "hormuz"
+  },
+  {
+   "asof": "2026-06-15",
+   "bullets": [
+    "At least 250 suspected ship-to-ship transfers of sanctioned goods near Malaysia between January and April.",
+    "Piracy in Asia rose 83% in the first half of 2025, mostly against bulk carriers."
+   ],
+   "lat": 2.6,
+   "lon": 101.4,
+   "name": "Strait of Malacca",
+   "region": "South-East Asia",
+   "sev": 3,
+   "sources": [
+    {
+     "t": "Chatham House, June 2026",
+     "u": "https://www.chathamhouse.org/publications/the-world-today/2026-06/maritime-chokepoints-could-be-worse-hormuz"
+    }
+   ],
+   "summary": "Handles almost a quarter of seaborne trade by volume and 45% of seaborne oil. The Hormuz disruption has raised its strategic weight.",
+   "trend": "flat",
+   "id": "malacca"
+  },
+  {
+   "asof": "2026-06-15",
+   "bullets": [
+    "About 40% of US container traffic relies on the canal."
+   ],
+   "lat": 9.1,
+   "lon": -79.7,
+   "name": "Panama Canal",
+   "region": "Central America",
+   "sev": 2,
+   "sources": [
+    {
+     "t": "Chatham House, June 2026",
+     "u": "https://www.chathamhouse.org/publications/the-world-today/2026-06/maritime-chokepoints-could-be-worse-hormuz"
+    }
+   ],
+   "summary": "Ports dispute. Panama's Supreme Court revoked CK Hutchison's port contracts in February, and China responded by detaining 136 Panama-registered vessels in April alone.",
+   "trend": "flat",
+   "id": "panama"
+  },
+  {
+   "asof": "2026-08-26",
+   "bullets": [
+    "Container rates are at their highest since 2024, partly through higher bunker fuel prices."
+   ],
+   "lat": 30.5,
+   "lon": 32.4,
+   "name": "Suez Canal",
+   "region": "Egypt",
+   "sev": 3,
+   "sources": [
+    {
+     "t": "Hellenic Shipping News",
+     "u": "https://www.hellenicshippingnews.com/?p=1145759"
+    }
+   ],
+   "summary": "Partial recovery. MSC announced a partial Suez return on Asia–Europe services, and Maersk and Hapag-Lloyd moved a Gemini service back in July. Analyst Lars Jensen sees normalization by end-2026, with some services still going round Africa.",
+   "trend": "flat",
+   "id": "suez"
+  },
+  {
+   "asof": "2026-06-15",
+   "bullets": [
+    "Chatham House reads Chinese live-fire drills as possible rehearsals for a blockade, and estimates a blockade could cut global GDP by about 5%."
+   ],
+   "lat": 24.5,
+   "lon": 119.8,
+   "name": "Taiwan Strait",
+   "region": "East Asia",
+   "sev": 2,
+   "sources": [
+    {
+     "t": "Chatham House, June 2026",
+     "u": "https://www.chathamhouse.org/publications/the-world-today/2026-06/maritime-chokepoints-could-be-worse-hormuz"
+    }
+   ],
+   "summary": "Baseline risk, not a live event. About a fifth of global maritime cargo passes through, and Taiwan makes roughly 90% of the leading-edge chips used worldwide.",
+   "trend": "flat",
+   "id": "taiwan"
+  }
+ ],
+ "incidents": [
+  {
+   "actor": "North Korea (per Chainalysis)",
+   "asof": "2026-10-03",
+   "bullets": [],
+   "sector": "Cryptocurrency",
+   "sev": 3,
+   "sources": [
+    {
+     "t": "Latest in Cyber, 27 Sep–3 Oct",
+     "u": "https://latestincyber.substack.com/p/cyberattack-sunday-sep-27th-oct-3rd"
+    }
+   ],
+   "summary": "$387.5 million was stolen through an exploit tied to an Aug 31 zero-day. A 2022 protection fund of about $309 million covered user losses, and withdrawals resumed.",
+   "title": "Bitget exchange hack",
+   "when": "Reported late Sep",
+   "id": "bitget"
+  },
+  {
+   "actor": "Not stated",
+   "asof": "2026-10-03",
+   "bullets": [],
+   "lat": 38.87,
+   "lon": -77.06,
+   "sector": "Government / defense",
+   "sev": 4,
+   "sources": [
+    {
+     "t": "Latest in Cyber, 27 Sep–3 Oct",
+     "u": "https://latestincyber.substack.com/p/cyberattack-sunday-sep-27th-oct-3rd"
+    }
+   ],
+   "summary": "Data on nearly 3 million current and former service members was taken from the Defense Manpower Data Center over months. The intrusion began in October 2025.",
+   "title": "Pentagon personnel system breach",
+   "when": "Disclosed week of 27 Sep–3 Oct",
+   "id": "dmdc"
+  },
+  {
+   "actor": "Not stated",
+   "asof": "2026-10-03",
+   "bullets": [
+    "CVE identifiers are as reported by the source. Verify against vendor advisories."
+   ],
+   "sector": "Enterprise networking",
+   "sev": 4,
+   "sources": [
+    {
+     "t": "Latest in Cyber, 27 Sep–3 Oct",
+     "u": "https://latestincyber.substack.com/p/cyberattack-sunday-sep-27th-oct-3rd"
+    }
+   ],
+   "summary": "Citrix flaws CVE-2026-88771 and CVE-2026-88772 gave root access at government and finance targets in North America and Europe, with WHIPSHOT and SLAPSHOT malware. A Cisco Catalyst SD-WAN Manager flaw (CVE-2026-76504) was added to CISA's exploited list.",
+   "title": "Citrix NetScaler and Cisco SD-WAN zero-days exploited",
+   "when": "Week of 27 Sep–3 Oct",
+   "id": "edge-zero-days"
+  },
+  {
+   "actor": "ShinyHunters (claimed)",
+   "asof": "2026-10-03",
+   "bullets": [],
+   "lat": 38.89,
+   "lon": -77.02,
+   "sector": "Government",
+   "sev": 3,
+   "sources": [
+    {
+     "t": "Latest in Cyber, 27 Sep–3 Oct",
+     "u": "https://latestincyber.substack.com/p/cyberattack-sunday-sep-27th-oct-3rd"
+    }
+   ],
+   "summary": "The FBI declared an incident and told staff to assume their personal data was taken. ShinyHunters claimed responsibility.",
+   "title": "FBI declares a cyber incident",
+   "when": "Week of 27 Sep–3 Oct",
+   "id": "fbi-shinyhunters"
+  },
+  {
+   "actor": "Not stated",
+   "asof": "2026-10-03",
+   "bullets": [],
+   "lat": 35.68,
+   "lon": 139.76,
+   "sector": "Transportation",
+   "sev": 3,
+   "sources": [
+    {
+     "t": "Latest in Cyber, 27 Sep–3 Oct",
+     "u": "https://latestincyber.substack.com/p/cyberattack-sunday-sep-27th-oct-3rd"
+    }
+   ],
+   "summary": "Keio Corporation's business systems were disrupted by ransomware, and a separate attack on Tokyo Metro was disclosed. Car-share operator Times Car also disclosed 6.6 million compromised accounts.",
+   "title": "Keio ransomware and Tokyo Metro attack",
+   "when": "Weekend of 27 Sep–3 Oct",
+   "id": "japan-transport"
+  },
+  {
+   "actor": "Not stated",
+   "asof": "2026-10-23",
+   "bullets": [
+    "Verify CVE details against the CISA catalog and vendor advisories."
+   ],
+   "sector": "Enterprise software",
+   "sev": 3,
+   "sources": [
+    {
+     "t": "explainx.ai October 2026 cyberattack tracker",
+     "u": "https://explainx.ai/blog/october-2026-cyberattacks-list-breaches-exploits-ai-run-attacks-tracker-2026"
+    }
+   ],
+   "summary": "Per one aggregator, CISA listed Arista VeloCloud Orchestrator CVE-2026-114625 (any authenticated user can gain superuser) and Collabora CODE CVE-2026-110447 on Oct 23; SiteGuard Server Edition CVE-2026-106931 (command injection, root/SYSTEM) is also listed as exploited. Dates come from the tracker and were not checked against CISA.",
+   "title": "Arista VeloCloud, Collabora CODE and SiteGuard flaws on CISA list",
+   "when": "Listed week of 19–25 Oct",
+   "id": "kev-oct23"
+  },
+  {
+   "actor": "Not attributed",
+   "asof": "2026-10-27",
+   "bullets": [
+    "Federal agencies must patch by Oct 29.",
+    "Separate unpatched PHP flaw CVE-2026-115560 has mitigation guidance.",
+    "VirusTotal estimates over 5.1 million exposed PHP hosts."
+   ],
+   "sector": "Web infrastructure",
+   "sev": 4,
+   "sources": [
+    {
+     "t": "The Register, 27 Oct",
+     "u": "https://theregister.com/cyber-crime/2026/10/27/cisa-confirms-php2shell-under-attack-as-researchers-clock-successful-exploits/5305681"
+    },
+    {
+     "t": "BleepingComputer, 27 Oct",
+     "u": "https://www.bleepingcomputer.com/news/security/cisa-confirms-php2shell-vulnerabilities-now-exploited-in-attacks/"
+    }
+   ],
+   "summary": "CVE-2026-109618 and CVE-2026-109619 (CVSS 9.2) allow unauthenticated code execution on PHP servers. Fixes shipped Oct 21; exploitation attempts began about Oct 17. A researcher logged 35 successful shell executions on honeypots (CVE-2026-109618 only); Delft tracked over 50,000 requests from 600+ IPs. Some vendor reports were retracted, and the number of real compromises is unknown.",
+   "title": "PHP2Shell remote-code-execution flaws exploited",
+   "when": "Added to CISA KEV 26 Oct",
+   "id": "php2shell"
+  },
+  {
+   "actor": "Not stated",
+   "asof": "2026-10-21",
+   "bullets": [
+    "Single-source report; details not checked against the 8-K."
+   ],
+   "sector": "Healthcare",
+   "sev": 3,
+   "sources": [
+    {
+     "t": "explainx.ai October 2026 cyberattack tracker",
+     "u": "https://explainx.ai/blog/october-2026-cyberattacks-list-breaches-exploits-ai-run-attacks-tracker-2026"
+    }
+   ],
+   "summary": "Quest Diagnostics' Quanum LSM ordering system was accessed and taken offline, and the company filed an SEC 8-K, per one tracker. Patient impact is believed but not confirmed.",
+   "title": "Quest Diagnostics ordering system accessed",
+   "when": "Reported 21 Oct",
+   "id": "quest-quanum"
+  },
+  {
+   "actor": "Star Blizzard (Russian state)",
+   "asof": "2026-10-03",
+   "bullets": [],
+   "sector": "Government / NGOs",
+   "sev": 3,
+   "sources": [
+    {
+     "t": "Latest in Cyber, 27 Sep–3 Oct",
+     "u": "https://latestincyber.substack.com/p/cyberattack-sunday-sep-27th-oct-3rd"
+    }
+   ],
+   "summary": "More than 100 Ukraine-linked organizations, mostly in the US and UK, were targeted with fake event invitations that install backdoors. A new RedFlick technique deploys CosmicPulse.",
+   "title": "Star Blizzard campaign against Ukraine-linked groups",
+   "when": "Ongoing since Jan 2026",
+   "id": "star-blizzard"
+  },
+  {
+   "actor": "Storm-0940 (per Microsoft, via tracker)",
+   "asof": "2026-10-21",
+   "bullets": [],
+   "sector": "IT services / cloud",
+   "sev": 3,
+   "sources": [
+    {
+     "t": "explainx.ai October 2026 cyberattack tracker",
+     "u": "https://explainx.ai/blog/october-2026-cyberattacks-list-breaches-exploits-ai-run-attacks-tracker-2026"
+    }
+   ],
+   "summary": "A stolen app credential from ConnectWise Cloud Backup reportedly affected 162–173 Microsoft 365 tenants; a later entry says ARTEX agents used stolen credentials against more than 2,250 tenants. Figures vary between entries and are single-source.",
+   "title": "Storm-0940 abuses ConnectWise app credentials",
+   "when": "Oct 13–21",
+   "id": "storm-0940-connectwise"
+  },
+  {
+   "actor": "Not attributed",
+   "asof": "2026-10-26",
+   "bullets": [
+    "Presbyterian and Lovelace took additional patients.",
+    "UNM Health Sciences Center cancelled classes Oct 26–27."
+   ],
+   "lat": 35.08,
+   "lon": -106.62,
+   "sector": "Healthcare",
+   "sev": 4,
+   "sources": [
+    {
+     "t": "AP via The Star, 27 Oct",
+     "u": "https://thestar.com.my/tech/tech-news/2026/10/27/a-cybersecurity-issue-forces-a-major-us-hospital-to-divert-patients-and-close-clinics"
+    }
+   ],
+   "summary": "Employees saw messages claiming student, employee and patient data had been stolen. Ambulances were diverted and clinics cancelled at the state's only Level One trauma center. The FBI is assisting, and operations began resuming in phases the same day.",
+   "title": "University of New Mexico Health System disrupted",
+   "id": "unm-health"
+  },
+  {
+   "actor": "Warlock (China-linked)",
+   "asof": "2026-10-03",
+   "bullets": [],
+   "sector": "Critical infrastructure",
+   "sev": 4,
+   "sources": [
+    {
+     "t": "Latest in Cyber, 27 Sep–3 Oct",
+     "u": "https://latestincyber.substack.com/p/cyberattack-sunday-sep-27th-oct-3rd"
+    }
+   ],
+   "summary": "A water utility, a telecom provider, a regional government body and a university were breached through SharePoint flaws. Security tools were disabled before ransomware was deployed.",
+   "title": "Warlock ransomware hits utilities and government",
+   "when": "Week of 27 Sep–3 Oct",
+   "id": "warlock"
+  }
+ ]
+}
