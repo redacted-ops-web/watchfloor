@@ -2,7 +2,7 @@
 # Replace the DuckDNS name and the gaming PC address (192.168.1.64) with yours.
 # The site files live in /srv/watchfloor (see pull-data.sh).
 
-yourname.duckdns.org {
+watchfloor.duckdns.org {
 	# AI questions go to the proxy on the gaming PC. The /api prefix is removed.
 	handle_path /api/* {
 		reverse_proxy 192.168.1.64:8787 {
