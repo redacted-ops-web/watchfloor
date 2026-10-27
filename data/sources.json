@@ -9,12 +9,18 @@
     "id": "dirtycivilian",
     "name": "Dirty Civilian",
     "type": "youtube",
-    "handle": "DirtyCivilian"
+    "handle": "dirty-civilian"
   },
   {
     "id": "techprepper",
     "name": "The Tech Prepper",
     "type": "youtube",
     "channelId": "UCqO2enRDIhg1PXahSxpoVHw"
+  },
+  {
+    "id": "enforcer",
+    "name": "The Enforcer",
+    "type": "youtube",
+    "handle": "enforcerofficial"
   }
 ]
