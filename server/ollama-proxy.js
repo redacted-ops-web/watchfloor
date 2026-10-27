@@ -12,8 +12,12 @@
  *   OLLAMA_URL Default http://127.0.0.1:11434
  *   NUM_CTX    Context window in tokens. Default 16384
  *   RATE       Questions per visitor per minute. Default 6
+ *   SITE_DATA_URL  Where to read the dashboard data for pre-answering questions. Default https://watchfloor.duckdns.org/data/data.json
+ *   ANSWERS_FILE   Where prepared answers are saved. Default answers.json next to this file
  */
 const http = require('http');
+const fs = require('fs');
+const path = require('path');
 
 const ALLOW = (process.env.ALLOW || '').split(',').map(s => s.trim()).filter(Boolean);
 const CFG = {
@@ -133,6 +137,56 @@ async function ask(req, res, ip) {
   } finally { release(); }
 }
 
+// ---- prepared answers: after each data refresh, answer the dashboard's suggested questions in advance ----
+const SITE = process.env.SITE_DATA_URL || 'https://watchfloor.duckdns.org/data/data.json';
+const AFILE = process.env.ANSWERS_FILE || path.join(__dirname, 'answers.json');
+const DEFAULT_QS = [
+  'Write a situation brief from this data.',
+  'Which hotspots are most likely to escalate in the next 30 days, and why?',
+  'How might a prolonged Hormuz closure cascade into the other theaters and into cyber risk?'
+];
+let cache = { key: '', dataAsOf: null, at: null, items: [] };
+try { cache = JSON.parse(fs.readFileSync(AFILE, 'utf8')); } catch (e) { /* none yet */ }
+const slim = a => (Array.isArray(a) ? a : []).map(x => ({ name: x.name || x.title, region: x.region || x.sector, sev: x.sev, trend: x.trend, asof: x.asof, when: x.when, actor: x.actor, metric: x.metric, summary: x.summary, bullets: x.bullets }));
+async function askOnce(messages) {
+  const up = await fetch(CFG.ollama + '/api/chat', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(600000),
+    body: JSON.stringify({ model: CFG.model, messages, stream: false, keep_alive: '30m', options: { num_ctx: CFG.numCtx, temperature: 0.3, num_predict: CFG.numPredict } }),
+  });
+  if (!up.ok) throw new Error('ollama ' + up.status);
+  const j = await up.json();
+  return (j.message && j.message.content) || '';
+}
+let preparing = false;
+async function prepare() {
+  if (preparing) return; preparing = true;
+  try {
+    const r = await fetch(SITE, { signal: AbortSignal.timeout(15000) });
+    if (!r.ok) return;
+    const j = await r.json(), m = j.meta || {};
+    let qs = (Array.isArray(m.questions) ? m.questions : []).filter(q => typeof q === 'string' && q.trim() && q.length <= 300).slice(0, 6);
+    if (!qs.length) qs = DEFAULT_QS;
+    const key = String(m.updatedAt || j.generatedAt || '') + '|' + qs.join('|');
+    if (key === cache.key) return;
+    const data = JSON.stringify({ asOf: m.updatedAt, indicators: m.indicators || [], hotspots: slim(j.hotspots), chokepoints: slim(j.chokepoints), cyberIncidents: slim(j.incidents) });
+    const items = [];
+    for (const q of qs) {
+      let got = false;
+      try {
+        await acquire(); got = true;
+        const a = await askOnce([{ role: 'system', content: INSTR }, { role: 'user', content: 'DATA (JSON):\n' + data + '\n\nQUESTION:\n' + q }]);
+        if (a.trim()) items.push({ q, a: a.trim() });
+      } catch (e) { /* try again next cycle */ } finally { if (got) release(); }
+    }
+    if (items.length) {
+      cache = { key: items.length === qs.length ? key : '', dataAsOf: m.updatedAt || null, at: new Date().toISOString(), items };
+      fs.writeFileSync(AFILE + '.tmp', JSON.stringify(cache)); fs.renameSync(AFILE + '.tmp', AFILE);
+      console.log('Prepared ' + items.length + '/' + qs.length + ' answers');
+    }
+  } catch (e) { /* site or model unreachable; retry later */ } finally { preparing = false; }
+}
+setTimeout(prepare, 5000); setInterval(prepare, 10 * 60 * 1000);
+
 const server = http.createServer(async (req, res) => {
   const { sock, ip } = clientIp(req);
   if (!ALLOW.includes(sock)) { res.writeHead(403); return res.end(); }
@@ -143,6 +197,7 @@ const server = http.createServer(async (req, res) => {
       return send(res, r.ok ? 200 : 503, { ok: r.ok });
     } catch (e) { return send(res, 503, { ok: false }); }
   }
+  if (req.method === 'GET' && path === '/answers') return send(res, 200, { dataAsOf: cache.dataAsOf, at: cache.at, items: cache.items || [] });
   if (req.method === 'POST' && path === '/ask') return ask(req, res, ip);
   res.writeHead(404); res.end();
 });

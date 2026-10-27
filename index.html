@@ -258,18 +258,15 @@ body { margin: 0; }
     </section>
 
     <aside class="card analyst" aria-label="Analyst">
-      <div class="card-h"><h2>Analyst</h2><span class="count" id="ai-state">Checking…</span></div>
+      <div class="card-h"><h2>Analyst</h2><button class="lsn" id="head-listen" type="button" hidden>Listen</button><span class="count" id="ai-state">Checking…</span></div>
       <div class="body">
-        <div class="base" id="base" hidden><div class="lab" id="base-lab">Baseline brief <button class="lsn" id="base-listen" type="button" hidden>Listen</button></div><div class="prose" id="base-txt"></div></div>
+        <div class="base" id="base" hidden><div class="lab" id="base-lab">Baseline brief</div><div class="prose" id="base-txt"></div></div>
         <p class="fine" id="ai-off" hidden>The analyst is offline right now. The rest of the page still works.</p>
         <div id="ai-ctl" hidden>
           <div class="chips" id="chips"></div>
-          <div class="ask" style="margin-top:8px">
-            <input id="q" type="text" placeholder="Ask about this data…" aria-label="Ask the analyst" autocomplete="off">
-            <button class="btn pri" id="ask">Ask</button>
-            <button class="btn" id="stop" hidden>Stop</button>
-          </div>
-          <p class="fine" style="margin:8px 0 0">Answers use only the data on this page plus general background knowledge. The analyst cannot browse, long answers can take a minute, and it can be wrong. Press Listen on any answer to hear it read aloud.</p>
+          <div class="ask" hidden><input id="q" type="text" aria-label="Ask the analyst" autocomplete="off"><button class="btn pri" id="ask">Ask</button></div>
+          <button class="btn" id="stop" hidden style="margin-top:8px">Stop</button>
+          <p class="fine" style="margin:8px 0 0">Tap a question to read the analysis. Answers are prepared after each data refresh, use only the data on this page plus general background knowledge, and can be wrong. Press Listen to hear any answer read aloud.</p>
         </div>
         <div class="log" id="log" aria-live="polite"></div>
       </div>
@@ -589,7 +586,7 @@ body { margin: 0; }
     else f.textContent = 'No data yet';
     var base = $('#base');
     if (meta && meta.brief) {
-      base.hidden = false; renderMd($('#base-txt'), meta.brief);
+      base.hidden = false; renderMd($('#base-txt'), meta.brief); if (SYN) $('#head-listen').hidden = false;
       $('#base-lab').textContent = 'Baseline brief · ' + (meta.updatedAt ? fmtStamp(meta.updatedAt) : '');
     } else base.hidden = true;
     var fl = $('#feeds');
@@ -749,6 +746,7 @@ body { margin: 0; }
   async function ask(q) {
     q = String(q || '').trim(); if (!q || busy) return;
     $('#q').value = '';
+    if (answers[q]) { showPrepared(q, answers[q]); return; }
     var t = await run('Q · ' + q, q, turns.slice(-6));
     if (t) turns.push({ role: 'user', content: q }, { role: 'assistant', content: t });
   }
@@ -759,13 +757,32 @@ body { margin: 0; }
     $('.analyst').scrollIntoView({ block: 'nearest', behavior: reduce ? 'auto' : 'smooth' });
     run('Analysis · ' + item.name, q, []);
   }
+  var answers = {};
+  function currentQs() {
+    var q = meta && Array.isArray(meta.questions) ? meta.questions.filter(function (x) { return typeof x === 'string' && x.trim(); }).slice(0, 6) : [];
+    return q.length ? q : QUESTIONS;
+  }
+  function renderChips() {
+    var chips = $('#chips'); if (!chips) return; chips.textContent = '';
+    currentQs().forEach(function (q) { var b = document.createElement('button'); b.className = 'chip'; b.textContent = q; b.disabled = busy; b.addEventListener('click', function () { ask(q); }); chips.appendChild(b); });
+  }
+  async function loadAnswers() {
+    try {
+      var r = await fetch('/api/answers', { cache: 'no-store' }); if (!r.ok) return;
+      var j = await r.json(), m = {}; (j.items || []).forEach(function (x) { if (x && x.q && x.a) m[x.q] = x.a; }); answers = m;
+    } catch (e) { }
+  }
+  function showPrepared(q, a) {
+    var entry = addEntry('Q · ' + q); renderMd(entry.body, a); addListen(entry);
+    note(entry, 'Prepared from the latest data refresh.');
+    entry.el.scrollIntoView({ block: 'nearest', behavior: reduce ? 'auto' : 'smooth' });
+  }
   function setupAnalyst() {
-    var chips = $('#chips');
-    QUESTIONS.forEach(function (q) { var b = document.createElement('button'); b.className = 'chip'; b.textContent = q; b.addEventListener('click', function () { ask(q); }); chips.appendChild(b); });
+    renderChips();
     $('#ask').addEventListener('click', function () { ask($('#q').value); });
     $('#q').addEventListener('keydown', function (e) { if (e.key === 'Enter') ask($('#q').value); });
     $('#stop').addEventListener('click', function () { if (ctl) ctl.abort(); });
-    var bl = $('#base-listen'); if (bl && SYN) { bl.hidden = false; bl.addEventListener('click', function () { speak($('#base-txt').innerText, bl); }); }
+    var hl = $('#head-listen'); if (hl && SYN) { hl.addEventListener('click', function () { speak($('#base-txt').innerText, hl); }); }
   }
   function setupRefresh() { }
   function rstatus(t) { var s = $('#rstatus'); s.hidden = !t; s.textContent = t || ''; }
@@ -1067,7 +1084,7 @@ body { margin: 0; }
       if (!r.ok) throw new Error('http ' + r.status);
       var j = await r.json();
       KINDS.forEach(function (k) { data[k] = Array.isArray(j[k]) ? j[k] : []; });
-      meta = j.meta || {}; noDb = false; lastLoad = Date.now(); renderAll();
+      meta = j.meta || {}; noDb = false; lastLoad = Date.now(); renderAll(); renderChips(); loadAnswers();
     } catch (e) {
       if (data.hotspots === null) { noDb = true; KINDS.forEach(function (k) { data[k] = []; }); meta = null; renderAll(); }
     }
