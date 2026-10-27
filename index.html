@@ -129,6 +129,7 @@ svg.labels .lbl, .mk.on .lbl, .mk:hover .lbl, .mk:focus-visible .lbl { display: 
 .pz { display: grid; gap: 6px; } .pz-r { display: grid; grid-template-columns: 1fr auto 96px; gap: 4px 12px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
 .pz-r .n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .pz-r .v { font: 600 13px var(--font-mono, monospace); text-align: right; } .pz-r .v small { color: var(--muted); font-weight: 400; margin-left: 4px; }
 .pz-r.spike .v { color: var(--sev); } .pz-r .na { color: var(--faint); } .pz-r svg { width: 96px; height: 24px; } .pz-r path { fill: none; stroke: var(--accent); stroke-width: 1.4; vector-effect: non-scaling-stroke; }
+.lsn { font: 600 11px var(--font-body); background: transparent; color: var(--accent); border: 1px solid var(--line); border-radius: 5px; padding: 2px 9px; cursor: pointer; margin: 2px 0 4px 8px; } .lsn.on { background: var(--panel-2); border-color: var(--accent); } .lsn:hover { border-color: var(--accent); }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 8px 14px 10px; font-size: 11.5px; color: var(--muted); border-top: 1px solid var(--line); }
 .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; background: var(--c); }
 
@@ -259,8 +260,8 @@ body { margin: 0; }
     <aside class="card analyst" aria-label="Analyst">
       <div class="card-h"><h2>Analyst</h2><span class="count" id="ai-state">Checking…</span></div>
       <div class="body">
-        <div class="base" id="base" hidden><div class="lab" id="base-lab">Baseline brief</div><div class="prose" id="base-txt"></div></div>
-        <p class="fine" id="ai-off" hidden>The analyst runs on a local model that is offline right now. The rest of the page still works.</p>
+        <div class="base" id="base" hidden><div class="lab" id="base-lab">Baseline brief <button class="lsn" id="base-listen" type="button" hidden>Listen</button></div><div class="prose" id="base-txt"></div></div>
+        <p class="fine" id="ai-off" hidden>The analyst is offline right now. The rest of the page still works.</p>
         <div id="ai-ctl" hidden>
           <div class="chips" id="chips"></div>
           <div class="ask" style="margin-top:8px">
@@ -268,7 +269,7 @@ body { margin: 0; }
             <button class="btn pri" id="ask">Ask</button>
             <button class="btn" id="stop" hidden>Stop</button>
           </div>
-          <p class="fine" style="margin:8px 0 0">Answers come from a small local model running on the site owner's PC, using only the data on this page plus its background knowledge. It cannot browse, can be slow, and can be wrong.</p>
+          <p class="fine" style="margin:8px 0 0">Answers use only the data on this page plus general background knowledge. The analyst cannot browse, long answers can take a minute, and it can be wrong. Press Listen on any answer to hear it read aloud.</p>
         </div>
         <div class="log" id="log" aria-live="polite"></div>
       </div>
@@ -302,7 +303,7 @@ body { margin: 0; }
   <footer>
     <div class="card"><h2>How to read this</h2>
       <p>Severity and trend are analyst judgments on a 1–5 scale, based on headline-level reporting. Treat them as a starting point and open the sources. Items older than the latest refresh are marked with an amber date.</p>
-      <p>AI answers come from a small local model, can be wrong, and are not verified intelligence.</p>
+      <p>AI answers can be wrong and are not verified intelligence.</p>
     </div>
     <div class="card"><h2>More feeds</h2><ul id="feeds"><li>None added yet.</li></ul></div>
   </footer>
@@ -625,7 +626,51 @@ body { margin: 0; }
     });
   }
 
-  /* ---------- analyst (local model on the site owner's PC) ---------- */
+  /* ---------- read aloud (uses the visitor's own device voice, no cost) ---------- */
+  var SYN = window.speechSynthesis || null, speaking = null, pickedVoice = null;
+  function pickVoice() {
+    if (pickedVoice || !SYN) return pickedVoice;
+    var vs = SYN.getVoices().filter(function (v) { return /^en(-|_)/i.test(v.lang); });
+    var pref = /natural|online|neural|google us|samantha|aria|jenny|ava|zoe/i;
+    pickedVoice = vs.filter(function (v) { return pref.test(v.name) && /en(-|_)US/i.test(v.lang); })[0] || vs.filter(function (v) { return /en(-|_)US/i.test(v.lang); })[0] || vs[0] || null;
+    return pickedVoice;
+  }
+  function chunksOf(text) {
+    var parts = String(text || '').replace(/https?:\/\/\S+/g, '').replace(/[*_#`]/g, '').split(/\n+/), out = [];
+    parts.forEach(function (ln) {
+      ln = ln.replace(/^\s*(?:[-•]|\d+[.)])\s+/, '').trim(); if (!ln) return;
+      var sents = ln.match(/[^.!?]+[.!?]+["')\]]*\s*|[^.!?]+$/g) || [ln], cur = '';
+      sents.forEach(function (x) { if ((cur + x).length > 220 && cur) { out.push(cur.trim()); cur = x; } else cur += x; });
+      if (cur.trim()) out.push(cur.trim());
+    });
+    return out;
+  }
+  function stopSpeak() { if (!SYN) return; var h = speaking; speaking = null; SYN.cancel(); if (h) h.reset(); }
+  function speak(text, btn) {
+    if (!SYN) return;
+    if (speaking && speaking.btn === btn) { stopSpeak(); return; }
+    stopSpeak();
+    var q = chunksOf(text); if (!q.length) return;
+    var h = { btn: btn, reset: function () { btn.textContent = 'Listen'; btn.classList.remove('on'); } };
+    speaking = h; btn.textContent = 'Stop'; btn.classList.add('on');
+    var v = pickVoice(), i = 0;
+    (function next() {
+      if (speaking !== h) return;
+      if (i >= q.length) { speaking = null; h.reset(); return; }
+      var u = new SpeechSynthesisUtterance(q[i++]); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'en-US';
+      u.rate = 1.02; u.onend = next; u.onerror = function () { if (speaking === h) { speaking = null; h.reset(); } };
+      SYN.speak(u);
+    })();
+  }
+  function addListen(entry) {
+    if (!SYN) return;
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'lsn'; b.textContent = 'Listen';
+    b.addEventListener('click', function () { speak(entry.body.innerText, b); });
+    entry.el.insertBefore(b, entry.body);
+  }
+  if (SYN) { SYN.onvoiceschanged = function () { pickedVoice = null; }; window.addEventListener('pagehide', stopSpeak); }
+
+  /* ---------- analyst ---------- */
   var sample = false, busy = false, ctl = null, turns = [];
   var QUESTIONS = [
     'Write a situation brief from this data.',
@@ -664,7 +709,7 @@ body { margin: 0; }
     try {
       var r = await fetch('/api/health', { cache: 'no-store', signal: (window.AbortSignal && AbortSignal.timeout) ? AbortSignal.timeout(4000) : undefined });
       var j = await r.json();
-      return j && j.ok ? (j.model || 'local model') : null;
+      return j && j.ok ? 'Online' : null;
     } catch (e) { return null; }
   }
   function errCopy(status) {
@@ -691,6 +736,7 @@ body { margin: 0; }
       }
       text += dec.decode(); renderMd(entry.body, text);
       if (!text.trim()) { entry.body.textContent = ''; note(entry, 'The model returned nothing. Try again.'); return null; }
+      addListen(entry);
       return text;
     } catch (e) {
       if (e && e.name === 'AbortError') { if (!text) entry.el.remove(); return text || null; }
@@ -719,6 +765,7 @@ body { margin: 0; }
     $('#ask').addEventListener('click', function () { ask($('#q').value); });
     $('#q').addEventListener('keydown', function (e) { if (e.key === 'Enter') ask($('#q').value); });
     $('#stop').addEventListener('click', function () { if (ctl) ctl.abort(); });
+    var bl = $('#base-listen'); if (bl && SYN) { bl.hidden = false; bl.addEventListener('click', function () { speak($('#base-txt').innerText, bl); }); }
   }
   function setupRefresh() { }
   function rstatus(t) { var s = $('#rstatus'); s.hidden = !t; s.textContent = t || ''; }
@@ -1040,8 +1087,8 @@ body { margin: 0; }
   measure(); buildMarkers();
   loadData(); setInterval(loadData, 300000);
   document.addEventListener('visibilitychange', function () { if (!document.hidden && Date.now() - lastLoad > 60000) loadData(); });
-  health().then(function (m) { if (m) setAi(true, m); else setAi(false, 'Offline'); });
-  setInterval(function () { if (!busy) health().then(function (m) { if (m) setAi(true, m); else setAi(false, 'Offline'); }); }, 120000);
+  health().then(function (m) { if (m) setAi(true, 'Online'); else setAi(false, 'Offline'); });
+  setInterval(function () { if (!busy) health().then(function (m) { if (m) setAi(true, 'Online'); else setAi(false, 'Offline'); }); }, 120000);
 })();
 </script>
 
