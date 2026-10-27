@@ -1076,7 +1076,11 @@ body { margin: 0; }
       b.addEventListener('click', function () { feedSel = p[0]; renderFeeds(); }); chips.appendChild(b);
     });
     list.textContent = '';
-    feedItems.filter(function (i) { return feedSel === 'all' || i.src === feedSel; }).slice(0, 30).forEach(function (i) {
+    var cnt = {};
+    feedItems.slice().sort(function (x, y) { return (y.ts || 0) - (x.ts || 0); }).filter(function (i) {
+      if (feedSel !== 'all' && i.src !== feedSel) return false;
+      cnt[i.src] = (cnt[i.src] || 0) + 1; return cnt[i.src] <= 4;
+    }).forEach(function (i) {
       var u = safeUrl(i.url); if (!u) return;
       var a = document.createElement('a'); a.href = u; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.className = i.kind === 'video' ? 'video' : 'post';
       if (i.kind === 'video' && /^https:\/\/i\.ytimg\.com\//.test(i.thumb || '')) { var im = document.createElement('img'); im.src = i.thumb; im.alt = ''; im.loading = 'lazy'; im.referrerPolicy = 'no-referrer'; a.appendChild(im); }
