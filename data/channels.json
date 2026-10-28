@@ -58,60 +58,11 @@
    "url": "https://www.youtube.com/@AssociatedPress/live"
   },
   {
-   "id": "reuters",
-   "name": "Reuters",
-   "note": "UK",
-   "channelId": "UChqUTb7kYRX8-EiaN3XFrSQ",
-   "url": "https://www.youtube.com/@Reuters/live"
-  },
-  {
-   "id": "yahoo",
-   "name": "Yahoo Finance",
-   "note": "US",
-   "channelId": "UCEAZeUIeJs0IjQiqTCdVSIg",
-   "url": "https://www.youtube.com/@YahooFinance/live"
-  },
-  {
-   "id": "ndtv",
-   "name": "NDTV 24x7",
-   "note": "India",
-   "channelId": "UCZFMm1mMw0F81Z37aaEzTUA",
-   "url": "https://www.youtube.com/@NDTV/live"
-  },
-  {
-   "id": "indiatoday",
-   "name": "India Today",
-   "note": "India",
-   "channelId": "UCYPvAwZP8pZhSMW8qs7cVCw",
-   "url": "https://www.youtube.com/@indiatoday/live"
-  },
-  {
-   "id": "abcau",
-   "name": "ABC News Australia",
-   "note": "Australia",
-   "channelId": "UCVgO39Bk5sMo66-6o6Spn6Q",
-   "url": "https://www.youtube.com/@abcnewsaustralia/live"
-  },
-  {
    "id": "cgtn",
    "name": "CGTN",
    "note": "China",
    "channelId": "UCgrNz-aDmcr2uuto8_DL2jg",
    "url": "https://www.youtube.com/@CGTNOfficial/live"
-  },
-  {
-   "id": "africanews",
-   "name": "Africanews",
-   "note": "Africa",
-   "channelId": "UC1_E8NeF5QHY2dtdLRBCCLA",
-   "url": "https://www.youtube.com/@africanews/live"
-  },
-  {
-   "id": "channel4",
-   "name": "Channel 4 News",
-   "note": "UK",
-   "channelId": "UCTrQ7HXWRRxr7OsOtodr2_w",
-   "url": "https://www.youtube.com/@Channel4News/live"
   }
  ]
 }
