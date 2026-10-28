@@ -1,4 +1,4 @@
-You are doing a LIGHT refresh of the data file behind the Watchfloor dashboard. Work only with files in the current directory. Do not change any file except data/live.new.json. A separate full refresh rewrites everything twice a day, so keep this run quick: about 10 searches and 5 page fetches at most.
+You are doing a LIGHT refresh of the data file behind the INTSUM dashboard. Work only with files in the current directory. Do not change any file except data/live.new.json. A separate full refresh rewrites everything twice a day, so keep this run quick: about 10 searches and 5 page fetches at most.
 
 INPUT: read data/live.json if it exists, otherwise data/data.json. It is one JSON object: {"generatedAt", "meta": {brief, questions, feeds, indicators, updatedAt, updatedBy}, "hotspots": [...], "chokepoints": [...], "incidents": [...]}. Every item has an "id". Item fields: hotspots have name, region, lat, lon, sev (1-5), trend (up/flat/down), asof (ISO date), summary, bullets, sources ({t, u}); chokepoints add metric and metricNote; incidents use title, sector, actor.
 

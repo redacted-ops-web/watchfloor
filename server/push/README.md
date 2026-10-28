@@ -1,4 +1,4 @@
-# Watchfloor push service
+# INTSUM push service
 
 Sends a notification to subscribed browsers when a refresh adds or escalates a severe or critical item.
 

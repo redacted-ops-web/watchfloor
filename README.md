@@ -1,4 +1,4 @@
-# Watchfloor
+# INTSUM
 
 Situational-awareness dashboard: conflict hotspots, shipping chokepoints, cyber incidents, live news streams, Pentagon Pizza Index and S2 Underground map links, and a local-AI analyst.
 

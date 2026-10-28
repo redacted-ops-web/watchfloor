@@ -1,5 +1,5 @@
 #!/bin/sh
-# Nightly backup of the Watchfloor data (live data, history, pizza readings) and the refresh logs. Keeps 14 days.
+# Nightly backup of the INTSUM data (live data, history, pizza readings) and the refresh logs. Keeps 14 days.
 SRC=/Volume2/Media2/docker/watchfloor
 CH=/Volume2/Media2/docker/claude-refresh
 DEST=/Volume2/Media2/backups/watchfloor

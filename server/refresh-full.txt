@@ -1,4 +1,4 @@
-You are refreshing the data file behind the Watchfloor dashboard, a situational-awareness web page. Work only with files in the current directory. Do not change any file except data/live.new.json.
+You are refreshing the data file behind the INTSUM dashboard, a situational-awareness web page. Work only with files in the current directory. Do not change any file except data/live.new.json.
 
 INPUT: read data/live.json if it exists, otherwise data/data.json. It is one JSON object: {"generatedAt", "meta": {brief, questions, feeds, indicators, updatedAt, updatedBy}, "hotspots": [...], "chokepoints": [...], "incidents": [...]}. Every array item has an "id" (short lowercase slug). Keep existing ids stable.
 

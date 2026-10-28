@@ -1,5 +1,5 @@
 #!/bin/sh
-# Runs a Watchfloor data refresh with Claude Code inside Docker. Usage: refresh.sh full|light
+# Runs an INTSUM data refresh with Claude Code inside Docker. Usage: refresh.sh full|light
 # Writes data/live.json in the site folder (untracked, so the git pull cron never overwrites it).
 # cron has a bare PATH, so add the Synology Docker location
 export PATH="/Volume1/@apps/DockerEngine/dockerd/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"

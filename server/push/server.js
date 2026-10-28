@@ -1,10 +1,10 @@
-// Watchfloor push service: stores browser push subscriptions and sends a notification when a refresh
+// INTSUM push service: stores browser push subscriptions and sends a notification when a refresh
 // adds or escalates a severe (4) or critical (5) item. Reads data/history.json from the site folder.
 const http = require('http'), fs = require('fs'), path = require('path'), webpush = require('web-push');
 const PORT = Number(process.env.PORT) || 8791;
 const DATA = process.env.DATA_DIR || '/data', SITE = process.env.SITE_DIR || '/site';
-const SUBJECT = process.env.VAPID_SUBJECT || 'https://watchfloor.duckdns.org';
-const ORIGIN = process.env.SITE_URL || 'https://watchfloor.duckdns.org';
+const SUBJECT = process.env.VAPID_SUBJECT || 'https://intsum.net';
+const ORIGIN = process.env.SITE_URL || 'https://intsum.net';
 const ANY = process.env.ALLOW_ANY_ENDPOINT === '1';
 const HOSTS = /(^|\.)(fcm\.googleapis\.com|push\.services\.mozilla\.com|notify\.windows\.com|push\.apple\.com|web\.push\.apple\.com)$/;
 const rd = (f, d) => { try { return JSON.parse(fs.readFileSync(path.join(DATA, f), 'utf8')); } catch (e) { return d; } };
@@ -75,4 +75,4 @@ async function check() {
   await notify({ title: 'INTSUM: ' + list.length + ' severe update' + (list.length > 1 ? 's' : ''), body: list.slice(0, 3).map(label).join('; ') + (list.length > 3 ? '; +' + (list.length - 3) + ' more' : ''), url: list.length === 1 ? ORIGIN + '/#i=' + list[0].k : ORIGIN + '/' });
 }
 setInterval(() => check().catch(e => console.log('check failed: ' + e.message)), 60000);
-server.listen(PORT, () => console.log('Watchfloor push on ' + PORT + ', ' + Object.keys(subs).length + ' subscribers'));
+server.listen(PORT, () => console.log('INTSUM push on ' + PORT + ', ' + Object.keys(subs).length + ' subscribers'));

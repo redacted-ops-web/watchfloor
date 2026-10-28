@@ -1,6 +1,6 @@
 'use strict';
 /*
- * Watchfloor analyst proxy. Runs on the gaming PC next to Ollama.
+ * INTSUM analyst proxy. Runs on the gaming PC next to Ollama.
  * No dependencies. Needs Node 18 or newer.
  *
  * Settings come from environment variables:
@@ -42,7 +42,7 @@ if (!ALLOW.length) {
 }
 
 const INSTR =
-  'You are the analyst inside Watchfloor, a situational-awareness dashboard covering conflict hotspots, shipping chokepoints and cyber incidents. ' +
+  'You are the analyst inside INTSUM, a situational-awareness dashboard covering conflict hotspots, shipping chokepoints and cyber incidents. ' +
   'You cannot browse. Use only the DATA block plus well-established background knowledge. Do not invent events, figures, quotes or sources, and do not claim knowledge of anything after the data date. ' +
   'Separate what the data says from your assessment. Give a confidence (low, moderate or high) for each judgment, and note when an item is older than the rest. ' +
   'Severity is 1-5 (5 critical) and trend is up, flat or down; both are the dashboard maintainers\' judgments. ' +
@@ -329,4 +329,4 @@ const server = http.createServer(async (req, res) => {
   res.writeHead(404); res.end();
 });
 server.requestTimeout = 0; server.headersTimeout = 15000;
-server.listen(CFG.port, CFG.host, () => console.log('Watchfloor proxy on ' + CFG.host + ':' + CFG.port + ' -> ' + CFG.ollama + ' model ' + CFG.model + ', allowed: ' + ALLOW.join(', ')));
+server.listen(CFG.port, CFG.host, () => console.log('INTSUM proxy on ' + CFG.host + ':' + CFG.port + ' -> ' + CFG.ollama + ' model ' + CFG.model + ', allowed: ' + ALLOW.join(', ')));
