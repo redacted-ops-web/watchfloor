@@ -170,6 +170,7 @@ svg.labels .lbl, .mk.on .lbl, .mk:hover .lbl, .mk:focus-visible .lbl { display: 
 .pz { display: grid; gap: 6px; } .pz-r { display: grid; grid-template-columns: 1fr auto 96px; gap: 4px 12px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
 .pz-r .n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .pz-r .v { font: 600 13px var(--font-mono, monospace); text-align: right; } .pz-r .v small { color: var(--muted); font-weight: 400; margin-left: 4px; }
 .pz-r.spike .v { color: var(--sev); } .pz-r .na { color: var(--faint); } .pz-r svg { width: 96px; height: 24px; } .pz-r path { fill: none; stroke: var(--accent); stroke-width: 1.4; vector-effect: non-scaling-stroke; }
+.pz-r path.typ { stroke: var(--faint); stroke-dasharray: 3 3; } .pz-r circle { fill: var(--accent); } .pz-note { margin: 8px 0 0; }
 .lsn { font: 600 11px var(--font-body); background: transparent; color: var(--accent); border: 1px solid var(--line); border-radius: 5px; padding: 2px 9px; cursor: pointer; margin: 2px 0 4px 8px; } .lsn.on { background: var(--panel-2); border-color: var(--accent); } .lsn:hover { border-color: var(--accent); }
 .fd { display: grid; margin-top: 8px; } .fd a { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; padding: 9px 0; border-bottom: 1px solid var(--line); color: inherit; text-decoration: none; }
 .fd a:hover .t { text-decoration: underline; } .fd img { width: 120px; aspect-ratio: 16/9; object-fit: cover; border-radius: 5px; background: var(--panel-2); grid-row: span 2; }
@@ -376,7 +377,7 @@ body { margin: 0; }
     <section class="card views" aria-label="Pentagon Pizza Index">
       <div class="card-h"><h2>Pentagon Pizza Index</h2><span class="pz-lv" id="pz-lv" hidden></span><span class="count" id="pz-meta">Loading…</span></div>
       <div class="vbody"><div id="pz-list" class="pz"></div>
-      <p class="fine">Foot-traffic readings for pizza places near the Pentagon, from Google popular times via <a href="https://www.pizzint.watch/" target="_blank" rel="noopener noreferrer">pizzint.watch</a>, copied here every 10 minutes. An unusual jump is a rough signal, not proof of anything. Sparkline is the last 24 hours. The DEFCON-style level is pizzint.watch’s own calculation (5 calm, 1 highest alert), not ours.</p></div>
+      <p class="fine">Foot-traffic readings for pizza places near the Pentagon. Live busyness comes from Google popular times via <a href="https://www.pizzint.watch/" target="_blank" rel="noopener noreferrer">pizzint.watch</a>, collected here every 10 minutes. When the source has no live reading, each row shows the place’s typical level for this hour. A jump well above typical is a rough signal, not proof of anything. The DEFCON-style level is pizzint.watch’s own calculation (5 calm, 1 highest alert) and is hidden when there is no live data.</p></div>
     </section>
   </div>
 
@@ -1255,41 +1256,77 @@ body { margin: 0; }
     return { init: init, scale: scale };
   })();
 
-  /* ---------- Pentagon Pizza Index (data copied from pizzint.watch by the server) ---------- */
+  /* ---------- Pentagon Pizza Index (collected by the server from pizzint.watch, with our own status and typical-level baseline) ---------- */
   function loadPizza() {
-    var list = $('#pz-list'), meta = $('#pz-meta');
+    var list = $('#pz-list'), meta = $('#pz-meta'), badge = $('#pz-lv');
+    var ageText = function (ms) { var m = Math.max(0, Math.round(ms / 60000)); return m < 90 ? m + ' min' : Math.round(m / 60) + ' h'; };
     fetch('data/pizza.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) {
       var rows = (j && j.data) || []; if (!rows.length) throw 0;
-      var found = function (o, k, d) { if (!o || typeof o !== 'object' || d > 3) return undefined; if (typeof o[k] === 'number') return o[k]; for (var x in o) { if (x === 'data' && Array.isArray(o[x])) continue; var r = found(o[x], k, d + 1); if (r !== undefined) return r; } return undefined; };
-      var lvl = found(j, 'defcon_level', 0), idx = found(j, 'overall_index', 0), badge = $('#pz-lv');
-      if (typeof lvl === 'number' && lvl >= 1 && lvl <= 5) {
-        badge.textContent = 'DEFCON ' + lvl + (typeof idx === 'number' ? ' · index ' + (Math.round(idx * 10) / 10) : '');
-        badge.style.setProperty('--c', ['', 'var(--crit)', 'var(--crit)', 'var(--sev)', 'var(--elev)', 'var(--watch)'][lvl]);
-        badge.title = 'Alert level reported by pizzint.watch: 5 is calm, 1 is highest alert'; badge.hidden = false;
-      } else badge.hidden = true;
+      var ours = j.ours || {}, now = Date.now();
+      var checked = Date.parse(ours.checkedAt || j.timestamp || '') || 0;
+      var stale = checked && now - checked > 45 * 60000, down = ours.ok === false;
+      var parts = {};
+      try { new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'short', hour: 'numeric', hourCycle: 'h23' }).formatToParts(new Date()).forEach(function (q) { parts[q.type] = q.value; }); } catch (e) { }
+      var dow = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(parts.weekday), hr = parseInt(parts.hour, 10);
+      if (dow < 0 || isNaN(hr)) { var d0 = new Date(); dow = d0.getUTCDay(); hr = d0.getUTCHours(); }
+      var dayOf = function (p) { return p.baseline_popular_times && p.baseline_popular_times[String(dow)]; };
+      var typ = function (p) { var day = dayOf(p); if (!day) return null; for (var i = 0; i < day.length; i++) if (day[i].hour === hr) return day[i].popularity; return null; };
       list.textContent = '';
-      var live = 0, spikes = 0, newest = 0;
+      var live = 0, spikes = 0, sparkLive = 0;
       rows.forEach(function (p) {
-        var cur = p.current_popularity, pct = p.percentage_of_usual, has = typeof cur === 'number';
-        if (has) live++; if (p.is_spike) spikes++;
-        var t = Date.parse(p.recorded_at); if (t > newest) newest = t;
-        var r = document.createElement('div'); r.className = 'pz-r' + (p.is_spike ? ' spike' : '');
+        var cur = typeof p.current_popularity === 'number' ? p.current_popularity : null, t = typ(p);
+        var spike = !!p.is_spike || (cur != null && t > 0 && cur >= t * 1.5 && cur >= 40);
+        if (cur != null) live++; if (spike) spikes++;
+        var pts = (p.sparkline_24h || []).map(function (q) { return q.current_popularity; }).filter(function (x) { return typeof x === 'number'; });
+        sparkLive += pts.length;
+        var r = document.createElement('div'); r.className = 'pz-r' + (spike ? ' spike' : '');
         var n = document.createElement('span'); n.className = 'n'; n.textContent = p.name || 'Unknown';
         var v = document.createElement('span'); v.className = 'v';
-        if (has) { v.textContent = Math.round(cur); if (typeof pct === 'number') { var sm = document.createElement('small'); sm.textContent = Math.round(pct) + '% of usual' + (p.is_spike ? ' · spike' : ''); v.appendChild(sm); } }
-        else { v.className = 'v na'; v.textContent = 'no reading'; }
+        if (cur != null) {
+          v.textContent = Math.round(cur);
+          var pct = typeof p.percentage_of_usual === 'number' ? p.percentage_of_usual : (t > 0 ? cur / t * 100 : null);
+          if (pct != null) { var sm = document.createElement('small'); sm.textContent = Math.round(pct) + '% of usual' + (spike ? ' · spike' : ''); v.appendChild(sm); }
+        } else {
+          v.className = 'v na'; v.textContent = t === 0 ? 'closed hours' : (t != null ? 'typical ' + t : 'no data');
+        }
         r.appendChild(n); r.appendChild(v);
-        var pts = (p.sparkline_24h || []).map(function (q) { return q.current_popularity; }).filter(function (x) { return typeof x === 'number'; });
         var sv = document.createElementNS(NS, 'svg'); sv.setAttribute('viewBox', '0 0 96 24'); sv.setAttribute('preserveAspectRatio', 'none');
         if (pts.length > 1) {
           var mx = Math.max.apply(null, pts.concat([1])), d = pts.map(function (y, i) { return (i ? 'L' : 'M') + (i / (pts.length - 1) * 96).toFixed(1) + ',' + (22 - y / mx * 20).toFixed(1); }).join('');
           var pa = document.createElementNS(NS, 'path'); pa.setAttribute('d', d); sv.appendChild(pa);
+        } else {
+          var day = dayOf(p);
+          if (day && day.length > 1) {
+            var m2 = 1, k; for (k = 0; k < day.length; k++) m2 = Math.max(m2, day[k].popularity);
+            var dd = '', cx = null, cy = null;
+            for (k = 0; k < day.length; k++) {
+              var x = (day[k].hour - 6) / 17 * 96, y2 = 22 - day[k].popularity / m2 * 20;
+              dd += (k ? 'L' : 'M') + x.toFixed(1) + ',' + y2.toFixed(1);
+              if (day[k].hour === hr) { cx = x; cy = y2; }
+            }
+            var tp = document.createElementNS(NS, 'path'); tp.setAttribute('d', dd); tp.setAttribute('class', 'typ'); sv.appendChild(tp);
+            if (cx != null) { var dot = document.createElementNS(NS, 'circle'); dot.setAttribute('cx', cx.toFixed(1)); dot.setAttribute('cy', cy.toFixed(1)); dot.setAttribute('r', '2.4'); sv.appendChild(dot); }
+          }
         }
         r.appendChild(sv); list.appendChild(r);
       });
-      var ago = newest ? Math.max(0, Math.round((Date.now() - newest) / 60000)) : null;
-      meta.textContent = live + ' of ' + rows.length + ' reporting' + (spikes ? ' · ' + spikes + ' spike' + (spikes > 1 ? 's' : '') : '') + (ago != null ? ' · ' + (ago < 90 ? ago + ' min ago' : Math.round(ago / 60) + ' h ago') : '');
-    }).catch(function () { meta.textContent = 'Unavailable'; list.innerHTML = '<p class="fine">The pizza data could not be loaded right now.</p>'; });
+      var lvl = typeof j.defcon_level === 'number' ? j.defcon_level : null, idx = typeof j.overall_index === 'number' ? j.overall_index : null;
+      if (live > 0 && lvl >= 1 && lvl <= 5 && !down && !stale) {
+        badge.textContent = 'DEFCON ' + lvl + (idx != null ? ' · index ' + (Math.round(idx * 10) / 10) : '');
+        badge.style.setProperty('--c', ['', 'var(--crit)', 'var(--crit)', 'var(--sev)', 'var(--elev)', 'var(--watch)'][lvl]);
+        badge.title = 'Alert level reported by pizzint.watch: 5 is calm, 1 is highest alert'; badge.hidden = false;
+      } else {
+        badge.textContent = down ? 'SOURCE DOWN' : stale ? 'COLLECTOR STOPPED' : 'NO LIVE SIGNAL';
+        badge.style.setProperty('--c', 'var(--faint)');
+        badge.title = 'The source is not reporting live busyness right now, so no alert level is shown. A missing signal does not mean things are calm.'; badge.hidden = false;
+      }
+      var note = document.createElement('p'); note.className = 'fine pz-note';
+      if (down) note.textContent = 'The source could not be reached on the last check' + (ours.error ? ' (' + ours.error + ')' : '') + '. Showing the last data collected.';
+      else if (stale) note.textContent = 'The collector has not checked the source for ' + ageText(now - checked) + '. The data shown may be old.';
+      else if (live === 0) note.textContent = 'The source has no live busyness for any of these places' + (sparkLive === 0 ? ' in the last 24 hours' : ' right now') + '. Google only reports live busyness for some places and hours. Each row shows the place’s typical level for this hour (Washington time); the dashed line is its typical day and the dot is now. No reading is not the same as calm.';
+      if (note.textContent) list.appendChild(note);
+      meta.textContent = live + ' of ' + rows.length + ' live' + (spikes ? ' · ' + spikes + ' spike' + (spikes > 1 ? 's' : '') : '') + (checked ? ' · checked ' + ageText(now - checked) + ' ago' : '');
+    }).catch(function () { badge.hidden = true; meta.textContent = 'Unavailable'; list.innerHTML = '<p class="fine">The pizza data could not be loaded right now.</p>'; });
   }
 
   /* ---------- live feeds (collected by the server from public sources) ---------- */
