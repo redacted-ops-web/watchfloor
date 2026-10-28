@@ -220,6 +220,19 @@ footer h2 { font: 600 11px/1.2 var(--font-display); letter-spacing: .16em; text-
 footer p { margin: 0 0 8px; color: var(--muted); font-size: 12.5px; } footer p:last-child { margin-bottom: 0; }
 footer ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 12.5px; }
 
+
+/* desktop: fill the empty space (map column matches the analyst, live feeds fill beside streams + pizza) */
+@media (min-width: 981px) {
+  .main { align-items: stretch; }
+  .main > section.card { display: flex; flex-direction: column; }
+  .main > section.card .s2 { flex: 0 0 auto; }
+  .main > section.card .s2[open] { flex: 1 1 0; min-height: 170px; overflow: auto; }
+  .lower { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
+  .lower .streams { grid-column: 1; grid-row: 1; }
+  .lower .views { grid-column: 1; grid-row: 2; }
+  .lower .feeds { grid-column: 2; grid-row: 1 / span 2; contain: size; min-height: 380px; display: flex; flex-direction: column; }
+  .lower .feeds .vbody { flex: 1 1 auto; min-height: 0; overflow: auto; }
+}
 @media (max-width: 980px) { .main { grid-template-columns: minmax(0, 1fr); } .log { max-height: none; } }
 @media (max-width: 560px) { .vbody iframe { height: 420px; } .map-wrap { aspect-ratio: 1.45 / 1; } .brand h1 { font-size: 19px; } }
 [hidden] { display: none !important; }
@@ -1029,6 +1042,7 @@ body { margin: 0; }
       build();
       CAT.forEach(function (d) { if (d.show) load(d); });
       var det = $('#s2'); det.addEventListener('toggle', function () { if (det.open && !opened) { opened = true; metaNames(); } });
+      if (window.matchMedia && matchMedia('(min-width: 981px)').matches) det.open = true;
       base.addEventListener('click', showPop);
       pop2.addEventListener('click', function (e) { if (e.target.closest('.x')) closePop(); e.stopPropagation(); });
       mapWrap.addEventListener('click', function (e) { if (!pop2.contains(e.target) && !e.target.closest('.s2pt, .s2l, .s2p')) closePop(); });
