@@ -1127,7 +1127,8 @@ body { margin: 0; }
   var lastLoad = 0;
   async function loadData() {
     try {
-      var r = await fetch('data/data.json', { cache: 'no-store' });
+      var r = await fetch('data/live.json', { cache: 'no-store' });
+      if (!r.ok) r = await fetch('data/data.json', { cache: 'no-store' });
       if (!r.ok) throw new Error('http ' + r.status);
       var j = await r.json();
       KINDS.forEach(function (k) { data[k] = Array.isArray(j[k]) ? j[k] : []; });

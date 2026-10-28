@@ -161,7 +161,8 @@ let preparing = false;
 async function prepare() {
   if (preparing) return; preparing = true;
   try {
-    const r = await fetch(SITE, { signal: AbortSignal.timeout(15000) });
+    let r = await fetch(SITE.replace(/data\.json$/, 'live.json'), { signal: AbortSignal.timeout(15000) });
+    if (!r.ok) r = await fetch(SITE, { signal: AbortSignal.timeout(15000) });
     if (!r.ok) return;
     const j = await r.json(), m = j.meta || {};
     let qs = (Array.isArray(m.questions) ? m.questions : []).filter(q => typeof q === 'string' && q.trim() && q.length <= 300).slice(0, 6);
