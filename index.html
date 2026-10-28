@@ -244,8 +244,8 @@ footer ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 12.5p
   .lower { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
   .lower .streams { grid-column: 1; grid-row: 1; }
   .lower .views { grid-column: 1; grid-row: 2; }
-  .lower .feeds { grid-column: 2; grid-row: 1; contain: size; min-height: 380px; display: flex; flex-direction: column; }
-  .lower .feeds.vids { grid-row: 2; min-height: 240px; }
+  .lower .feeds { grid-column: 2; grid-row: 2; contain: size; min-height: 260px; display: flex; flex-direction: column; }
+  .lower .feeds.vids { grid-row: 1; min-height: 380px; }
   .lower .feeds .vbody { flex: 1 1 auto; min-height: 0; overflow: auto; }
 }
 @media (max-width: 980px) { .main { grid-template-columns: minmax(0, 1fr); } .log { max-height: none; } }
@@ -334,15 +334,15 @@ body { margin: 0; }
       </div>
       <p class="fine" style="padding:0 14px 12px;margin:0">Pick a channel to play it here. Star channels to keep them first. Stars stay in this browser.</p>
     </section>
-    <section class="card feeds" aria-label="News feeds">
-      <div class="card-h"><h2>News feeds</h2><span class="count" id="fd-meta">Loading…</span></div>
-      <div class="vbody"><div id="fd-chips"></div><div id="fd-list" class="fd"></div>
-      <p class="fine">Headlines from public news and security sources, by category. Content belongs to its authors and is not verified by this dashboard.</p></div>
-    </section>
     <section class="card feeds vids" aria-label="Channel videos">
       <div class="card-h"><h2>Channel videos</h2><span class="count" id="vd-meta">Loading…</span></div>
       <div class="vbody"><div id="vd-chips"></div><div id="vd-list" class="fd"></div>
       <p class="fine">Latest videos from YouTube channels the site owner follows. Content belongs to its authors and is not verified by this dashboard.</p></div>
+    </section>
+    <section class="card feeds" aria-label="News feeds">
+      <div class="card-h"><h2>News feeds</h2><span class="count" id="fd-meta">Loading…</span></div>
+      <div class="vbody"><div id="fd-chips"></div><div id="fd-list" class="fd"></div>
+      <p class="fine">Headlines from public news and security sources, by category. Content belongs to its authors and is not verified by this dashboard.</p></div>
     </section>
     <section class="card views" aria-label="Pentagon Pizza Index">
       <div class="card-h"><h2>Pentagon Pizza Index</h2><span class="pz-lv" id="pz-lv" hidden></span><span class="count" id="pz-meta">Loading…</span></div>
