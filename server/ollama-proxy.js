@@ -252,6 +252,8 @@ async function refreshFeeds() {
       if (!s || !s.id || !s.name) continue;
       try { items.push(...await readSource(s)); } catch (e) { errors[s.id] = String(e.message || e).slice(0, 80); }
     }
+    // a source that failed this round keeps its last good items
+    for (const id of Object.keys(errors)) items.push(...((feeds.items || []).filter(i => i.src === id)));
     items.sort((a, b) => (b.ts || 0) - (a.ts || 0));
     feeds = { at: new Date().toISOString(), items: items.slice(0, 120), errors };
     fs.writeFileSync(FFILE + '.tmp', JSON.stringify(feeds)); fs.renameSync(FFILE + '.tmp', FFILE);
