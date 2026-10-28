@@ -244,7 +244,8 @@ footer ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 12.5p
   .lower { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
   .lower .streams { grid-column: 1; grid-row: 1; }
   .lower .views { grid-column: 1; grid-row: 2; }
-  .lower .feeds { grid-column: 2; grid-row: 1 / span 2; contain: size; min-height: 380px; display: flex; flex-direction: column; }
+  .lower .feeds { grid-column: 2; grid-row: 1; contain: size; min-height: 380px; display: flex; flex-direction: column; }
+  .lower .feeds.vids { grid-row: 2; min-height: 240px; }
   .lower .feeds .vbody { flex: 1 1 auto; min-height: 0; overflow: auto; }
 }
 @media (max-width: 980px) { .main { grid-template-columns: minmax(0, 1fr); } .log { max-height: none; } }
@@ -333,10 +334,15 @@ body { margin: 0; }
       </div>
       <p class="fine" style="padding:0 14px 12px;margin:0">Pick a channel to play it here. Star channels to keep them first. Stars stay in this browser.</p>
     </section>
-    <section class="card feeds" aria-label="Live feeds">
-      <div class="card-h"><h2>Live feeds</h2><span class="count" id="fd-meta">Loading…</span></div>
-      <div class="vbody"><div class="seg" id="fd-chips"></div><div id="fd-list" class="fd"></div>
-      <p class="fine">Latest posts and videos from channels the site owner follows. Content belongs to its authors and is not verified by this dashboard.</p></div>
+    <section class="card feeds" aria-label="News feeds">
+      <div class="card-h"><h2>News feeds</h2><span class="count" id="fd-meta">Loading…</span></div>
+      <div class="vbody"><div id="fd-chips"></div><div id="fd-list" class="fd"></div>
+      <p class="fine">Headlines from public news and security sources, by category. Content belongs to its authors and is not verified by this dashboard.</p></div>
+    </section>
+    <section class="card feeds vids" aria-label="Channel videos">
+      <div class="card-h"><h2>Channel videos</h2><span class="count" id="vd-meta">Loading…</span></div>
+      <div class="vbody"><div id="vd-chips"></div><div id="vd-list" class="fd"></div>
+      <p class="fine">Latest videos from YouTube channels the site owner follows. Content belongs to its authors and is not verified by this dashboard.</p></div>
     </section>
     <section class="card views" aria-label="Pentagon Pizza Index">
       <div class="card-h"><h2>Pentagon Pizza Index</h2><span class="pz-lv" id="pz-lv" hidden></span><span class="count" id="pz-meta">Loading…</span></div>
@@ -380,7 +386,9 @@ body { margin: 0; }
   var openRows = {};
   var selected = null;
   var canEdit = false, noDb = false, isOwner = false, dbRef = null;
-  var channels = null, favs = {}, favOnly = false, editing = false, liveInfo = {};
+  var channels = null, favs = {}, favOnly = false, editing = false, liveInfo = {}, blockedCh = {}, ytReady = null;
+  try { blockedCh = JSON.parse(localStorage.getItem('watchfloor.blocked') || '{}') || {}; } catch (e) { blockedCh = {}; }
+  function noEmbed(c) { var l = liveInfo[c.channelId]; return c.embed === false || !!blockedCh[c.channelId] || !!(l && l.live && l.embeddable === false); }
   try { favs = JSON.parse(localStorage.getItem('watchfloor.fav') || '{}') || {}; } catch (e) { favs = {}; }
 
   /* ---------- map geometry ---------- */
@@ -855,7 +863,7 @@ body { margin: 0; }
     box.innerHTML = list.map(function (c) {
       var f = !!favs[c.id];
       var l = liveInfo[c.channelId], tag = '';
-      if (l && l.live && l.embeddable === false) tag = '<em class="lv no">opens on YouTube</em>';
+      if (noEmbed(c) && !(l && l.live === false)) tag = '<em class="lv no">opens on YouTube</em>';
       else if (l && l.live) tag = '<em class="lv on">live</em>';
       else if (l && l.live === false) tag = '<em class="lv off">offline</em>';
       return '<div class="ch' + (f ? ' fav' : '') + (activeCh === c.id ? ' on' : '') + (l && l.live === false ? ' dim' : '') + '" data-id="' + esc(c.id) + '"><button class="pick" data-a="play">' + esc(c.name) + (c.note ? '<small>' + esc(c.note) + '</small>' : '') + tag + '</button>' +
@@ -871,11 +879,13 @@ body { margin: 0; }
     var a = $('#p-open'); a.hidden = !open; if (open) a.href = open;
     var fr = $('#p-frame');
     var li = liveInfo[c.channelId];
-    if (li && li.live && li.embeddable === false) {
+    if (li && li.live && /^[\w-]{11}$/.test(li.videoId || '')) { a.hidden = false; a.href = 'https://www.youtube.com/watch?v=' + li.videoId; }
+    if (noEmbed(c) && !(li && li.live === false)) {
       fr.removeAttribute('src');
-      $('#p-hint').textContent = 'This broadcaster does not allow its live stream to be played inside other sites. Use Open on YouTube.';
+      $('#p-hint').textContent = 'This broadcaster does not allow its live stream to play inside other sites, so it has to open on YouTube. Tap Open on YouTube to watch it live.';
     } else if (li && li.live && /^[\w-]{11}$/.test(li.videoId || '')) {
-      fr.src = 'https://www.youtube-nocookie.com/embed/' + li.videoId + '?autoplay=1&mute=1';
+      fr.src = 'https://www.youtube-nocookie.com/embed/' + li.videoId + '?autoplay=1&mute=1&enablejsapi=1&origin=' + encodeURIComponent(location.origin);
+      watchPlayer(c);
       $('#p-hint').textContent = 'Playing muted' + (li.title ? ': ' + li.title : '') + '. Use Open on YouTube if the picture does not appear.';
     } else if (li && li.live === false) {
       fr.removeAttribute('src');
@@ -885,6 +895,29 @@ body { margin: 0; }
       $('#p-hint').textContent = 'Playing muted. If the player says the video is unavailable, this channel is not live or does not allow embedding. Use Open on YouTube.';
     } else { fr.removeAttribute('src'); $('#p-hint').textContent = 'No embed is set for this channel. Use Open on YouTube.'; }
     $('#player').hidden = false;
+  }
+  /* learn which channels refuse to play here: the YouTube player reports error 101/150 when embedding is blocked */
+  function watchPlayer(c) {
+    try {
+      var go = function () {
+        try {
+          var fr = $('#p-frame'), done = false;
+          var arm = function () {
+            if (done) return; done = true;
+            new YT.Player(fr, { events: { onError: function (e) {
+              if (e && (e.data === 101 || e.data === 150 || e.data === 100)) {
+                blockedCh[c.channelId] = 1; try { localStorage.setItem('watchfloor.blocked', JSON.stringify(blockedCh)); } catch (x) { }
+                renderChannels();
+                $('#p-hint').textContent = 'This broadcaster does not allow its live stream to play inside other sites. Tap Open on YouTube to watch it live.';
+              }
+            } } });
+          };
+          if (fr.contentWindow) fr.addEventListener('load', arm, { once: true });
+        } catch (x) { }
+      };
+      if (window.YT && window.YT.Player) { go(); return; }
+      if (!ytReady) { ytReady = true; var sc = document.createElement('script'); sc.src = 'https://www.youtube.com/iframe_api'; window.onYouTubeIframeAPIReady = function () { go(); }; document.head.appendChild(sc); }
+    } catch (x) { }
   }
   function stopPlayer() { $('#p-frame').removeAttribute('src'); $('#player').hidden = true; activeCh = null; renderChannels(); }
   function setupPlayer() {
@@ -1128,36 +1161,42 @@ body { margin: 0; }
   }
 
   /* ---------- live feeds (collected by the server from public sources) ---------- */
-  var feedSel = 'all', feedCat = 'all', feedItems = [], feedErrs = {};
+  var feedItems = [], feedErrs = {};
   function agoText(ts) {
     if (!ts) return ''; var m = Math.max(0, Math.round((Date.now() - ts) / 60000));
     if (m < 60) return m + ' min ago'; if (m < 1440) return Math.round(m / 60) + ' h ago'; return Math.round(m / 1440) + ' d ago';
   }
-  function renderFeeds() {
-    var chips = $('#fd-chips'), list = $('#fd-list'), names = {}, order = [], cats = [], catOf = {};
-    feedItems.forEach(function (i) {
+  var isVid = function (i) { return i.cat === 'Video' || i.kind === 'video'; };
+  var FMODS = [
+    { key: 'news', chips: '#fd-chips', list: '#fd-list', meta: '#fd-meta', sel: 'all', cat: 'all', pred: function (i) { return !isVid(i); }, per: 3, perOne: 12, empty: 'No news items yet.' },
+    { key: 'vids', chips: '#vd-chips', list: '#vd-list', meta: '#vd-meta', sel: 'all', cat: 'all', pred: isVid, per: 3, perOne: 12, empty: 'No channel videos yet.' }
+  ];
+  function renderFeeds() { FMODS.forEach(renderFeedMod); }
+  function renderFeedMod(M) {
+    var chips = $(M.chips), list = $(M.list), names = {}, order = [], cats = [], catOf = {}, items = feedItems.filter(M.pred);
+    items.forEach(function (i) {
       if (!names[i.src]) { names[i.src] = i.name; order.push(i.src); catOf[i.src] = i.cat || 'Other'; }
       var cc = i.cat || 'Other'; if (cats.indexOf(cc) < 0) cats.push(cc);
     });
-    if (feedCat !== 'all' && cats.indexOf(feedCat) < 0) feedCat = 'all';
-    var srcs = order.filter(function (k) { return feedCat === 'all' || catOf[k] === feedCat; });
-    if (feedSel !== 'all' && srcs.indexOf(feedSel) < 0) feedSel = 'all';
+    if (M.cat !== 'all' && cats.indexOf(M.cat) < 0) M.cat = 'all';
+    var srcs = order.filter(function (k) { return M.cat === 'all' || catOf[k] === M.cat; });
+    if (M.sel !== 'all' && srcs.indexOf(M.sel) < 0) M.sel = 'all';
     chips.textContent = '';
     function chipRow(pairs, cur, set, cls) {
       var row = document.createElement('div'); row.className = 'seg ' + cls;
       pairs.forEach(function (p) {
         var b = document.createElement('button'); b.textContent = p[1]; b.setAttribute('aria-pressed', cur === p[0] ? 'true' : 'false');
-        b.addEventListener('click', function () { set(p[0]); renderFeeds(); }); row.appendChild(b);
+        b.addEventListener('click', function () { set(p[0]); renderFeedMod(M); }); row.appendChild(b);
       });
       chips.appendChild(row);
     }
-    if (cats.length > 1) chipRow([['all', 'All']].concat(cats.map(function (c) { return [c, c]; })), feedCat, function (v) { feedCat = v; feedSel = 'all'; }, 'cats');
-    if (srcs.length > 1) chipRow([['all', 'All sources']].concat(srcs.map(function (k) { return [k, names[k]]; })), feedSel, function (v) { feedSel = v; }, 'srcs');
+    if (cats.length > 1) chipRow([['all', 'All']].concat(cats.map(function (c) { return [c, c]; })), M.cat, function (v) { M.cat = v; M.sel = 'all'; }, 'cats');
+    if (srcs.length > 1) chipRow([['all', 'All sources']].concat(srcs.map(function (k) { return [k, names[k]]; })), M.sel, function (v) { M.sel = v; }, 'srcs');
     list.textContent = '';
-    var cnt = {}, per = feedSel === 'all' ? 3 : 12;
-    feedItems.slice().sort(function (x, y) { return (y.ts || 0) - (x.ts || 0); }).filter(function (i) {
-      if (feedCat !== 'all' && (i.cat || 'Other') !== feedCat) return false;
-      if (feedSel !== 'all' && i.src !== feedSel) return false;
+    var cnt = {}, per = M.sel === 'all' ? M.per : M.perOne;
+    items.slice().sort(function (x, y) { return (y.ts || 0) - (x.ts || 0); }).filter(function (i) {
+      if (M.cat !== 'all' && (i.cat || 'Other') !== M.cat) return false;
+      if (M.sel !== 'all' && i.src !== M.sel) return false;
       cnt[i.src] = (cnt[i.src] || 0) + 1; return cnt[i.src] <= per;
     }).forEach(function (i) {
       var u = safeUrl(i.url); if (!u) return;
@@ -1168,17 +1207,21 @@ body { margin: 0; }
       if (i.kind === 'post' && i.title && i.text) { var x = document.createElement('div'); x.className = 'm'; x.textContent = i.text; a.insertBefore(x, m); }
       list.appendChild(a);
     });
-    if (!list.children.length) list.innerHTML = '<p class="fine">Nothing to show yet.</p>';
-    var ek = Object.keys(feedErrs || {});
+    if (!list.children.length) list.innerHTML = '<p class="fine">' + M.empty + '</p>';
+    var ek;
+    ek = Object.keys(feedErrs || {}).filter(function (k) { var v = /^(s2g|dirtycivilian|techprepper|enforcer)$/.test(k); return M.key === 'vids' ? v : !v; });
     if (ek.length) { var ep = document.createElement('p'); ep.className = 'fine'; ep.textContent = 'Not loading right now: ' + ek.join(', ') + '.'; list.appendChild(ep); }
   }
   function loadFeeds() {
     fetch('/api/feeds', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) {
-      feedItems = j.items || []; renderFeeds();
-      var badKeys = Object.keys(j.errors || {}), bad = badKeys.length;
-      $('#fd-meta').textContent = feedItems.length ? feedItems.length + ' items' + (j.at ? ' · updated ' + agoText(Date.parse(j.at)) : '') + (bad ? ' · ' + bad + ' source' + (bad > 1 ? 's' : '') + ' unavailable' : '') : 'No items yet';
-      feedErrs = j.errors || {}; renderFeeds();
-    }).catch(function () { $('#fd-meta').textContent = 'Unavailable'; $('#fd-list').innerHTML = '<p class="fine">Feeds could not be loaded right now.</p>'; });
+      feedItems = j.items || []; feedErrs = j.errors || {}; renderFeeds();
+      var bad = Object.keys(feedErrs).length, at = j.at ? ' · updated ' + agoText(Date.parse(j.at)) : '';
+      FMODS.forEach(function (M) {
+        var n = feedItems.filter(M.pred).length, ids = M.key === 'vids' ? /^(s2g|dirtycivilian|techprepper|enforcer)$/ : null;
+        var b = Object.keys(feedErrs).filter(function (k) { return ids ? ids.test(k) : !/^(s2g|dirtycivilian|techprepper|enforcer)$/.test(k); }).length;
+        $(M.meta).textContent = n ? n + ' items' + at + (b ? ' · ' + b + ' unavailable' : '') : 'No items yet';
+      });
+    }).catch(function () { FMODS.forEach(function (M) { $(M.meta).textContent = 'Unavailable'; $(M.list).innerHTML = '<p class="fine">Feeds could not be loaded right now.</p>'; }); });
   }
 
   /* ---------- other live views (iframes) ---------- */

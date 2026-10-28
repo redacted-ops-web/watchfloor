@@ -13,7 +13,8 @@
    "name": "Sky News",
    "note": "UK",
    "channelId": "UCoMdktPbSTixAyNGwb-UYkQ",
-   "url": "https://www.youtube.com/@SkyNews/live"
+   "url": "https://www.youtube.com/@SkyNews/live",
+   "embed": false
   },
   {
    "id": "dw",
@@ -34,14 +35,16 @@
    "name": "Euronews",
    "note": "Europe",
    "channelId": "UCSrZ3UV4jOidv8ppoVuvW9Q",
-   "url": "https://www.youtube.com/@euronews/live"
+   "url": "https://www.youtube.com/@euronews/live",
+   "embed": false
   },
   {
    "id": "abc",
    "name": "ABC News Live",
    "note": "US",
    "channelId": "UCBi2mrWuNuyYy4gbM6fU18Q",
-   "url": "https://www.youtube.com/@ABCNews/live"
+   "url": "https://www.youtube.com/@ABCNews/live",
+   "embed": false
   },
   {
    "id": "trt",
@@ -55,14 +58,16 @@
    "name": "WION",
    "note": "India",
    "channelId": "UC_gUM8rL-Lrg6O3adPW9K1g",
-   "url": "https://www.youtube.com/@WION/live"
+   "url": "https://www.youtube.com/@WION/live",
+   "embed": false
   },
   {
    "id": "cna",
    "name": "CNA",
    "note": "Singapore",
    "channelId": "UC83jt4dlz1Gjl58fzQrrIgQ",
-   "url": "https://www.youtube.com/@channelnewsasia/live"
+   "url": "https://www.youtube.com/@channelnewsasia/live",
+   "embed": false
   },
   {
    "id": "bloomberg",
@@ -83,14 +88,16 @@
    "name": "NBC News NOW",
    "note": "US",
    "channelId": "UCeY0bbntWzzVIaj2z3QigXg",
-   "url": "https://www.youtube.com/@NBCNews/live"
+   "url": "https://www.youtube.com/@NBCNews/live",
+   "embed": false
   },
   {
    "id": "livenow",
    "name": "LiveNOW from FOX",
    "note": "US",
    "channelId": "UCJg9wBPyKMNA5sRDnvzmkdg",
-   "url": "https://www.youtube.com/@LiveNOWFOX/live"
+   "url": "https://www.youtube.com/@LiveNOWFOX/live",
+   "embed": false
   },
   {
    "id": "i24",
@@ -104,14 +111,16 @@
    "name": "Sky News Australia",
    "note": "Australia",
    "channelId": "UCO0akufu9MOzyz3nvGIXAAw",
-   "url": "https://www.youtube.com/@SkyNewsAustralia/live"
+   "url": "https://www.youtube.com/@SkyNewsAustralia/live",
+   "embed": false
   },
   {
    "id": "gbn",
    "name": "GB News",
    "note": "UK",
    "channelId": "UC0vn8ISa4LKMunLbzaXLnOg",
-   "url": "https://www.youtube.com/@GBNewsOnline/live"
+   "url": "https://www.youtube.com/@GBNewsOnline/live",
+   "embed": false
   }
  ]
 }
