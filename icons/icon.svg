@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="46%" r="70%">
+      <stop offset="0" stop-color="#16222f"/>
+      <stop offset="1" stop-color="#0b1016"/>
+    </radialGradient>
+    <linearGradient id="sweep" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#86b6f5" stop-opacity="0"/>
+      <stop offset="1" stop-color="#86b6f5" stop-opacity="0.55"/>
+    </linearGradient>
+    <clipPath id="disc"><circle cx="256" cy="256" r="150"/></clipPath>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <!-- faint map grid -->
+  <g stroke="#223142" stroke-width="2" opacity="0.7">
+    <path d="M96 176H416M96 256H416M96 336H416M176 96V416M256 96V416M336 96V416"/>
+  </g>
+  <!-- range rings -->
+  <g fill="none" stroke="#86b6f5">
+    <circle cx="256" cy="256" r="150" stroke-width="7" opacity="0.95"/>
+    <circle cx="256" cy="256" r="100" stroke-width="4" opacity="0.5"/>
+    <circle cx="256" cy="256" r="50" stroke-width="4" opacity="0.5"/>
+  </g>
+  <!-- radar sweep wedge -->
+  <g clip-path="url(#disc)">
+    <path d="M256 256L256 106A150 150 0 0 1 386 181Z" fill="url(#sweep)"/>
+  </g>
+  <path d="M256 256L386 181" stroke="#86b6f5" stroke-width="5" stroke-linecap="round"/>
+  <!-- cross ticks -->
+  <g stroke="#86b6f5" stroke-width="7" stroke-linecap="round" opacity="0.95">
+    <path d="M256 84v34M256 394v34M84 256h34M394 256h34"/>
+  </g>
+  <!-- contact blips -->
+  <circle cx="318" cy="212" r="16" fill="#ff6b5e"/>
+  <circle cx="318" cy="212" r="30" fill="none" stroke="#ff6b5e" stroke-width="4" opacity="0.55"/>
+  <circle cx="208" cy="300" r="9" fill="#ff9f43"/>
+  <circle cx="276" cy="316" r="7" fill="#4fb8a6"/>
+  <circle cx="256" cy="256" r="7" fill="#d9e1ea"/>
+</svg>
