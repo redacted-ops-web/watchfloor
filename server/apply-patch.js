@@ -9,6 +9,10 @@ const live = load(liveF, 'data file');
 const patch = load(patchF, 'patch');
 if (!patch || typeof patch !== 'object' || Array.isArray(patch)) die('patch is not an object');
 
+// Refuse a lazy run: the model must list at least 8 searches it actually ran, or nothing is published.
+const searches = Array.isArray(patch.searches) ? patch.searches.filter(q => typeof q === 'string' && q.trim().length > 3) : [];
+if (searches.length < 8) die('only ' + searches.length + ' searches listed, need at least 8; not publishing');
+
 const LISTS = ['hotspots', 'chokepoints', 'incidents'];
 const SETTABLE = ['summary', 'sev', 'trend', 'asof', 'bullets', 'sources', 'metric', 'metricNote'];
 const goodSources = s => Array.isArray(s) && s.length > 0 && s.every(x => x && /^https?:\/\//.test(x.u || ''));
@@ -44,4 +48,4 @@ live.generatedAt = now;
 live.meta.updatedAt = now;
 live.meta.updatedBy = 'Server refresh (light)';
 fs.writeFileSync(outF, JSON.stringify(live, null, 2) + '\n');
-console.log('PATCH applied: ' + upd + ' updated, ' + added + ' added, ' + skipped + ' skipped' + (typeof patch.note === 'string' ? ' - ' + patch.note.slice(0, 200) : ''));
+console.log('PATCH applied (' + searches.length + ' searches): ' + upd + ' updated, ' + added + ' added, ' + skipped + ' skipped' + (typeof patch.note === 'string' ? ' - ' + patch.note.slice(0, 200) : ''));
