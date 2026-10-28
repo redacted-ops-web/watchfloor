@@ -728,7 +728,7 @@ body { margin: 0; }
       (sub ? '<span class="rg">' + esc(sub) + '</span>' : '') + (tr ? '<span class="tr ' + tr[0] + '">' + tr[1] + '</span>' : '') + '</div>' +
       '<div class="sm">' + esc(it.summary) + '</div><div class="asof' + (isOld(it) ? ' old' : '') + '">' + esc(when) + trustBits(it) + '</div></button>' +
       '<div class="row-d"' + (open ? '' : ' hidden') + '>' + extra + (bullets ? '<ul>' + bullets + '</ul>' : '') + (src ? '<div class="src">' + src + '</div>' : '') +
-      '<div class="acts">' + (hasLoc ? '<button class="btn" data-a="map">Show on map</button>' : '') + (sample ? '<button class="btn pri" data-a="analyze">Analyze with Claude</button>' : '') + '</div></div></li>';
+      '<div class="acts">' + (hasLoc ? '<button class="btn" data-a="map">Show on map</button>' : '') + (sample ? '<button class="btn pri" data-a="analyze">Analyze</button>' : '') + '</div></div></li>';
   }
   function renderList(kind) {
     var ul = $('#rows-' + kind), a = data[kind];
