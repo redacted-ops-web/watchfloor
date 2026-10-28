@@ -201,7 +201,8 @@ async function getText(url) {
   if (!r.ok) throw new Error('http ' + r.status);
   return r.text();
 }
-const ytIds = {};
+const ytIds = {}, ytUp = {};
+const YT_KEY = process.env.YT_API_KEY || '';
 async function ytId(s) {
   if (s.channelId) return s.channelId;
   const h = String(s.handle || '').replace(/^@/, ''); if (!h) throw new Error('no channel');
@@ -214,7 +215,23 @@ async function ytId(s) {
 const short = (s, n) => s.length > n ? s.slice(0, n - 1) + '\u2026' : s;
 async function readSource(s) {
   const out = [];
-  if (s.type === 'youtube') {
+  if (s.type === 'youtube' && YT_KEY) {
+    const key = '&key=' + encodeURIComponent(YT_KEY), api = process.env.YT_API_BASE || 'https://www.googleapis.com/youtube/v3/';
+    const ck = s.channelId || s.handle;
+    if (!ytUp[ck]) {
+      const q = s.channelId ? 'id=' + encodeURIComponent(s.channelId) : 'forHandle=' + encodeURIComponent('@' + String(s.handle || '').replace(/^@/, ''));
+      const c = JSON.parse(await getText(api + 'channels?part=contentDetails&' + q + key));
+      const up = c.items && c.items[0] && c.items[0].contentDetails && c.items[0].contentDetails.relatedPlaylists.uploads;
+      if (!up) throw new Error('channel not found');
+      ytUp[ck] = up;
+    }
+    const pl = JSON.parse(await getText(api + 'playlistItems?part=snippet,contentDetails&maxResults=8&playlistId=' + encodeURIComponent(ytUp[ck]) + key));
+    (pl.items || []).forEach(it => {
+      const id = it.contentDetails && it.contentDetails.videoId; if (!id) return;
+      const sn = it.snippet || {};
+      out.push({ kind: 'video', title: short(strip(sn.title || ''), 160), url: 'https://www.youtube.com/watch?v=' + id, thumb: 'https://i.ytimg.com/vi/' + id + '/mqdefault.jpg', ts: Date.parse((it.contentDetails && it.contentDetails.videoPublishedAt) || sn.publishedAt) });
+    });
+  } else if (s.type === 'youtube') {
     const xml = await getText('https://www.youtube.com/feeds/videos.xml?channel_id=' + await ytId(s));
     xml.split('<entry>').slice(1, 9).forEach(e => {
       const id = tagOf(e, 'yt:videoId'); if (!id) return;
@@ -260,7 +277,7 @@ async function refreshFeeds() {
     console.log('Feeds: ' + items.length + ' items, ' + Object.keys(errors).length + ' source errors');
   } catch (e) { /* site unreachable; keep old */ } finally { fetching = false; }
 }
-setTimeout(refreshFeeds, 8000); setInterval(refreshFeeds, 10 * 60 * 1000);
+setTimeout(refreshFeeds, 8000); setInterval(refreshFeeds, (Number(process.env.FEED_MIN) || 30) * 60 * 1000);
 
 const server = http.createServer(async (req, res) => {
   const { sock, ip } = clientIp(req);
