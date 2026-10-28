@@ -1,27 +1,171 @@
 [
-  {
-    "id": "s2g",
-    "name": "S2 Underground",
-    "type": "youtube",
-    "handle": "s2underground",
-    "channelId": "UCTq1zHztiV69Ur8t6jco4CQ"
-  },
-  {
-    "id": "dirtycivilian",
-    "name": "Dirty Civilian",
-    "type": "youtube",
-    "handle": "dirty-civilian"
-  },
-  {
-    "id": "techprepper",
-    "name": "The Tech Prepper",
-    "type": "youtube",
-    "handle": "TheTechPrepper"
-  },
-  {
-    "id": "enforcer",
-    "name": "The Enforcer",
-    "type": "youtube",
-    "handle": "enforcerofficial"
-  }
+ {
+  "id": "s2g",
+  "name": "S2 Underground",
+  "type": "youtube",
+  "handle": "s2underground",
+  "channelId": "UCTq1zHztiV69Ur8t6jco4CQ",
+  "cat": "Video"
+ },
+ {
+  "id": "dirtycivilian",
+  "name": "Dirty Civilian",
+  "type": "youtube",
+  "handle": "dirty-civilian",
+  "cat": "Video"
+ },
+ {
+  "id": "techprepper",
+  "name": "The Tech Prepper",
+  "type": "youtube",
+  "handle": "TheTechPrepper",
+  "cat": "Video"
+ },
+ {
+  "id": "enforcer",
+  "name": "The Enforcer",
+  "type": "youtube",
+  "handle": "enforcerofficial",
+  "cat": "Video"
+ },
+ {
+  "id": "bbc",
+  "name": "BBC World",
+  "type": "rss",
+  "url": "https://feeds.bbci.co.uk/news/world/rss.xml",
+  "cat": "World"
+ },
+ {
+  "id": "aje",
+  "name": "Al Jazeera",
+  "type": "rss",
+  "url": "https://www.aljazeera.com/xml/rss/all.xml",
+  "cat": "World"
+ },
+ {
+  "id": "guardian",
+  "name": "The Guardian World",
+  "type": "rss",
+  "url": "https://www.theguardian.com/world/rss",
+  "cat": "World"
+ },
+ {
+  "id": "npr",
+  "name": "NPR World",
+  "type": "rss",
+  "url": "https://feeds.npr.org/1004/rss.xml",
+  "cat": "World"
+ },
+ {
+  "id": "dw",
+  "name": "DW News",
+  "type": "rss",
+  "url": "https://rss.dw.com/xml/rss-en-top",
+  "cat": "World"
+ },
+ {
+  "id": "f24",
+  "name": "France 24",
+  "type": "rss",
+  "url": "https://www.france24.com/en/rss",
+  "cat": "World"
+ },
+ {
+  "id": "skyw",
+  "name": "Sky News World",
+  "type": "rss",
+  "url": "https://feeds.skynews.com/feeds/rss/world.xml",
+  "cat": "World"
+ },
+ {
+  "id": "un",
+  "name": "UN News",
+  "type": "rss",
+  "url": "https://news.un.org/feed/subscribe/en/news/all/rss.xml",
+  "cat": "World"
+ },
+ {
+  "id": "kyiv",
+  "name": "Kyiv Independent",
+  "type": "rss",
+  "url": "https://kyivindependent.com/news-archive/rss/",
+  "cat": "Conflict"
+ },
+ {
+  "id": "isw",
+  "name": "ISW",
+  "type": "rss",
+  "url": "https://understandingwar.org/feed/",
+  "cat": "Conflict"
+ },
+ {
+  "id": "toi",
+  "name": "Times of Israel",
+  "type": "rss",
+  "url": "https://www.timesofisrael.com/feed/",
+  "cat": "Conflict"
+ },
+ {
+  "id": "almon",
+  "name": "Al-Monitor",
+  "type": "rss",
+  "url": "https://www.al-monitor.com/rss",
+  "cat": "Conflict"
+ },
+ {
+  "id": "twz",
+  "name": "The War Zone",
+  "type": "rss",
+  "url": "https://www.twz.com/feed",
+  "cat": "Conflict"
+ },
+ {
+  "id": "bcat",
+  "name": "Bellingcat",
+  "type": "rss",
+  "url": "https://www.bellingcat.com/feed/",
+  "cat": "Conflict"
+ },
+ {
+  "id": "cisa",
+  "name": "CISA advisories",
+  "type": "rss",
+  "url": "https://www.cisa.gov/cybersecurity-advisories/all.xml",
+  "cat": "Cyber"
+ },
+ {
+  "id": "bleep",
+  "name": "BleepingComputer",
+  "type": "rss",
+  "url": "https://www.bleepingcomputer.com/feed/",
+  "cat": "Cyber"
+ },
+ {
+  "id": "thn",
+  "name": "The Hacker News",
+  "type": "rss",
+  "url": "https://feeds.feedburner.com/TheHackersNews",
+  "cat": "Cyber"
+ },
+ {
+  "id": "krebs",
+  "name": "Krebs on Security",
+  "type": "rss",
+  "url": "https://krebsonsecurity.com/feed/",
+  "cat": "Cyber"
+ },
+ {
+  "id": "gcap",
+  "name": "gCaptain",
+  "type": "rss",
+  "url": "https://gcaptain.com/feed/",
+  "cat": "Shipping"
+ },
+ {
+  "id": "maritime",
+  "name": "Maritime Executive",
+  "type": "rss",
+  "url": "https://maritime-executive.com/articles.rss",
+  "cat": "Shipping"
+ }
 ]

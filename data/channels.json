@@ -1,5 +1,5 @@
 {
- "_note": "Edit this list to change the channels. channelId is the YouTube channel ID (starts with UC). url is the channel's live page. Verify each ID: open https://www.youtube.com/channel/<ID>/live.",
+ "_note": "Edit this list to change the channels. channelId is the YouTube channel ID (starts with UC). The proxy checks each channel every 10 minutes and the page shows which are live now and which block embedding.",
  "channels": [
   {
    "id": "aljazeera",
@@ -42,6 +42,76 @@
    "note": "US",
    "channelId": "UCBi2mrWuNuyYy4gbM6fU18Q",
    "url": "https://www.youtube.com/@ABCNews/live"
+  },
+  {
+   "id": "trt",
+   "name": "TRT World",
+   "note": "Turkey",
+   "channelId": "UC7fWeaHhqgM4Ry-RMpM2YYw",
+   "url": "https://www.youtube.com/@trtworld/live"
+  },
+  {
+   "id": "wion",
+   "name": "WION",
+   "note": "India",
+   "channelId": "UC_gUM8rL-Lrg6O3adPW9K1g",
+   "url": "https://www.youtube.com/@WION/live"
+  },
+  {
+   "id": "cna",
+   "name": "CNA",
+   "note": "Singapore",
+   "channelId": "UC83jt4dlz1Gjl58fzQrrIgQ",
+   "url": "https://www.youtube.com/@channelnewsasia/live"
+  },
+  {
+   "id": "bloomberg",
+   "name": "Bloomberg TV",
+   "note": "US",
+   "channelId": "UCIALMKvObZNtJ6AmdCLP7Lg",
+   "url": "https://www.youtube.com/@markets/live"
+  },
+  {
+   "id": "cbs",
+   "name": "CBS News 24/7",
+   "note": "US",
+   "channelId": "UC8p1vwvWtl6T73JiExfWs1g",
+   "url": "https://www.youtube.com/@CBSNews/live"
+  },
+  {
+   "id": "nbc",
+   "name": "NBC News NOW",
+   "note": "US",
+   "channelId": "UCeY0bbntWzzVIaj2z3QigXg",
+   "url": "https://www.youtube.com/@NBCNews/live"
+  },
+  {
+   "id": "livenow",
+   "name": "LiveNOW from FOX",
+   "note": "US",
+   "channelId": "UCJg9wBPyKMNA5sRDnvzmkdg",
+   "url": "https://www.youtube.com/@LiveNOWFOX/live"
+  },
+  {
+   "id": "i24",
+   "name": "i24NEWS English",
+   "note": "Israel",
+   "channelId": "UCvHDpsWKADrDia0c99X37vg",
+   "url": "https://www.youtube.com/@i24NEWS_EN/live"
+  },
+  {
+   "id": "skyau",
+   "name": "Sky News Australia",
+   "note": "Australia",
+   "channelId": "UCO0akufu9MOzyz3nvGIXAAw",
+   "url": "https://www.youtube.com/@SkyNewsAustralia/live"
+  },
+  {
+   "id": "gbn",
+   "name": "GB News",
+   "note": "UK",
+   "channelId": "UC0vn8ISa4LKMunLbzaXLnOg",
+   "url": "https://www.youtube.com/@GBNewsOnline/live"
   }
  ]
 }

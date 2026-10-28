@@ -257,7 +257,7 @@ async function readSource(s) {
       out.push({ kind: 'post', text: short(strip(tx), 400), url: 'https://t.me/' + post, ts: Date.parse((b.match(/datetime="([^"]+)"/) || [])[1]) });
     });
   } else throw new Error('unknown type');
-  return out.filter(i => i.url && /^https?:/.test(i.url)).map(i => Object.assign({ src: s.id, name: s.name }, i));
+  return out.filter(i => i.url && /^https?:/.test(i.url)).map(i => Object.assign({ src: s.id, name: s.name, cat: s.cat || '' }, i));
 }
 let fetching = false;
 async function refreshFeeds() {
@@ -272,12 +272,45 @@ async function refreshFeeds() {
     // a source that failed this round keeps its last good items
     for (const id of Object.keys(errors)) items.push(...((feeds.items || []).filter(i => i.src === id)));
     items.sort((a, b) => (b.ts || 0) - (a.ts || 0));
-    feeds = { at: new Date().toISOString(), items: items.slice(0, 120), errors };
+    feeds = { at: new Date().toISOString(), items: items.slice(0, 320), errors };
     fs.writeFileSync(FFILE + '.tmp', JSON.stringify(feeds)); fs.renameSync(FFILE + '.tmp', FFILE);
     console.log('Feeds (' + (YT_KEY ? 'api' : 'rss') + '): ' + items.length + ' items, ' + Object.keys(errors).length + ' source errors');
   } catch (e) { /* site unreachable; keep old */ } finally { fetching = false; }
 }
 setTimeout(refreshFeeds, 8000); setInterval(refreshFeeds, (Number(process.env.FEED_MIN) || 30) * 60 * 1000);
+
+// ---- live stream status: which video is each news channel streaming right now, and can it be embedded ----
+const CH_URL = process.env.CHANNELS_URL || SITE.replace(/data\.json$/, 'channels.json');
+let live = { at: null, channels: {} };
+async function resolveLive(c) {
+  const page = await getText('https://www.youtube.com/channel/' + encodeURIComponent(c.channelId) + '/live');
+  const m = page.match(/<link rel="canonical" href="https:\/\/www\.youtube\.com\/watch\?v=([\w-]{11})"/);
+  if (!m || !/"isLive(Now)?":true/.test(page)) return { live: false };
+  const out = { live: true, videoId: m[1], embeddable: null };
+  const t = page.match(/<meta property="og:title" content="([^"]*)"/); if (t) out.title = short(strip(t[1]), 120);
+  if (YT_KEY) {
+    try {
+      const api = process.env.YT_API_BASE || 'https://www.googleapis.com/youtube/v3/';
+      const v = JSON.parse(await getText(api + 'videos?part=status&id=' + m[1] + '&key=' + encodeURIComponent(YT_KEY)));
+      if (v.items && v.items[0] && v.items[0].status) out.embeddable = v.items[0].status.embeddable !== false;
+    } catch (e) { /* leave unknown */ }
+  }
+  return out;
+}
+let livePolling = false;
+async function refreshLive() {
+  if (livePolling) return; livePolling = true;
+  try {
+    const j = JSON.parse(await getText(CH_URL)), res = {};
+    for (const c of (j.channels || []).slice(0, 40)) {
+      if (!c || !/^UC[\w-]{20,24}$/.test(c.channelId || '')) continue;
+      try { res[c.channelId] = await resolveLive(c); } catch (e) { res[c.channelId] = { live: null, error: String(e.message || e).slice(0, 60) }; }
+    }
+    live = { at: new Date().toISOString(), channels: res };
+    console.log('Live status: ' + Object.keys(res).filter(k => res[k].live).length + ' of ' + Object.keys(res).length + ' channels live');
+  } catch (e) { /* site unreachable; keep old */ } finally { livePolling = false; }
+}
+setTimeout(refreshLive, 12000); setInterval(refreshLive, (Number(process.env.LIVE_MIN) || 10) * 60 * 1000);
 
 const server = http.createServer(async (req, res) => {
   const { sock, ip } = clientIp(req);
@@ -290,6 +323,7 @@ const server = http.createServer(async (req, res) => {
     } catch (e) { return send(res, 503, { ok: false }); }
   }
   if (req.method === 'GET' && path === '/feeds') return send(res, 200, feeds);
+  if (req.method === 'GET' && path === '/live') return send(res, 200, live);
   if (req.method === 'GET' && path === '/answers') return send(res, 200, { dataAsOf: cache.dataAsOf, at: cache.at, items: cache.items || [] });
   if (req.method === 'POST' && path === '/ask') return ask(req, res, ip);
   res.writeHead(404); res.end();
