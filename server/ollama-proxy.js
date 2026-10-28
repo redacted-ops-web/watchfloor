@@ -202,7 +202,7 @@ async function getText(url) {
   return r.text();
 }
 const ytIds = {}, ytUp = {};
-const YT_KEY = process.env.YT_API_KEY || '';
+const YT_KEY = process.env.YT_API_KEY || (() => { try { return fs.readFileSync(require('path').join(__dirname, 'yt-key.txt'), 'utf8').trim(); } catch (e) { return ''; } })();
 async function ytId(s) {
   if (s.channelId) return s.channelId;
   const h = String(s.handle || '').replace(/^@/, ''); if (!h) throw new Error('no channel');
@@ -274,7 +274,7 @@ async function refreshFeeds() {
     items.sort((a, b) => (b.ts || 0) - (a.ts || 0));
     feeds = { at: new Date().toISOString(), items: items.slice(0, 120), errors };
     fs.writeFileSync(FFILE + '.tmp', JSON.stringify(feeds)); fs.renameSync(FFILE + '.tmp', FFILE);
-    console.log('Feeds: ' + items.length + ' items, ' + Object.keys(errors).length + ' source errors');
+    console.log('Feeds (' + (YT_KEY ? 'api' : 'rss') + '): ' + items.length + ' items, ' + Object.keys(errors).length + ' source errors');
   } catch (e) { /* site unreachable; keep old */ } finally { fetching = false; }
 }
 setTimeout(refreshFeeds, 8000); setInterval(refreshFeeds, (Number(process.env.FEED_MIN) || 30) * 60 * 1000);
