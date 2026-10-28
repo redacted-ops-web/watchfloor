@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "Watchfloor",
-  "short_name": "Watchfloor",
+  "name": "INTSUM",
+  "short_name": "INTSUM",
   "description": "Conflict hotspots, shipping chokepoints and cyber incidents in one view.",
   "start_url": "/?source=pwa",
   "scope": "/",

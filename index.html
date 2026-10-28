@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Watchfloor</title>
+<title>INTSUM</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0b1016">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Watchfloor">
+<meta name="apple-mobile-web-app-title" content="INTSUM">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -273,7 +273,7 @@ body { margin: 0; }
 
 <div class="wrap">
   <header class="top">
-    <div class="brand"><h1>Watchfloor</h1><span>Conflict · Chokepoints · Cyber</span></div>
+    <div class="brand"><h1>INTSUM</h1><span>Conflict · Chokepoints · Cyber</span></div>
     <div class="top-r">
       <span id="clock">UTC --:--:--</span>
       <span id="fresh">Loading feeds…</span>
@@ -1378,7 +1378,7 @@ body { margin: 0; }
       if (b[0] >= 4 && (!a || b[0] > a[0])) hits.push(b[1] + (a ? ' escalated to ' + lv(b[0])[0].toLowerCase() : ' (new, ' + lv(b[0])[0].toLowerCase() + ')'));
     });
     if (!hits.length) return;
-    var title = 'Watchfloor: ' + hits.length + ' update' + (hits.length > 1 ? 's' : ''), body = hits.slice(0, 3).join('; ');
+    var title = 'INTSUM: ' + hits.length + ' update' + (hits.length > 1 ? 's' : ''), body = hits.slice(0, 3).join('; ');
     try {
       if (navigator.serviceWorker && navigator.serviceWorker.ready) navigator.serviceWorker.ready.then(function (r) { r.showNotification(title, { body: body, icon: 'icons/icon-192.png', tag: 'watchfloor-alert' }); });
       else new Notification(title, { body: body, icon: 'icons/icon-192.png' });
@@ -1415,7 +1415,7 @@ body { margin: 0; }
       var ok = function (p) {
         if (p !== 'granted') { msg('Notifications are blocked for this site. Allow them in the browser site settings to turn alerts on.'); return; }
         alertsOn = true; try { localStorage.setItem('watchfloor.alerts', '1'); } catch (e) { } setAlertBtn();
-        if (pushSupported()) pushSubscribe().then(function () { pushOn = true; msg('Alerts are on. You will get a notification for new severe or critical items, even when the app is closed.' + (/android/i.test(navigator.userAgent) ? ' To make sure they arrive on time, open Android Settings, Apps, Chrome (or Watchfloor), Battery, and choose Unrestricted.' : ''), 20000); })
+        if (pushSupported()) pushSubscribe().then(function () { pushOn = true; msg('Alerts are on. You will get a notification for new severe or critical items, even when the app is closed.' + (/android/i.test(navigator.userAgent) ? ' To make sure they arrive on time, open Android Settings, Apps, Chrome (or INTSUM), Battery, and choose Unrestricted.' : ''), 20000); })
           .catch(function () { msg('Alerts are on while the app or tab is open. Background alerts are not available right now.'); });
         else msg('Alerts are on while the app or tab is open.');
       };
@@ -1445,7 +1445,7 @@ body { margin: 0; }
     var b = $('#shareBtn'); if (!b) return;
     b.addEventListener('click', function () {
       var url = location.origin + location.pathname + curHash(), done = function (msg) { b.textContent = msg; setTimeout(function () { b.textContent = 'Share'; }, 1800); };
-      if (navigator.share) { navigator.share({ title: 'Watchfloor', url: url }).catch(function () { }); return; }
+      if (navigator.share) { navigator.share({ title: 'INTSUM', url: url }).catch(function () { }); return; }
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(function () { done('Link copied'); }, function () { done('Copy failed'); });
       else done('Copy failed');
     });

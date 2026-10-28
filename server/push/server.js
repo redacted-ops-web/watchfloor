@@ -72,7 +72,7 @@ async function check() {
   const uniq = {}; found.forEach(f => { uniq[f.k] = f; });
   const list = Object.values(uniq).sort((x, y) => y.sev - x.sev);
   const label = f => (names[f.k] || f.k.split('/')[1]) + (f.isNew ? ' (new' : ' (escalated') + ', ' + (f.sev >= 5 ? 'critical' : 'severe') + ')';
-  await notify({ title: 'Watchfloor: ' + list.length + ' severe update' + (list.length > 1 ? 's' : ''), body: list.slice(0, 3).map(label).join('; ') + (list.length > 3 ? '; +' + (list.length - 3) + ' more' : ''), url: list.length === 1 ? ORIGIN + '/#i=' + list[0].k : ORIGIN + '/' });
+  await notify({ title: 'INTSUM: ' + list.length + ' severe update' + (list.length > 1 ? 's' : ''), body: list.slice(0, 3).map(label).join('; ') + (list.length > 3 ? '; +' + (list.length - 3) + ' more' : ''), url: list.length === 1 ? ORIGIN + '/#i=' + list[0].k : ORIGIN + '/' });
 }
 setInterval(() => check().catch(e => console.log('check failed: ' + e.message)), 60000);
 server.listen(PORT, () => console.log('Watchfloor push on ' + PORT + ', ' + Object.keys(subs).length + ' subscribers'));
