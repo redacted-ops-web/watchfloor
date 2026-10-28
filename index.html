@@ -69,6 +69,10 @@ h1, h2, h3, h4 { margin: 0; text-wrap: balance; }
 .brand span { color: var(--muted); font: 500 12px/1 var(--font-display); letter-spacing: .12em; text-transform: uppercase; }
 .top-r { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font: 400 12px/1.2 var(--font-mono); color: var(--muted); }
 .top-r b { color: var(--fg); font-weight: 500; }
+.install-btn { font: 600 12px/1 var(--font-display); letter-spacing: .1em; text-transform: uppercase; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 6px; padding: 8px 12px; cursor: pointer; }
+.install-btn[hidden] { display: none; }
+.install-hint { flex-basis: 100%; font: 400 12px/1.4 var(--font-mono); color: var(--muted); background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; }
+.install-hint[hidden] { display: none; }
 .btn { background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 6px 11px; cursor: pointer; font: 500 12px/1.2 var(--font-body); }
 .btn:hover:not(:disabled) { border-color: var(--accent); }
 .btn:disabled { opacity: .5; cursor: default; }
@@ -232,7 +236,9 @@ body { margin: 0; }
     <div class="top-r">
       <span id="clock">UTC --:--:--</span>
       <span id="fresh">Loading feeds…</span>
+      <button type="button" class="install-btn" id="installBtn" hidden>Install app</button>
     </div>
+    <div class="install-hint" id="installHint" hidden></div>
   </header>
   <div class="status" id="rstatus" role="status" aria-live="polite" hidden></div>
 
@@ -1166,6 +1172,20 @@ body { margin: 0; }
 </script>
 
 <script>
+(function () {
+  var btn = document.getElementById('installBtn'), hint = document.getElementById('installHint'), dp = null;
+  var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+  if (!btn || standalone) return;
+  var ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); dp = e; btn.hidden = false; });
+  window.addEventListener('appinstalled', function () { btn.hidden = true; hint.hidden = true; dp = null; });
+  if (ios) { btn.hidden = false; }
+  btn.addEventListener('click', function () {
+    if (dp) { dp.prompt(); dp.userChoice.then(function () { dp = null; btn.hidden = true; }); return; }
+    hint.textContent = ios ? 'To install: tap the Share button in Safari, then Add to Home Screen.' : 'To install: open the browser menu, then Install app or Add to Home screen.';
+    hint.hidden = !hint.hidden;
+  });
+})();
 if ('serviceWorker' in navigator) { window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); }); }
 </script>
 </body>
