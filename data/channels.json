@@ -9,14 +9,6 @@
    "url": "https://www.youtube.com/@aljazeeraenglish/live"
   },
   {
-   "id": "sky",
-   "name": "Sky News",
-   "note": "UK",
-   "channelId": "UCoMdktPbSTixAyNGwb-UYkQ",
-   "url": "https://www.youtube.com/@SkyNews/live",
-   "embed": false
-  },
-  {
    "id": "dw",
    "name": "DW News",
    "note": "Germany",
@@ -31,43 +23,11 @@
    "url": "https://www.youtube.com/@FRANCE24English/live"
   },
   {
-   "id": "euronews",
-   "name": "Euronews",
-   "note": "Europe",
-   "channelId": "UCSrZ3UV4jOidv8ppoVuvW9Q",
-   "url": "https://www.youtube.com/@euronews/live",
-   "embed": false
-  },
-  {
-   "id": "abc",
-   "name": "ABC News Live",
-   "note": "US",
-   "channelId": "UCBi2mrWuNuyYy4gbM6fU18Q",
-   "url": "https://www.youtube.com/@ABCNews/live",
-   "embed": false
-  },
-  {
    "id": "trt",
    "name": "TRT World",
    "note": "Turkey",
    "channelId": "UC7fWeaHhqgM4Ry-RMpM2YYw",
    "url": "https://www.youtube.com/@trtworld/live"
-  },
-  {
-   "id": "wion",
-   "name": "WION",
-   "note": "India",
-   "channelId": "UC_gUM8rL-Lrg6O3adPW9K1g",
-   "url": "https://www.youtube.com/@WION/live",
-   "embed": false
-  },
-  {
-   "id": "cna",
-   "name": "CNA",
-   "note": "Singapore",
-   "channelId": "UC83jt4dlz1Gjl58fzQrrIgQ",
-   "url": "https://www.youtube.com/@channelnewsasia/live",
-   "embed": false
   },
   {
    "id": "bloomberg",
@@ -84,22 +44,6 @@
    "url": "https://www.youtube.com/@CBSNews/live"
   },
   {
-   "id": "nbc",
-   "name": "NBC News NOW",
-   "note": "US",
-   "channelId": "UCeY0bbntWzzVIaj2z3QigXg",
-   "url": "https://www.youtube.com/@NBCNews/live",
-   "embed": false
-  },
-  {
-   "id": "livenow",
-   "name": "LiveNOW from FOX",
-   "note": "US",
-   "channelId": "UCJg9wBPyKMNA5sRDnvzmkdg",
-   "url": "https://www.youtube.com/@LiveNOWFOX/live",
-   "embed": false
-  },
-  {
    "id": "i24",
    "name": "i24NEWS English",
    "note": "Israel",
@@ -107,20 +51,67 @@
    "url": "https://www.youtube.com/@i24NEWS_EN/live"
   },
   {
-   "id": "skyau",
-   "name": "Sky News Australia",
-   "note": "Australia",
-   "channelId": "UCO0akufu9MOzyz3nvGIXAAw",
-   "url": "https://www.youtube.com/@SkyNewsAustralia/live",
-   "embed": false
+   "id": "ap",
+   "name": "Associated Press",
+   "note": "US",
+   "channelId": "UC52X5wxOL_s5yw0dQk7NtgA",
+   "url": "https://www.youtube.com/@AssociatedPress/live"
   },
   {
-   "id": "gbn",
-   "name": "GB News",
+   "id": "reuters",
+   "name": "Reuters",
    "note": "UK",
-   "channelId": "UC0vn8ISa4LKMunLbzaXLnOg",
-   "url": "https://www.youtube.com/@GBNewsOnline/live",
-   "embed": false
+   "channelId": "UChqUTb7kYRX8-EiaN3XFrSQ",
+   "url": "https://www.youtube.com/@Reuters/live"
+  },
+  {
+   "id": "yahoo",
+   "name": "Yahoo Finance",
+   "note": "US",
+   "channelId": "UCEAZeUIeJs0IjQiqTCdVSIg",
+   "url": "https://www.youtube.com/@YahooFinance/live"
+  },
+  {
+   "id": "ndtv",
+   "name": "NDTV 24x7",
+   "note": "India",
+   "channelId": "UCZFMm1mMw0F81Z37aaEzTUA",
+   "url": "https://www.youtube.com/@NDTV/live"
+  },
+  {
+   "id": "indiatoday",
+   "name": "India Today",
+   "note": "India",
+   "channelId": "UCYPvAwZP8pZhSMW8qs7cVCw",
+   "url": "https://www.youtube.com/@indiatoday/live"
+  },
+  {
+   "id": "abcau",
+   "name": "ABC News Australia",
+   "note": "Australia",
+   "channelId": "UCVgO39Bk5sMo66-6o6Spn6Q",
+   "url": "https://www.youtube.com/@abcnewsaustralia/live"
+  },
+  {
+   "id": "cgtn",
+   "name": "CGTN",
+   "note": "China",
+   "channelId": "UCgrNz-aDmcr2uuto8_DL2jg",
+   "url": "https://www.youtube.com/@CGTNOfficial/live"
+  },
+  {
+   "id": "africanews",
+   "name": "Africanews",
+   "note": "Africa",
+   "channelId": "UC1_E8NeF5QHY2dtdLRBCCLA",
+   "url": "https://www.youtube.com/@africanews/live"
+  },
+  {
+   "id": "channel4",
+   "name": "Channel 4 News",
+   "note": "UK",
+   "channelId": "UCTrQ7HXWRRxr7OsOtodr2_w",
+   "url": "https://www.youtube.com/@Channel4News/live"
   }
  ]
 }
