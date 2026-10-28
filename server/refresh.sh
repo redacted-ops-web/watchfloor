@@ -17,7 +17,7 @@ echo "$(date) $MODE start" >> "$LOG"
 docker run --rm -v "$CH":/root -v "$REPO":/work -w /work claude-refresh sh -c "
   rm -f data/live.new.json
   claude -p \"\$(cat server/refresh-$MODE.txt)\" --model claude-sonnet-5-5 --max-turns 80 --allowedTools WebSearch WebFetch Read Write > /root/last-$MODE.txt 2>&1
-  node server/validate.js data/live.new.json $MODE >> /root/refresh.log 2>&1 && mv data/live.new.json data/live.json && echo \"\$(date) $MODE published\" >> /root/refresh.log
+  node server/validate.js data/live.new.json $MODE >> /root/refresh.log 2>&1 && mv data/live.new.json data/live.json && echo \"\$(date) $MODE published\" >> /root/refresh.log && node server/history.js data/live.json data/history.json $MODE >> /root/refresh.log 2>&1
 " >> "$LOG" 2>&1
 echo "$(date) $MODE end" >> "$LOG"
 rm -rf "$LOCK"

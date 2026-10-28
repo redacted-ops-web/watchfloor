@@ -81,6 +81,10 @@ h1, h2, h3, h4 { margin: 0; text-wrap: balance; }
 .filters select { background: var(--panel); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; font: 13px var(--font-body); }
 .filters input:focus, .filters select:focus { outline: none; border-color: var(--accent); }
 .f-n { color: var(--muted); font: 12px var(--font-mono, monospace); }
+.tl summary { cursor: pointer; padding: 12px 14px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; list-style: none; } .tl summary::-webkit-details-marker { display: none; }
+.tl summary h2 { font: 600 12px/1.2 var(--font-display); letter-spacing: .16em; text-transform: uppercase; }
+.tl-b { padding: 0 14px 14px; max-height: 520px; overflow: auto; } .tl-d { margin: 12px 0 4px; font: 600 11px var(--font-display); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.tl-e { padding: 8px 0; border-top: 1px solid var(--line); font-size: 13px; } .tl-e .t { color: var(--faint); font: 11.5px var(--font-mono, monospace); } .tl-e ul { margin: 4px 0 0; padding-left: 18px; color: var(--muted); } .tl-e li strong { color: var(--fg); font-weight: 600; }
 .tb { color: var(--faint); } .tb.thin { color: var(--elev); } .tb.warn { color: var(--sev); }
 .cb { font: 700 10px/1 var(--font-mono, monospace); padding: 2px 5px; border-radius: 4px; margin-left: 6px; letter-spacing: .05em; }
 .cb.new { color: var(--accent-ink); background: var(--accent); } .cb.up { color: var(--crit); border: 1px solid var(--crit); } .cb.down { color: var(--watch); border: 1px solid var(--watch); }
@@ -375,6 +379,8 @@ body { margin: 0; }
     <section class="card" aria-label="Shipping chokepoints"><div class="card-h"><h2>Shipping chokepoints</h2><span class="count" id="n-chokepoints"></span></div><ul class="rows" id="rows-chokepoints"><li class="empty">Loading…</li></ul></section>
     <section class="card" aria-label="Cyber and infrastructure"><div class="card-h"><h2>Cyber &amp; infrastructure</h2><span class="count" id="n-incidents"></span></div><ul class="rows" id="rows-incidents"><li class="empty">Loading…</li></ul></section>
   </div>
+
+  <details class="card tl" id="tl"><summary><h2>Timeline</h2><span class="count" id="tl-n">Changes between refreshes</span></summary><div class="tl-b" id="tl-b"><p class="fine">Loading history…</p></div></details>
 
   <footer>
     <div class="card"><h2>How to read this</h2>
@@ -1455,6 +1461,40 @@ body { margin: 0; }
     }).catch(function () { });
   }
 
+  /* timeline: differences between consecutive refreshes, from data/history.json (kept on the server) */
+  function loadTimeline() {
+    fetch('data/history.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (h) {
+      var sn = (h.snaps || []).slice().sort(function (a, b) { return Date.parse(a.t) - Date.parse(b.t); }), nm = h.names || {}, ev = [];
+      for (var i = 1; i < sn.length; i++) {
+        var a = sn[i - 1].v, b = sn[i].v, ch = [];
+        Object.keys(b).forEach(function (k) {
+          if (!(k in a)) ch.push(['new', k, 0, b[k]]);
+          else if (b[k] > a[k]) ch.push(['up', k, a[k], b[k]]);
+          else if (b[k] < a[k]) ch.push(['down', k, a[k], b[k]]);
+        });
+        Object.keys(a).forEach(function (k) { if (!(k in b)) ch.push(['gone', k, a[k], 0]); });
+        if (ch.length) ev.push({ t: sn[i].t, m: sn[i].m, ch: ch });
+      }
+      var box = $('#tl-b'); box.textContent = '';
+      $('#tl-n').textContent = ev.length ? ev.length + ' updates with changes, ' + sn.length + ' refreshes kept' : (sn.length ? sn.length + ' refresh' + (sn.length > 1 ? 'es' : '') + ' recorded so far' : 'No history yet');
+      if (!ev.length) { box.innerHTML = '<p class="fine">' + (sn.length ? 'No changes recorded yet. Changes show up after a refresh finds something different.' : 'History starts with the next data refresh.') + '</p>'; return; }
+      var day = '';
+      ev.reverse().slice(0, 40).forEach(function (e) {
+        var d = e.t.slice(0, 10);
+        if (d !== day) { day = d; var dh = document.createElement('div'); dh.className = 'tl-d'; dh.textContent = fmtDay(d); box.appendChild(dh); }
+        var el = document.createElement('div'); el.className = 'tl-e';
+        var t = document.createElement('div'); t.className = 't'; t.textContent = e.t.slice(11, 16) + ' UTC · ' + (e.m === 'full' ? 'full refresh' : 'light refresh'); el.appendChild(t);
+        var ul = document.createElement('ul');
+        e.ch.sort(function (x, y) { return y[3] - x[3]; }).slice(0, 10).forEach(function (c) {
+          var li = document.createElement('li'), st = document.createElement('strong'); st.textContent = nm[c[1]] || c[1].split('/')[1]; li.appendChild(st);
+          li.appendChild(document.createTextNode(c[0] === 'new' ? ' · new, severity ' + c[3] : c[0] === 'gone' ? ' · dropped off the list' : ' · severity ' + c[2] + ' to ' + c[3] + (c[0] === 'up' ? ' (escalated)' : ' (eased)')));
+          ul.appendChild(li);
+        });
+        el.appendChild(ul); box.appendChild(el);
+      });
+    }).catch(function () { $('#tl-b').innerHTML = '<p class="fine">History starts with the next data refresh.</p>'; $('#tl-n').textContent = 'No history yet'; });
+  }
+
   /* search and filters */
   function setupFilters() {
     var q = $('#f-q'), sv = $('#f-sev'), rg = $('#f-reg'), clr = $('#f-clear'), n = $('#f-n'), t = 0;
@@ -1478,7 +1518,7 @@ body { margin: 0; }
 
   /* ---------- boot ---------- */
   function tickClock() { var d = new Date(); $('#clock').textContent = 'UTC ' + d.toISOString().slice(11, 19); }
-  buildGrid(); buildRegions(); setupFilters(); setupShare(); setupAlerts(); applyHash(); loadQuakes(); setInterval(loadQuakes, 900000); loadNatural(); setInterval(loadNatural, 1800000); S2.init(); setupAnalyst(); setupPlayer(); loadPizza(); setInterval(loadPizza, 600000); loadFeeds(); setInterval(loadFeeds, 300000);
+  buildGrid(); buildRegions(); setupFilters(); setupShare(); setupAlerts(); applyHash(); loadQuakes(); setInterval(loadQuakes, 900000); loadNatural(); setInterval(loadNatural, 1800000); loadTimeline(); setInterval(loadTimeline, 600000); S2.init(); setupAnalyst(); setupPlayer(); loadPizza(); setInterval(loadPizza, 600000); loadFeeds(); setInterval(loadFeeds, 300000);
   tickClock(); setInterval(tickClock, 1000); setInterval(renderMeta, 60000);
   $('#layers').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
