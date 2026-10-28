@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>INTSUM</title>
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="manifest.json?v=3">
 <meta name="theme-color" content="#0b1016">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="INTSUM">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="icon" type="image/png" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png?v=3">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -1380,8 +1380,8 @@ body { margin: 0; }
     if (!hits.length) return;
     var title = 'INTSUM: ' + hits.length + ' update' + (hits.length > 1 ? 's' : ''), body = hits.slice(0, 3).join('; ');
     try {
-      if (navigator.serviceWorker && navigator.serviceWorker.ready) navigator.serviceWorker.ready.then(function (r) { r.showNotification(title, { body: body, icon: 'icons/icon-192.png', tag: 'watchfloor-alert' }); });
-      else new Notification(title, { body: body, icon: 'icons/icon-192.png' });
+      if (navigator.serviceWorker && navigator.serviceWorker.ready) navigator.serviceWorker.ready.then(function (r) { r.showNotification(title, { body: body, icon: 'icons/icon-192.png?v=3', tag: 'watchfloor-alert' }); });
+      else new Notification(title, { body: body, icon: 'icons/icon-192.png?v=3' });
     } catch (e) { }
   }
   var pushOn = false;

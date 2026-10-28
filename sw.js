@@ -1,6 +1,6 @@
 // Minimal service worker: always go to the network first, so the data is never stale.
 // If the network is down, show the last page that loaded.
-const CACHE = 'intsum-shell-v3';
+const CACHE = 'intsum-shell-v4';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => { e.waitUntil(self.clients.claim()); });
 self.addEventListener('fetch', e => {
@@ -17,7 +17,7 @@ self.addEventListener('push', e => {
   let d = {};
   try { d = e.data ? e.data.json() : {}; } catch (x) { d = { body: e.data ? e.data.text() : '' }; }
   e.waitUntil(self.registration.showNotification(String(d.title || 'INTSUM').slice(0, 120), {
-    body: String(d.body || '').slice(0, 300), icon: 'icons/icon-192.png', badge: 'icons/icon-192.png',
+    body: String(d.body || '').slice(0, 300), icon: 'icons/icon-192.png?v=3', badge: 'icons/icon-192.png?v=3',
     tag: 'watchfloor-alert', renotify: true, data: { url: typeof d.url === 'string' ? d.url : '/' }
   }));
 });
