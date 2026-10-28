@@ -15,8 +15,9 @@ fi
 rm -rf "$LOCK"; mkdir "$LOCK"
 echo "$(date) $MODE start" >> "$LOG"
 docker run --rm -v "$CH":/root -v "$REPO":/work -w /work claude-refresh sh -c "
-  rm -f data/live.new.json
+  rm -f data/live.new.json data/patch.json
   claude -p \"\$(cat server/refresh-$MODE.txt)\" --model claude-sonnet-5-5 --max-turns 80 --allowedTools WebSearch WebFetch Read Write > /root/last-$MODE.txt 2>&1
+  if [ $MODE = light ]; then if [ -f data/live.json ]; then BASE=data/live.json; else BASE=data/data.json; fi; node server/apply-patch.js \$BASE data/patch.json data/live.new.json >> /root/refresh.log 2>&1; fi
   node server/validate.js data/live.new.json $MODE >> /root/refresh.log 2>&1 && mv data/live.new.json data/live.json && echo \"\$(date) $MODE published\" >> /root/refresh.log && node server/history.js data/live.json data/history.json $MODE >> /root/refresh.log 2>&1
 " >> "$LOG" 2>&1
 echo "$(date) $MODE end" >> "$LOG"
