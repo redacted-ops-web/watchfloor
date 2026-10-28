@@ -1405,7 +1405,7 @@ body { margin: 0; }
     var b = $('#alertBtn'); if (!b || !('Notification' in window)) return;
     b.hidden = false; setAlertBtn();
     if (alertsOn && pushSupported() && Notification.permission === 'granted') pushSubscribe().then(function () { pushOn = true; }).catch(function () { });
-    function msg(t) { var st = $('#rstatus'); st.textContent = t; st.hidden = false; setTimeout(function () { st.hidden = true; }, 7000); }
+    function msg(t, ms) { var st = $('#rstatus'); st.textContent = t; st.hidden = false; setTimeout(function () { st.hidden = true; }, ms || 7000); }
     b.addEventListener('click', function () {
       if (alertsOn) {
         alertsOn = false; pushOn = false; try { localStorage.setItem('watchfloor.alerts', '0'); } catch (e) { } setAlertBtn();
@@ -1415,7 +1415,7 @@ body { margin: 0; }
       var ok = function (p) {
         if (p !== 'granted') { msg('Notifications are blocked for this site. Allow them in the browser site settings to turn alerts on.'); return; }
         alertsOn = true; try { localStorage.setItem('watchfloor.alerts', '1'); } catch (e) { } setAlertBtn();
-        if (pushSupported()) pushSubscribe().then(function () { pushOn = true; msg('Alerts are on. You will get a notification for new severe or critical items, even when the app is closed.'); })
+        if (pushSupported()) pushSubscribe().then(function () { pushOn = true; msg('Alerts are on. You will get a notification for new severe or critical items, even when the app is closed.' + (/android/i.test(navigator.userAgent) ? ' To make sure they arrive on time, open Android Settings, Apps, Chrome (or Watchfloor), Battery, and choose Unrestricted.' : ''), 20000); })
           .catch(function () { msg('Alerts are on while the app or tab is open. Background alerts are not available right now.'); });
         else msg('Alerts are on while the app or tab is open.');
       };
