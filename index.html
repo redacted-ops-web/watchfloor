@@ -125,7 +125,12 @@ h1, h2, h3, h4 { margin: 0; text-wrap: balance; }
 .lyr button[data-l="nat"] .dot { border-radius: 50%; background: var(--c); opacity: .8; }
 .lyr button[data-l="quakes"] .dot { border-radius: 50%; background: transparent; border: 1.5px solid var(--c); }
 .lyr button[aria-pressed="false"] { opacity: .55; }
-.map-wrap { position: relative; aspect-ratio: 2.25 / 1; min-height: 240px; background: var(--sea); border-radius: 0 0 8px 8px; overflow: hidden; }
+.map-wrap { position: relative; aspect-ratio: 2.25 / 1; min-height: 240px; background: var(--sea); border-radius: 0 0 8px 8px; overflow: hidden; touch-action: pan-y; cursor: grab; }
+.map-wrap.zoomed { touch-action: none; }
+.map-wrap.drag { cursor: grabbing; }
+.zoomctl { position: absolute; right: 10px; bottom: 10px; z-index: 4; display: flex; flex-direction: column; gap: 4px; }
+.zoomctl button { width: 38px; height: 38px; font: 500 22px/1 var(--font-body); background: var(--panel); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; cursor: pointer; padding: 0; }
+.zoomctl button:hover { border-color: var(--accent); }
 .map-wrap svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; background: var(--sea); }
 .land { fill: var(--land); }
 .gl { stroke: var(--grid); stroke-width: 1; fill: none; vector-effect: non-scaling-stroke; }
@@ -318,6 +323,7 @@ body { margin: 0; }
           <g id="lyr-chokepoints"></g>
           <g id="lyr-hotspots"></g>
         </svg>
+        <div class="zoomctl"><button type="button" id="zin" aria-label="Zoom in">+</button><button type="button" id="zout" aria-label="Zoom out">&minus;</button></div>
         <div class="pop" id="pop" hidden></div>
         <div class="pop" id="s2pop" hidden></div>
         <div class="map-empty" id="mapempty">Loading markers…</div>
@@ -442,6 +448,7 @@ body { margin: 0; }
     vb = b;
     svg.setAttribute('viewBox', b.x + ' ' + b.y + ' ' + b.w + ' ' + b.h);
     svg.classList.toggle('labels', curView.span <= 140);
+    mapWrap.classList.toggle('zoomed', curView.span < 340);
     scaleMarkers();
     placePop();
   }
@@ -486,6 +493,80 @@ body { margin: 0; }
       box.appendChild(b);
     });
   }
+
+  /* ---------- zoom and pan: wheel, drag, pinch, buttons ---------- */
+  var MINSPAN = 10, minW = 1000 * MINSPAN / 360, maxW = 1000;
+  var lonOf = function (x) { return x / 1000 * 360 - 180; };
+  var latOf = function (y) { return 84 - y / MAPH * 141; };
+  var ptrs = {}, gest = null, suppressClick = false;
+  function clampVB(b) {
+    var w = Math.max(minW, Math.min(maxW, b.w)), h = w / AR, x = Math.max(0, Math.min(1000 - w, b.x)), y;
+    if (h >= MAPH) y = Math.max(MAPH - h, Math.min(0, b.y)); else y = Math.max(0, Math.min(MAPH - h, b.y));
+    return { x: x, y: y, w: w, h: h };
+  }
+  function userView(nb) {
+    cancelAnimationFrame(tween);
+    var span = nb.w / 1000 * 360;
+    curView = { name: 'Custom', lon: lonOf(nb.x + nb.w / 2), lat: latOf(nb.y + nb.h / 2), span: span };
+    curKey = span >= 359 ? 'world' : null;
+    markRegions(); setVB(nb);
+  }
+  function zoomAt(f, px, py) {
+    var fx = vb.x + px / cw * vb.w, fy = vb.y + py / ch * vb.h;
+    var w = Math.max(minW, Math.min(maxW, vb.w / f)), h = w / AR;
+    userView(clampVB({ x: fx - px / cw * w, y: fy - py / ch * h, w: w, h: h }));
+  }
+  function mapPt(e) { var r = mapWrap.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+  function clonePts() { var o = {}, k; for (k in ptrs) o[k] = { x: ptrs[k].x, y: ptrs[k].y }; return o; }
+  function gestStart() { gest = { vb0: { x: vb.x, y: vb.y, w: vb.w, h: vb.h }, p0: clonePts(), moved: gest ? gest.moved : false }; }
+  mapWrap.addEventListener('wheel', function (e) {
+    if (e.target.closest && e.target.closest('.pop')) return;
+    e.preventDefault();
+    var p = mapPt(e);
+    zoomAt(Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0018)), p.x, p.y);
+  }, { passive: false });
+  mapWrap.addEventListener('pointerdown', function (e) {
+    if (e.target.closest && e.target.closest('.pop, .zoomctl')) return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (!gest) gest = { moved: false };
+    ptrs[e.pointerId] = mapPt(e); gestStart();
+  });
+  mapWrap.addEventListener('pointermove', function (e) {
+    if (!ptrs[e.pointerId] || !gest || !gest.vb0) return;
+    if (e.pointerType === 'mouse' && e.buttons === 0) { gestEnd(e); return; }
+    ptrs[e.pointerId] = mapPt(e);
+    var ids = Object.keys(ptrs), b0 = gest.vb0, nb;
+    if (ids.length >= 2) {
+      var a0 = gest.p0[ids[0]], c0 = gest.p0[ids[1]], a = ptrs[ids[0]], c = ptrs[ids[1]];
+      if (!a0 || !c0) return;
+      var d0 = Math.sqrt(Math.pow(c0.x - a0.x, 2) + Math.pow(c0.y - a0.y, 2)) || 1, d1 = Math.sqrt(Math.pow(c.x - a.x, 2) + Math.pow(c.y - a.y, 2)) || 1;
+      var m0x = (a0.x + c0.x) / 2, m0y = (a0.y + c0.y) / 2, m1x = (a.x + c.x) / 2, m1y = (a.y + c.y) / 2;
+      var w = Math.max(minW, Math.min(maxW, b0.w / (d1 / d0))), h = w / AR;
+      var fx = b0.x + m0x / cw * b0.w, fy = b0.y + m0y / ch * b0.h;
+      nb = { x: fx - m1x / cw * w, y: fy - m1y / ch * h, w: w, h: h };
+      gest.moved = true;
+    } else {
+      var p0 = gest.p0[e.pointerId], p = ptrs[e.pointerId]; if (!p0) return;
+      var dx = p.x - p0.x, dy = p.y - p0.y;
+      if (!gest.moved && Math.sqrt(dx * dx + dy * dy) < 6) return;
+      if (!gest.moved) { gest.moved = true; try { mapWrap.setPointerCapture(e.pointerId); } catch (x) { } mapWrap.classList.add('drag'); }
+      nb = { x: b0.x - dx / cw * b0.w, y: b0.y - dy / ch * b0.h, w: b0.w, h: b0.h };
+    }
+    userView(clampVB(nb));
+  });
+  function gestEnd(e) {
+    if (!ptrs[e.pointerId]) return;
+    delete ptrs[e.pointerId];
+    if (Object.keys(ptrs).length) { gestStart(); return; }
+    if (gest && gest.moved) { suppressClick = true; setTimeout(function () { suppressClick = false; }, 60); }
+    gest = null; mapWrap.classList.remove('drag');
+  }
+  mapWrap.addEventListener('pointerup', gestEnd);
+  mapWrap.addEventListener('pointercancel', gestEnd);
+  mapWrap.addEventListener('click', function (e) { if (suppressClick) { e.stopPropagation(); e.preventDefault(); suppressClick = false; } }, true);
+  function stepZoom(f) { var s = Math.max(MINSPAN, Math.min(360, curView.span / f)); hidePop(); goTo({ name: 'Custom', lon: curView.lon, lat: curView.lat, span: s }, s >= 359 ? 'world' : null); }
+  $('#zin').addEventListener('click', function () { stepZoom(1.7); });
+  $('#zout').addEventListener('click', function () { stepZoom(1 / 1.7); });
 
   /* ---------- markers ---------- */
   var markers = [];
