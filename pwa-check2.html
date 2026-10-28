@@ -1,0 +1,19 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Watchfloor install check</title>
+<link rel="manifest" href="manifest2.json">
+<style>body{background:#0b1016;color:#d6e2ee;font:15px/1.5 monospace;padding:16px}h1{font-size:18px}.ok{color:#4fb8a6}.bad{color:#ff6b5e}pre{white-space:pre-wrap;word-break:break-word}button{font:inherit;padding:10px 14px;margin:8px 0}</style></head>
+<body><h1>Install check 2</h1><pre id="out">running...</pre><button id="btn" style="display:none">Try install prompt</button>
+<script>
+var out=document.getElementById('out'),lines=[],dp=null;
+function log(t,ok){lines.push((ok===true?'[OK] ':ok===false?'[NO] ':'     ')+t);out.textContent=lines.join('\n');}
+log('Secure context: '+window.isSecureContext,window.isSecureContext);
+log('Standalone now: '+(matchMedia('(display-mode: standalone)').matches));
+log('Browser: '+navigator.userAgent);
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;log('beforeinstallprompt FIRED (Chrome says installable)',true);var b=document.getElementById('btn');b.style.display='block';b.onclick=function(){dp.prompt();dp.userChoice.then(function(r){log('Prompt result: '+r.outcome)})};});
+window.addEventListener('appinstalled',function(){log('appinstalled event',true)});
+var link=document.querySelector('link[rel=manifest]');log('Manifest link href: '+(link&&link.href),!!link);
+fetch("manifest2.json",{cache:'no-store'}).then(function(r){log('manifest.json status '+r.status+', type '+r.headers.get('content-type'),r.ok);return r.json()}).then(function(m){log('manifest icons: '+m.icons.length+', display: '+m.display,true);return Promise.all(m.icons.map(function(i){return fetch(i.src,{cache:'no-store'}).then(function(r){log('icon '+i.src+' status '+r.status+', type '+r.headers.get('content-type'),r.ok)})}))}).catch(function(e){log('manifest error: '+e,false)});
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').then(function(r){log('Service worker registered, scope '+r.scope,true);return navigator.serviceWorker.ready}).then(function(r){log('Service worker ready, active: '+!!r.active,!!r.active)}).catch(function(e){log('Service worker FAILED: '+e,false)});}else{log('No serviceWorker support',false)}
+setTimeout(function(){if(!dp)log('No install prompt after 8 seconds',false)},8000);
+</script></body></html>
