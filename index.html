@@ -1371,7 +1371,7 @@ body { margin: 0; }
   /* alerts: only while the app or tab is open (there is no push server) */
   function setAlertBtn() { var b = $('#alertBtn'); if (!b) return; b.textContent = alertsOn ? 'Alerts on' : 'Alerts off'; b.classList.toggle('on', alertsOn); }
   function notifyNew(now) {
-    if (!alertsOn || !sessPrev || !('Notification' in window) || Notification.permission !== 'granted') return;
+    if (!alertsOn || pushOn || !sessPrev || !('Notification' in window) || Notification.permission !== 'granted') return;
     var hits = [];
     Object.keys(now.v).forEach(function (k) {
       var a = sessPrev.v[k], b = now.v[k];
@@ -1384,14 +1384,40 @@ body { margin: 0; }
       else new Notification(title, { body: body, icon: 'icons/icon-192.png' });
     } catch (e) { }
   }
+  var pushOn = false;
+  function b64u(k) { var p = '='.repeat((4 - k.length % 4) % 4), r = (k + p).replace(/-/g, '+').replace(/_/g, '/'), raw = atob(r), a = new Uint8Array(raw.length); for (var i = 0; i < raw.length; i++) a[i] = raw.charCodeAt(i); return a; }
+  function pushSupported() { return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
+  function pushSubscribe() {
+    return fetch('/push/key', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) {
+      return navigator.serviceWorker.ready.then(function (reg) {
+        return reg.pushManager.getSubscription().then(function (sub) { return sub || reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64u(j.key) }); });
+      });
+    }).then(function (sub) {
+      return fetch('/push/subscribe', { method: 'POST', body: JSON.stringify(sub.toJSON()) }).then(function (r) { if (!r.ok) throw 0; return true; });
+    });
+  }
+  function pushUnsubscribe() {
+    return navigator.serviceWorker.ready.then(function (reg) { return reg.pushManager.getSubscription(); }).then(function (sub) {
+      if (!sub) return; var o = sub.toJSON(); return sub.unsubscribe().then(function () { return fetch('/push/unsubscribe', { method: 'POST', body: JSON.stringify(o) }).catch(function () { }); });
+    });
+  }
   function setupAlerts() {
     var b = $('#alertBtn'); if (!b || !('Notification' in window)) return;
     b.hidden = false; setAlertBtn();
+    if (alertsOn && pushSupported() && Notification.permission === 'granted') pushSubscribe().then(function () { pushOn = true; }).catch(function () { });
+    function msg(t) { var st = $('#rstatus'); st.textContent = t; st.hidden = false; setTimeout(function () { st.hidden = true; }, 7000); }
     b.addEventListener('click', function () {
-      if (alertsOn) { alertsOn = false; try { localStorage.setItem('watchfloor.alerts', '0'); } catch (e) { } setAlertBtn(); return; }
+      if (alertsOn) {
+        alertsOn = false; pushOn = false; try { localStorage.setItem('watchfloor.alerts', '0'); } catch (e) { } setAlertBtn();
+        if (pushSupported()) pushUnsubscribe().catch(function () { });
+        return;
+      }
       var ok = function (p) {
-        alertsOn = p === 'granted'; try { localStorage.setItem('watchfloor.alerts', alertsOn ? '1' : '0'); } catch (e) { } setAlertBtn();
-        if (!alertsOn) { var st = $('#rstatus'); st.textContent = 'Notifications are blocked for this site. Allow them in the browser site settings to turn alerts on.'; st.hidden = false; setTimeout(function () { st.hidden = true; }, 6000); }
+        if (p !== 'granted') { msg('Notifications are blocked for this site. Allow them in the browser site settings to turn alerts on.'); return; }
+        alertsOn = true; try { localStorage.setItem('watchfloor.alerts', '1'); } catch (e) { } setAlertBtn();
+        if (pushSupported()) pushSubscribe().then(function () { pushOn = true; msg('Alerts are on. You will get a notification for new severe or critical items, even when the app is closed.'); })
+          .catch(function () { msg('Alerts are on while the app or tab is open. Background alerts are not available right now.'); });
+        else msg('Alerts are on while the app or tab is open.');
       };
       try { var r = Notification.requestPermission(ok); if (r && r.then) r.then(ok); } catch (e) { ok('denied'); }
     });
