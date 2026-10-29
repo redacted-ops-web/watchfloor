@@ -47,13 +47,21 @@ function parseFlare(a) {
 }
 module.exports = { normRows, parseKp, parseScales, parseAlerts, parseFlare };
 
+// SWPC sometimes appends extra text after the JSON; read just the first complete value.
+function firstJson(t) {
+  try { return JSON.parse(t); } catch (e) { /* fall through */ }
+  const m = /Unexpected non-whitespace character after JSON at position (\d+)/.exec(String(e0(t)));
+  if (m) return JSON.parse(t.slice(0, Number(m[1])));
+  throw new Error('invalid JSON');
+}
+function e0(t) { try { JSON.parse(t); } catch (e) { return e.message; } return ''; }
 async function get(p) {
   let err;
   for (let i = 0; i < 2; i++) {
     try {
       const r = await fetch(BASE + p, { headers: { 'User-Agent': 'intsum-dashboard/1.0', Accept: 'application/json' }, signal: AbortSignal.timeout(20000) });
       if (!r.ok) throw new Error(p + ' HTTP ' + r.status);
-      return await r.json();
+      return firstJson(await r.text());
     } catch (e) { err = e; await new Promise(res => setTimeout(res, 2500)); }
   }
   throw err;
