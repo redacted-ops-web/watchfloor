@@ -1367,7 +1367,17 @@ body { margin: 0; }
       renderSens();
     }).catch(function () { delete SENS.space; renderSens(); });
   }
-  function loadSensors() { loadSpace(); }
+  function loadOutages() {
+    fetch('data/outages.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) {
+      var stale = sensAgeMs(j) > 3 * 3600e3 || j.ok === false, list = j.countries || [];
+      var names = list.slice(0, 6).map(function (c) { return c.name; }).join(', ');
+      var val = stale ? 'data stale' : list.length ? list.length + ' countries' : 'none flagged';
+      var t = stale ? 'Outage data is out of date.' : list.length ? 'Internet disruptions detected in the last 24 hours, strongest first: ' + names + '. Shutdowns and outages often accompany conflict, unrest or grid damage. Source: Georgia Tech IODA.' : 'No significant national internet outages flagged in the last 24 hours. Source: Georgia Tech IODA.';
+      SENS.outages = { label: 'Internet outages', value: val, color: stale ? 'var(--faint)' : (list.length > 4 ? 'var(--sev)' : list.length ? 'var(--elev)' : 'var(--muted)'), title: t };
+      renderSens();
+    }).catch(function () { delete SENS.outages; renderSens(); });
+  }
+  function loadSensors() { loadSpace(); loadOutages(); }
 
   /* ---------- live feeds (collected by the server from public sources) ---------- */
   var feedItems = [], feedErrs = {};
