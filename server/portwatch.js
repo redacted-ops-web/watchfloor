@@ -43,8 +43,8 @@ async function main() {
     if (!pick.length) throw new Error('no chokepoint names matched: ' + names.slice(0, 8).join('|'));
     const since = new Date(now - 400 * 864e5).toISOString().slice(0, 10) + ' 00:00:00', ports = []; let sample = null;
     for (const p of pick) {
-      const where = "portname = '" + p.name.replace(/'/g, "''") + "' AND date >= timestamp '" + since + "'";
-      const j = await q({ where, outFields: 'portname,date,n_total,n_tanker', orderByFields: 'date DESC', resultRecordCount: '1000' });
+      const where = "portname IN ('" + p.name.replace(/'/g, "''") + "') AND date >= timestamp '" + since + "'";
+      const j = await q({ where, outFields: 'portname,date,n_total,n_tanker', orderByFields: 'date DESC', resultRecordCount: '2000' });
       const rows = j.features.map(f => f.attributes); sample = sample || rows[0];
       const s = summarize(rows); if (s) ports.push(Object.assign({ id: p.id, name: p.name }, s));
     }
