@@ -1,6 +1,6 @@
 // INTSUM Flock camera collector. Run from repo root: node server/flock.js
 // Reads community-mapped ALPR cameras tagged Flock in OpenStreetMap (ODbL) via the public Overpass API,
-// writes data/flock.json as {updatedAt, n, pts:[lat,lon,lat,lon,...]} (4 decimals, ~11 m). Keeps old data on failure.
+// writes data/flock.json as {updatedAt, n, pts:[lat,lon,lat,lon,...]} (6 decimals). Keeps old data on failure.
 const fs = require('fs');
 const OUT = 'data/flock.json';
 const HOSTS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
@@ -17,11 +17,11 @@ function dirOf(t) {
 }
 function parse(j) {
   if (!j || !Array.isArray(j.elements)) return null;
-  const seen = new Set(), out = { pts: [], ids: [], dir: [], op: {} };
+  const out = { pts: [], ids: [], dir: [], op: {} };
   j.elements.forEach(e => {
     if (!e || typeof e.lat !== 'number' || typeof e.lon !== 'number') return;
-    const la = Math.round(e.lat * 1e4) / 1e4, lo = Math.round(e.lon * 1e4) / 1e4, k = la + ',' + lo;
-    if (seen.has(k)) return; seen.add(k);
+    // keep every camera at full precision (6 decimals, about 0.1 m): two cameras on one pole facing different ways are different cameras
+    const la = Math.round(e.lat * 1e6) / 1e6, lo = Math.round(e.lon * 1e6) / 1e6;
     const t = e.tags || {}, idx = out.ids.length;
     out.pts.push(la, lo); out.ids.push(e.id); out.dir.push(dirOf(t));
     const op = t.operator || t['operator:short'] || ''; if (op) out.op[idx] = String(op).slice(0, 60);

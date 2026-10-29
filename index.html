@@ -132,6 +132,7 @@ h1, h2, h3, h4 { margin: 0; text-wrap: balance; }
 .stl { fill: none; stroke: var(--muted); stroke-opacity: .65; stroke-width: 1; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
 .osmc { position: absolute; left: 6px; bottom: 4px; z-index: 3; font-size: 10.5px; color: #333; background: rgba(255,255,255,.75); padding: 1px 5px; border-radius: 3px; }
 .osmc a { color: inherit; }
+.cn { fill: #8b5cf6; fill-opacity: .26; stroke: #7c3aed; stroke-opacity: .75; stroke-width: 1; vector-effect: non-scaling-stroke; pointer-events: none; }
 .fls { fill: none; stroke: #8b5cf6; stroke-opacity: .9; stroke-width: 14; stroke-linecap: round; vector-effect: non-scaling-stroke; pointer-events: none; }
 .pop .fkm { color: var(--muted); font-size: 12.5px; margin: 0 0 6px; }
 .fl { fill: none; stroke: #8b5cf6; stroke-opacity: .6; stroke-width: 2.4; stroke-linecap: round; vector-effect: non-scaling-stroke; }
@@ -355,6 +356,7 @@ body { margin: 0; }
           <g id="lyr-s2"></g>
           <g id="lyr-quakes" style="display:none"></g>
           <g id="lyr-nat" style="display:none"></g>
+          <g id="lyr-cones" style="display:none"></g>
           <g id="lyr-flock" style="display:none"></g>
           <g id="lyr-incidents"></g>
           <g id="lyr-chokepoints"></g>
@@ -362,7 +364,7 @@ body { margin: 0; }
         </svg>
         <div class="zoomctl"><button type="button" id="zin" aria-label="Zoom in">+</button><button type="button" id="zout" aria-label="Zoom out">&minus;</button></div>
         <div class="plcs" id="plcs" hidden></div>
-        <div class="osmc" id="osmc" hidden>\u00a9 <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</div>
+        <div class="osmc" id="osmc" hidden>© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</div>
         <div class="pop" id="pop" hidden></div>
         <div class="pop" id="s2pop" hidden></div>
         <div class="pop" id="fkpop" hidden></div>
@@ -537,13 +539,13 @@ body { margin: 0; }
 
   /* ---------- street map tiles (OpenStreetMap) when zoomed in close, and flock dots that grow with zoom ---------- */
   var tilesG = $('#lyr-tiles'), osmc = $('#osmc'), tileNodes = {}, tileRaf = 0, geo = null, geoState = 0;
-  function tspan() { return layers.flock ? 0.39 : 6; }
+  function tspan() { return layers.flock ? 0.2 : 6; }
   function tileLon(x, z) { return x / Math.pow(2, z) * 360 - 180; }
   function tileLat(y, z) { var n = Math.PI - 2 * Math.PI * y / Math.pow(2, z); return 180 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n))); }
   var tileT = 0;
   function viewFx() {
-    if (!tileRaf) tileRaf = requestAnimationFrame(function () { tileRaf = 0; flockSize(); if (vb.w / 1000 * 360 > tspan()) updateTiles(); stageFx(); });
-    clearTimeout(tileT); tileT = setTimeout(function () { updateTiles(); stageFx(); }, 160);
+    if (!tileRaf) tileRaf = requestAnimationFrame(function () { tileRaf = 0; flockSize(); if (vb.w / 1000 * 360 > tspan()) updateTiles(); stageFx(); updateCones(); });
+    clearTimeout(tileT); tileT = setTimeout(function () { updateTiles(); stageFx(); updateCones(); }, 160);
   }
   function flockSize() {
     var span = vb.w / 1000 * 360, w = span >= 20 ? 2.4 : Math.min(16, 2.4 + Math.pow(20 / span, 0.55));
@@ -565,7 +567,7 @@ body { margin: 0; }
   }
   var plcs = $('#plcs'), statesG = $('#lyr-states');
   function stageFx() {
-    var span = vb.w / 1000 * 360, on = layers.flock && span > 0.39;
+    var span = vb.w / 1000 * 360, on = layers.flock && span > 0.2;
     if (on && !geoState) loadGeo();
     statesG.style.display = on && span <= 25 ? '' : 'none';
     var minPop = !on || geoState !== 2 ? 0 : span <= 1.56 ? 5000 : span <= 6.25 ? 150000 : 0;
@@ -583,6 +585,26 @@ body { margin: 0; }
       out.push(d);
     }
     out.forEach(function (d) { plcs.appendChild(d); });
+  }
+  /* close-up: a cone from each camera in the direction it faces (OSM direction = degrees clockwise from north) */
+  var conesG = $('#lyr-cones'), conesEl = null;
+  function updateCones() {
+    var span = vb.w / 1000 * 360;
+    if (!fk || !layers.flock || span > 0.2) { conesG.style.display = 'none'; return; }
+    conesG.style.display = '';
+    if (!conesEl) { conesEl = document.createElementNS(NS, 'path'); conesEl.setAttribute('class', 'cn'); conesG.appendChild(conesEl); }
+    var upx = vb.w / cw, mpp = span * 111320 / cw, Lpx = Math.max(26, Math.min(64, 40 / mpp)), L = Lpx * upx;
+    var mx = 30 * upx, d = [], cnt = 0, i, g, lat, c, h = Math.PI / 180;
+    for (i = 0; i < fk.n && cnt < 4000; i++) {
+      g = fk.dir[i]; if (g == null || g < 0) continue;
+      var x = fk.x[i], y = fk.y[i];
+      if (x < vb.x - mx || x > vb.x + vb.w + mx || y < vb.y - mx || y > vb.y + vb.h + mx) continue;
+      lat = fk.lat[2 * i]; c = Math.cos(lat * h);
+      var pts = [-24, -8, 8, 24].map(function (a) { var t = (g + a) * h, ex = Math.sin(t) / c, ey = -Math.cos(t), n = Math.sqrt(ex * ex + ey * ey); return [x + ex / n * L, y + ey / n * L]; });
+      d.push('M' + x.toFixed(6) + ' ' + y.toFixed(6) + 'L' + pts.map(function (q) { return q[0].toFixed(6) + ' ' + q[1].toFixed(6); }).join('L') + 'Z');
+      cnt++;
+    }
+    conesEl.setAttribute('d', d.join(''));
   }
   function updateTiles() {
     var span = vb.w / 1000 * 360, on = span <= tspan();
@@ -609,7 +631,7 @@ body { margin: 0; }
   }
 
   /* ---------- zoom and pan: wheel, drag, pinch, buttons ---------- */
-  var MINSPAN = 0.03, minW = 1000 * MINSPAN / 360, maxW = 1000;
+  var MINSPAN = 0.006, minW = 1000 * MINSPAN / 360, maxW = 1000;
   var lonOf = function (x) { return x / 1000 * 360 - 180; };
   var latOf = function (y) { return 84 - y / MAPH * 141; };
   var ptrs = {}, gest = null, suppressClick = false;
@@ -1825,9 +1847,9 @@ body { margin: 0; }
     fetch('data/flock.json', { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) {
       var p = j.pts || [], d = [], i, n = p.length >> 1;
       fk = { n: n, x: new Float64Array(n), y: new Float64Array(n), lat: p, ids: j.ids || [], dir: j.dir || [], op: j.op || {} };
-      for (i = 0; i < n; i++) { fk.x[i] = X(p[2 * i + 1]); fk.y[i] = Y(p[2 * i]); d.push('M' + fk.x[i].toFixed(4) + ' ' + fk.y[i].toFixed(4) + 'h0'); }
+      for (i = 0; i < n; i++) { fk.x[i] = X(p[2 * i + 1]); fk.y[i] = Y(p[2 * i]); d.push('M' + fk.x[i].toFixed(5) + ' ' + fk.y[i].toFixed(5) + 'h0'); }
       var el = document.createElementNS(NS, 'path'); el.setAttribute('class', 'fl'); el.setAttribute('d', d.join(''));
-      var g = $('#lyr-flock'); g.textContent = ''; g.appendChild(el); flockSize();
+      var g = $('#lyr-flock'); g.textContent = ''; g.appendChild(el); flockSize(); viewFx();
       say('Flock cameras: ' + (j.n || n).toLocaleString() + ' mapped in the US. Zoom in for state lines, cities, towns, then streets; tap a camera for details. Community-mapped on OpenStreetMap, so real numbers are higher. Data: OpenStreetMap contributors (ODbL); place names: GeoNames (CC BY 4.0); updated ' + String(j.updatedAt || '').slice(0, 10) + '.');
     }).catch(function () { flockLoaded = false; say('Flock camera data is not available yet.'); });
   }
@@ -1859,7 +1881,7 @@ body { margin: 0; }
       fp.style.left = Math.max(8, Math.min(cw - pw - 8, mx - pw / 2)) + 'px';
       fp.style.top = Math.max(8, Math.min(ch - ph - 8, my + 14 + ph > ch ? my - ph - 14 : my + 14)) + 'px';
       if (sel) sel.remove();
-      sel = document.createElementNS(NS, 'path'); sel.setAttribute('class', 'fls'); sel.setAttribute('d', 'M' + fk.x[best].toFixed(5) + ' ' + fk.y[best].toFixed(5) + 'h0');
+      sel = document.createElementNS(NS, 'path'); sel.setAttribute('class', 'fls'); sel.setAttribute('d', 'M' + fk.x[best].toFixed(6) + ' ' + fk.y[best].toFixed(6) + 'h0');
       $('#lyr-flock').appendChild(sel); flockSize();
     });
   })();
