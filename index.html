@@ -272,6 +272,17 @@ footer ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 12.5p
 .sens { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; }
 .sn { font: 500 12px var(--font-mono, monospace); letter-spacing: .02em; display: inline-flex; gap: 8px; align-items: baseline; padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--muted); cursor: pointer; }
 .sn b { font-weight: 700; }
+.cx { background: transparent; border: 0; color: var(--muted); cursor: pointer; font-size: 15px; line-height: 1; padding: 2px 8px 2px 0; margin: 0; }
+.cx:hover { color: var(--fg); }
+.card > h2 .cx { padding-left: 0; }
+.card-h > .cx { order: -1; margin-right: -4px; }
+.card-h > .cx + h2 { margin-right: auto; }
+.card.collapsed, .lower .feeds.collapsed, .lower .feeds.vids.collapsed { align-self: start !important; min-height: 0 !important; contain: none !important; }
+.card.collapsed > .card-h { justify-content: flex-start; }
+.card.collapsed > :not(.card-h):not(h2) { display: none !important; }
+.card.collapsed > .card-h { border-bottom: 0; }
+.card.collapsed > .card-h > :not(h2):not(.cx) { display: none !important; }
+.card.collapsed > h2 { margin-bottom: 0; }
 .setp { margin: 10px 0 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); font-size: 13px; }
 .setp h3 { margin: 0 0 8px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .setp label { display: flex; gap: 8px; align-items: center; padding: 3px 0; }
@@ -1397,6 +1408,25 @@ body { margin: 0; }
     }).catch(function () { delete SENS.air; renderSens(); });
   }
   function loadSensors() { loadSpace(); loadOutages(); loadAir(); }
+  /* ---------- collapsible sections: tap the arrow to shrink a section to its title; remembered per device ---------- */
+  (function () {
+    var KEY = 'watchfloor.collapsed', st = {};
+    try { st = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { st = {}; }
+    Array.prototype.forEach.call(document.querySelectorAll('.card'), function (card) {
+      if (card.tagName === 'DETAILS') return;
+      var head = card.querySelector(':scope > .card-h, :scope > h2'); if (!head) return;
+      if (head.tagName !== 'H2' && !head.querySelector('h2') && card.getAttribute('aria-label')) { var nt = document.createElement('h2'); nt.textContent = card.getAttribute('aria-label'); head.insertBefore(nt, head.firstChild); }
+      var h2 = head.tagName === 'H2' ? head : head.querySelector('h2'), id = (h2 ? h2.textContent : card.getAttribute('aria-label') || '').trim().toLowerCase();
+      if (!id) return;
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'cx'; b.setAttribute('aria-label', 'Collapse or expand ' + id);
+      function set(on, save) {
+        card.classList.toggle('collapsed', on); b.setAttribute('aria-expanded', on ? 'false' : 'true'); b.textContent = on ? '\u25B8' : '\u25BE';
+        if (save) { if (on) st[id] = 1; else delete st[id]; try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { } }
+      }
+      b.addEventListener('click', function () { set(!card.classList.contains('collapsed'), true); });
+      head.insertBefore(b, head.firstChild); set(!!st[id], false);
+    });
+  })();
   /* ---------- settings: hide/show sensors, export and import everything this browser has saved ---------- */
   (function () {
     var panel = $('#setp'), btn = $('#setBtn');
