@@ -269,6 +269,9 @@ footer ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 12.5p
 }
 @media (max-width: 980px) { .main { grid-template-columns: minmax(0, 1fr); } .log { max-height: none; } }
 @media (max-width: 560px) { .vbody iframe { height: 420px; } .map-wrap { aspect-ratio: 1.45 / 1; } .brand h1 { font-size: 19px; } }
+.sens { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; }
+.chip { font: 500 12px var(--font-mono, monospace); letter-spacing: .02em; display: inline-flex; gap: 8px; align-items: baseline; padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--muted); cursor: pointer; }
+.chip b { font-weight: 700; }
 [hidden] { display: none !important; }
 img { max-width: 100%; }
 body { margin: 0; }
@@ -293,6 +296,7 @@ body { margin: 0; }
   <div class="chg" id="chg" hidden></div>
 
   <section class="strip" id="strip" aria-label="Posture"></section>
+  <div class="sens" id="sens" aria-label="Live sensors" hidden></div>
   <div class="filters" id="filters" role="search">
     <input type="search" id="f-q" placeholder="Search hotspots, chokepoints, incidents and news" aria-label="Search" autocomplete="off">
     <select id="f-sev" aria-label="Severity"><option value="1">All severities</option><option value="3">Elevated and up</option><option value="4">Severe and critical</option><option value="5">Critical only</option></select>
@@ -1329,6 +1333,42 @@ body { margin: 0; }
     }).catch(function () { badge.hidden = true; meta.textContent = 'Unavailable'; list.innerHTML = '<p class="fine">The pizza data could not be loaded right now.</p>'; });
   }
 
+  /* ---------- live sensors: small chips fed by server collectors (space weather now; outages, aircraft, ships as added) ---------- */
+  var SENS = {}, SENS_ORDER = ['space', 'outages', 'air', 'ships'], sensTimer = 0;
+  var SENS_COL = function (n) { return n >= 5 ? 'var(--crit)' : n >= 3 ? 'var(--sev)' : n >= 1 ? 'var(--elev)' : 'var(--muted)'; };
+  function sensAgeMs(j) { var t = Date.parse((j && (j.checkedAt || j.updatedAt)) || ''); return t ? Date.now() - t : Infinity; }
+  function renderSens() {
+    var box = $('#sens'); box.textContent = '';
+    SENS_ORDER.forEach(function (k) {
+      var s = SENS[k]; if (!s) return;
+      var c = document.createElement('button'); c.type = 'button'; c.className = 'chip'; c.title = s.title || '';
+      var a = document.createElement('span'); a.textContent = s.label;
+      var b = document.createElement('b'); b.textContent = s.value; b.style.color = s.color;
+      c.appendChild(a); c.appendChild(b);
+      c.addEventListener('click', function () { var st = $('#rstatus'); st.textContent = s.label + ': ' + (s.title || s.value); st.hidden = false; clearTimeout(sensTimer); sensTimer = setTimeout(function () { st.hidden = true; }, 14000); });
+      box.appendChild(c);
+    });
+    box.hidden = !box.children.length;
+  }
+  function loadSpace() {
+    fetch('data/space.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) {
+      var stale = sensAgeMs(j) > 2 * 3600e3 || j.ok === false;
+      var mx = Math.max(j.G || 0, j.S || 0, j.R || 0);
+      var kp = typeof j.kp === 'number' ? Math.round(j.kp * 10) / 10 : null;
+      var val = stale ? 'data stale' : (kp != null ? 'Kp ' + kp + ' · ' : '') + 'G' + (j.G || 0) + ' S' + (j.S || 0) + ' R' + (j.R || 0);
+      var bits = [];
+      if (kp != null) bits.push('Planetary K-index ' + kp + ' (24 h high ' + (Math.round(j.kpMax24 * 10) / 10) + ').');
+      bits.push('NOAA scales now: geomagnetic storm G' + (j.G || 0) + ', solar radiation S' + (j.S || 0) + ', radio blackout R' + (j.R || 0) + ' (0 is quiet, 5 is extreme).');
+      if (typeof j.forecastG === 'number') bits.push('Forecast peak geomagnetic level over the next 3 days: G' + j.forecastG + '.');
+      if (j.flare && j.flare.cls) bits.push('Latest solar flare: class ' + j.flare.cls + '.');
+      (j.alerts || []).slice(0, 2).forEach(function (x) { bits.push(String(x.text || '').slice(0, 140)); });
+      bits.push('Space weather can disturb GPS, radio and satellites. Source: NOAA SWPC.');
+      SENS.space = { label: 'Space weather', value: val, color: stale ? 'var(--faint)' : SENS_COL(mx), title: bits.join(' ') };
+      renderSens();
+    }).catch(function () { delete SENS.space; renderSens(); });
+  }
+  function loadSensors() { loadSpace(); }
+
   /* ---------- live feeds (collected by the server from public sources) ---------- */
   var feedItems = [], feedErrs = {};
   function agoText(ts) {
@@ -1662,7 +1702,7 @@ body { margin: 0; }
 
   /* ---------- boot ---------- */
   function tickClock() { var d = new Date(); $('#clock').textContent = 'UTC ' + d.toISOString().slice(11, 19); }
-  buildGrid(); buildRegions(); setupFilters(); setupShare(); setupAlerts(); applyHash(); loadQuakes(); setInterval(loadQuakes, 900000); loadNatural(); setInterval(loadNatural, 1800000); loadTimeline(); setInterval(loadTimeline, 600000); S2.init(); setupAnalyst(); setupPlayer(); loadPizza(); setInterval(loadPizza, 600000); loadFeeds(); setInterval(loadFeeds, 300000);
+  buildGrid(); buildRegions(); setupFilters(); setupShare(); setupAlerts(); applyHash(); loadQuakes(); setInterval(loadQuakes, 900000); loadNatural(); setInterval(loadNatural, 1800000); loadTimeline(); setInterval(loadTimeline, 600000); S2.init(); setupAnalyst(); setupPlayer(); loadPizza(); setInterval(loadPizza, 600000); loadSensors(); setInterval(loadSensors, 600000); loadFeeds(); setInterval(loadFeeds, 300000);
   tickClock(); setInterval(tickClock, 1000); setInterval(renderMeta, 60000);
   $('#layers').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
