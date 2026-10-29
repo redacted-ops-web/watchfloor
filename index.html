@@ -270,8 +270,12 @@ footer ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 12.5p
 @media (max-width: 980px) { .main { grid-template-columns: minmax(0, 1fr); } .log { max-height: none; } }
 @media (max-width: 560px) { .vbody iframe { height: 420px; } .map-wrap { aspect-ratio: 1.45 / 1; } .brand h1 { font-size: 19px; } }
 .sens { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; }
-.chip { font: 500 12px var(--font-mono, monospace); letter-spacing: .02em; display: inline-flex; gap: 8px; align-items: baseline; padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--muted); cursor: pointer; }
-.chip b { font-weight: 700; }
+.sn { font: 500 12px var(--font-mono, monospace); letter-spacing: .02em; display: inline-flex; gap: 8px; align-items: baseline; padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--muted); cursor: pointer; }
+.sn b { font-weight: 700; }
+.setp { margin: 10px 0 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); font-size: 13px; }
+.setp h3 { margin: 0 0 8px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.setp label { display: flex; gap: 8px; align-items: center; padding: 3px 0; }
+.setp .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
 [hidden] { display: none !important; }
 img { max-width: 100%; }
 body { margin: 0; }
@@ -286,6 +290,7 @@ body { margin: 0; }
     <div class="top-r">
       <span id="clock">UTC --:--:--</span>
       <span id="fresh">Loading feeds…</span>
+      <button type="button" class="top-btn" id="setBtn">Settings</button>
       <button type="button" class="top-btn" id="shareBtn">Share</button>
       <button type="button" class="top-btn" id="alertBtn" hidden>Alerts off</button>
       <button type="button" class="install-btn" id="installBtn" hidden>Install app</button>
@@ -293,6 +298,7 @@ body { margin: 0; }
     <div class="install-hint" id="installHint" hidden></div>
   </header>
   <div class="status" id="rstatus" role="status" aria-live="polite" hidden></div>
+  <div class="setp" id="setp" hidden></div>
   <div class="chg" id="chg" hidden></div>
 
   <section class="strip" id="strip" aria-label="Posture"></section>
@@ -1337,11 +1343,13 @@ body { margin: 0; }
   var SENS = {}, SENS_ORDER = ['space', 'outages', 'air', 'ships'], sensTimer = 0;
   var SENS_COL = function (n) { return n >= 5 ? 'var(--crit)' : n >= 3 ? 'var(--sev)' : n >= 1 ? 'var(--elev)' : 'var(--muted)'; };
   function sensAgeMs(j) { var t = Date.parse((j && (j.checkedAt || j.updatedAt)) || ''); return t ? Date.now() - t : Infinity; }
+  var SENS_NAMES = { space: 'Space weather', outages: 'Internet outages', air: 'Military aircraft' }, hideSens = {};
+  try { hideSens = JSON.parse(localStorage.getItem('watchfloor.hidesens') || '{}') || {}; } catch (e) { hideSens = {}; }
   function renderSens() {
     var box = $('#sens'); box.textContent = '';
     SENS_ORDER.forEach(function (k) {
-      var s = SENS[k]; if (!s) return;
-      var c = document.createElement('button'); c.type = 'button'; c.className = 'chip'; c.title = s.title || '';
+      var s = SENS[k]; if (!s || hideSens[k]) return;
+      var c = document.createElement('button'); c.type = 'button'; c.className = 'sn'; c.title = s.title || '';
       var a = document.createElement('span'); a.textContent = s.label;
       var b = document.createElement('b'); b.textContent = s.value; b.style.color = s.color;
       c.appendChild(a); c.appendChild(b);
@@ -1389,6 +1397,43 @@ body { margin: 0; }
     }).catch(function () { delete SENS.air; renderSens(); });
   }
   function loadSensors() { loadSpace(); loadOutages(); loadAir(); }
+  /* ---------- settings: hide/show sensors, export and import everything this browser has saved ---------- */
+  (function () {
+    var panel = $('#setp'), btn = $('#setBtn');
+    function build() {
+      panel.textContent = '';
+      var h = document.createElement('h3'); h.textContent = 'Show sensors'; panel.appendChild(h);
+      Object.keys(SENS_NAMES).forEach(function (k) {
+        var l = document.createElement('label'), cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !hideSens[k];
+        cb.addEventListener('change', function () { if (cb.checked) delete hideSens[k]; else hideSens[k] = 1; try { localStorage.setItem('watchfloor.hidesens', JSON.stringify(hideSens)); } catch (e) { } renderSens(); });
+        l.appendChild(cb); l.appendChild(document.createTextNode(SENS_NAMES[k])); panel.appendChild(l);
+      });
+      var row = document.createElement('div'); row.className = 'row';
+      var ex = document.createElement('button'); ex.type = 'button'; ex.className = 'top-btn'; ex.textContent = 'Export settings';
+      var im = document.createElement('button'); im.type = 'button'; im.className = 'top-btn'; im.textContent = 'Import settings';
+      var fi = document.createElement('input'); fi.type = 'file'; fi.accept = 'application/json,.json'; fi.hidden = true;
+      ex.addEventListener('click', function () {
+        var o = {}; try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k.indexOf('watchfloor.') === 0 && k !== 'watchfloor.snap') o[k] = localStorage.getItem(k); } } catch (e) { }
+        var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({ intsum: 1, settings: o }, null, 1)], { type: 'application/json' })); a.download = 'intsum-settings.json'; document.body.appendChild(a); a.click(); a.remove();
+      });
+      im.addEventListener('click', function () { fi.click(); });
+      fi.addEventListener('change', function () {
+        var f = fi.files && fi.files[0]; if (!f) return;
+        var r = new FileReader();
+        r.onload = function () {
+          try {
+            var j = JSON.parse(r.result), o = j && j.settings, n = 0;
+            if (!o || typeof o !== 'object') throw 0;
+            Object.keys(o).forEach(function (k) { if (k.indexOf('watchfloor.') === 0 && k !== 'watchfloor.snap' && typeof o[k] === 'string' && o[k].length < 20000) { localStorage.setItem(k, o[k]); n++; } });
+            if (!n) throw 0; location.reload();
+          } catch (e) { var st = $('#rstatus'); st.textContent = 'That file is not an INTSUM settings export.'; st.hidden = false; }
+        };
+        r.readAsText(f);
+      });
+      row.appendChild(ex); row.appendChild(im); row.appendChild(fi); panel.appendChild(row);
+    }
+    btn.addEventListener('click', function () { if (panel.hidden) build(); panel.hidden = !panel.hidden; });
+  })();
 
   /* ---------- live feeds (collected by the server from public sources) ---------- */
   var feedItems = [], feedErrs = {};
