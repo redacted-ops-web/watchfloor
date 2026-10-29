@@ -125,6 +125,8 @@ h1, h2, h3, h4 { margin: 0; text-wrap: balance; }
 .lyr button[data-l="nat"] .dot { border-radius: 50%; background: var(--c); opacity: .8; }
 .lyr button[data-l="quakes"] .dot { border-radius: 50%; background: transparent; border: 1.5px solid var(--c); }
 .lyr button[data-l="flock"] .dot { border-radius: 50%; background: var(--c); width: 5px; height: 5px; margin: 0 8px 1px 1px; }
+.fls { fill: none; stroke: #8b5cf6; stroke-opacity: .9; stroke-width: 14; stroke-linecap: round; vector-effect: non-scaling-stroke; pointer-events: none; }
+.pop .fkm { color: var(--muted); font-size: 12.5px; margin: 0 0 6px; }
 .fl { fill: none; stroke: #8b5cf6; stroke-opacity: .6; stroke-width: 2.4; stroke-linecap: round; vector-effect: non-scaling-stroke; }
 .lyr button[aria-pressed="false"] { opacity: .55; }
 .map-wrap { position: relative; aspect-ratio: 2.25 / 1; min-height: 240px; background: var(--sea); border-radius: 0 0 8px 8px; overflow: hidden; touch-action: pan-y; cursor: grab; }
@@ -352,6 +354,7 @@ body { margin: 0; }
         <div class="zoomctl"><button type="button" id="zin" aria-label="Zoom in">+</button><button type="button" id="zout" aria-label="Zoom out">&minus;</button></div>
         <div class="pop" id="pop" hidden></div>
         <div class="pop" id="s2pop" hidden></div>
+        <div class="pop" id="fkpop" hidden></div>
         <div class="map-empty" id="mapempty">Loading markers…</div>
       </div>
       <div class="legend">
@@ -439,7 +442,7 @@ body { margin: 0; }
 
   var data = { hotspots: null, chokepoints: null, incidents: null };
   var meta = null;
-  var layers = { hotspots: true, chokepoints: true, incidents: true, quakes: false, nat: false, flock: false }, flockLoaded = false;
+  var fk = null, layers = { hotspots: true, chokepoints: true, incidents: true, quakes: false, nat: false, flock: false }, flockLoaded = false;
   var openRows = {};
   var selected = null;
   var canEdit = false, noDb = false, isOwner = false, dbRef = null;
@@ -521,7 +524,7 @@ body { margin: 0; }
   }
 
   /* ---------- zoom and pan: wheel, drag, pinch, buttons ---------- */
-  var MINSPAN = 10, minW = 1000 * MINSPAN / 360, maxW = 1000;
+  var MINSPAN = 0.03, minW = 1000 * MINSPAN / 360, maxW = 1000;
   var lonOf = function (x) { return x / 1000 * 360 - 180; };
   var latOf = function (y) { return 84 - y / MAPH * 141; };
   var ptrs = {}, gest = null, suppressClick = false;
@@ -1735,13 +1738,46 @@ body { margin: 0; }
     var st = $('#rstatus');
     function say(t) { st.textContent = t; st.hidden = false; clearTimeout(loadFlock.t); loadFlock.t = setTimeout(function () { st.hidden = true; }, 12000); }
     fetch('data/flock.json', { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) {
-      var p = j.pts || [], d = [], i;
-      for (i = 0; i + 1 < p.length; i += 2) d.push('M' + X(p[i + 1]).toFixed(1) + ' ' + Y(p[i]).toFixed(1) + 'h0');
+      var p = j.pts || [], d = [], i, n = p.length >> 1;
+      fk = { n: n, x: new Float64Array(n), y: new Float64Array(n), lat: p, ids: j.ids || [], dir: j.dir || [], op: j.op || {} };
+      for (i = 0; i < n; i++) { fk.x[i] = X(p[2 * i + 1]); fk.y[i] = Y(p[2 * i]); d.push('M' + fk.x[i].toFixed(4) + ' ' + fk.y[i].toFixed(4) + 'h0'); }
       var el = document.createElementNS(NS, 'path'); el.setAttribute('class', 'fl'); el.setAttribute('d', d.join(''));
       var g = $('#lyr-flock'); g.textContent = ''; g.appendChild(el);
-      say('Flock cameras: ' + (j.n || p.length / 2).toLocaleString() + ' mapped in the US. Community-mapped on OpenStreetMap, so real numbers are higher. Data: OpenStreetMap contributors (ODbL), updated ' + String(j.updatedAt || '').slice(0, 10) + '.');
+      say('Flock cameras: ' + (j.n || n).toLocaleString() + ' mapped in the US. Zoom in and tap a camera for details. Community-mapped on OpenStreetMap, so real numbers are higher. Data: OpenStreetMap contributors (ODbL), updated ' + String(j.updatedAt || '').slice(0, 10) + '.');
     }).catch(function () { flockLoaded = false; say('Flock camera data is not available yet.'); });
   }
+
+  /* tap a Flock camera (zoomed in): nearest dot within a few pixels, then details and links */
+  (function () {
+    var fp = $('#fkpop'), sel = null;
+    var DIRS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+    function hide() { fp.hidden = true; if (sel) { sel.remove(); sel = null; } }
+    mapWrap.addEventListener('pointerdown', function (e) { if (!e.target.closest || !e.target.closest('#fkpop')) hide(); });
+    mapWrap.addEventListener('click', function (e) {
+      if (!fk || !layers.flock || suppressClick) return;
+      if (e.target.closest && e.target.closest('.pop, .zoomctl, button, #lyr-hotspots, #lyr-chokepoints, #lyr-incidents, #lyr-s2')) return;
+      if (vb.w > 1000 * 40 / 360) return;
+      var r = mapWrap.getBoundingClientRect(), px = e.clientX - r.left, py = e.clientY - r.top;
+      var sx = vb.x + px / cw * vb.w, sy = vb.y + py / ch * vb.h, rad = 14 / cw * vb.w, best = -1, bd = rad * rad, i, dx, dy, dd;
+      for (i = 0; i < fk.n; i++) { dx = fk.x[i] - sx; if (dx > rad || dx < -rad) continue; dy = fk.y[i] - sy; dd = dx * dx + dy * dy; if (dd < bd) { bd = dd; best = i; } }
+      if (best < 0) { hide(); return; }
+      var lat = fk.lat[2 * best], lon = fk.lat[2 * best + 1], id = fk.ids[best], dg = fk.dir[best], op = fk.op[best];
+      var h = '<button class="x" aria-label="Close">\u00d7</button><span class="rg">Flock Safety camera</span><h3>License plate reader</h3>';
+      h += '<p class="fkm">' + (dg >= 0 ? 'Faces about ' + DIRS[Math.round(dg / 45) % 8] + ' (' + Math.round(dg) + '\u00b0)' : 'Direction not mapped') + (op ? ' \u00b7 Operator: ' + esc(op) : '') + '</p>';
+      h += '<p class="fkm">' + lat.toFixed(4) + ', ' + lon.toFixed(4) + '</p><div class="acts">';
+      if (id) h += '<a class="top-btn" target="_blank" rel="noopener" href="https://www.openstreetmap.org/node/' + id + '">OpenStreetMap</a>';
+      h += '<a class="top-btn" target="_blank" rel="noopener" href="https://www.openstreetmap.org/?mlat=' + lat + '&mlon=' + lon + '#map=19/' + lat + '/' + lon + '">Street map</a>';
+      h += '<a class="top-btn" target="_blank" rel="noopener" href="https://deflock.me/map#map=18/' + lat + '/' + lon + '">DeFlock</a></div>';
+      fp.innerHTML = h; fp.hidden = false;
+      fp.querySelector('.x').addEventListener('click', hide);
+      var pw = Math.min(300, cw - 16), ph = fp.offsetHeight || 150, mx = (fk.x[best] - vb.x) / vb.w * cw, my = (fk.y[best] - vb.y) / vb.h * ch;
+      fp.style.left = Math.max(8, Math.min(cw - pw - 8, mx - pw / 2)) + 'px';
+      fp.style.top = Math.max(8, Math.min(ch - ph - 8, my + 14 + ph > ch ? my - ph - 14 : my + 14)) + 'px';
+      if (sel) sel.remove();
+      sel = document.createElementNS(NS, 'path'); sel.setAttribute('class', 'fls'); sel.setAttribute('d', 'M' + fk.x[best].toFixed(5) + ' ' + fk.y[best].toFixed(5) + 'h0');
+      $('#lyr-flock').appendChild(sel);
+    });
+  })();
 
   /* earthquakes: USGS M4.5+ in the past day, loaded in the visitor's browser */
   function loadQuakes() {
