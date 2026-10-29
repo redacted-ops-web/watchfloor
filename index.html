@@ -542,10 +542,17 @@ body { margin: 0; }
   function tspan() { return layers.flock ? 0.2 : 6; }
   function tileLon(x, z) { return x / Math.pow(2, z) * 360 - 180; }
   function tileLat(y, z) { var n = Math.PI - 2 * Math.PI * y / Math.pow(2, z); return 180 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n))); }
-  var tileT = 0;
+  var tileT = 0, VK = 'watchfloor.view';
+  function saveView() { try { if (curView && curView.span >= 2) localStorage.setItem(VK, JSON.stringify({ lon: curView.lon, lat: curView.lat, span: curView.span, key: curKey })); } catch (e) { } }
+  function restoreView() {
+    try {
+      var v = JSON.parse(localStorage.getItem(VK) || 'null');
+      if (v && isFinite(v.lon) && isFinite(v.lat) && v.span >= 2 && v.span <= 360 && v.key !== 'world') goTo({ name: 'Custom', lon: v.lon, lat: v.lat, span: v.span }, PRESETS[v.key] ? v.key : null);
+    } catch (e) { }
+  }
   function viewFx() {
     if (!tileRaf) tileRaf = requestAnimationFrame(function () { tileRaf = 0; flockSize(); if (vb.w / 1000 * 360 > tspan()) updateTiles(); stageFx(); updateCones(); });
-    clearTimeout(tileT); tileT = setTimeout(function () { updateTiles(); stageFx(); updateCones(); }, 160);
+    clearTimeout(tileT); tileT = setTimeout(function () { updateTiles(); stageFx(); updateCones(); saveView(); }, 160);
   }
   function flockSize() {
     var span = vb.w / 1000 * 360, w = span >= 20 ? 2.4 : Math.min(16, 2.4 + Math.pow(20 / span, 0.55));
@@ -1468,7 +1475,7 @@ body { margin: 0; }
   var SENS = {}, SENS_ORDER = ['space', 'outages', 'air', 'ships'], sensTimer = 0;
   var SENS_COL = function (n) { return n >= 5 ? 'var(--crit)' : n >= 3 ? 'var(--sev)' : n >= 1 ? 'var(--elev)' : 'var(--muted)'; };
   function sensAgeMs(j) { var t = Date.parse((j && (j.checkedAt || j.updatedAt)) || ''); return t ? Date.now() - t : Infinity; }
-  var SENS_NAMES = { space: 'Space weather', outages: 'Internet outages', air: 'Military aircraft' }, hideSens = {};
+  var SENS_NAMES = { space: 'Space weather', outages: 'Internet outages', air: 'Military aircraft', ships: 'Ship traffic (AIS)' }, hideSens = {};
   try { hideSens = JSON.parse(localStorage.getItem('watchfloor.hidesens') || '{}') || {}; } catch (e) { hideSens = {}; }
   function renderSens() {
     var box = $('#sens'); box.textContent = '';
@@ -1521,7 +1528,19 @@ body { margin: 0; }
       renderSens();
     }).catch(function () { delete SENS.air; renderSens(); });
   }
-  function loadSensors() { loadSpace(); loadOutages(); loadAir(); }
+  function loadShips() {
+    fetch('data/ships.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) {
+      var stale = sensAgeMs(j) > 2 * 3600e3 || j.ok === false, rg = j.regions || [];
+      var low = rg.filter(function (r) { return r.usual != null && r.usual >= 8 && r.n <= r.usual * 0.5; });
+      var hm = rg.filter(function (r) { return r.id === 'hormuz'; })[0];
+      var val = stale ? 'data stale' : (hm ? 'Hormuz ' + hm.n + (hm.usual != null ? ' (usual ' + hm.usual + ')' : '') : rg.length + ' areas') + (low.length ? ' · drop ' + low.length : '');
+      var parts = rg.map(function (r) { return r.name + ' ' + r.n + (r.usual != null ? ' (usual ' + r.usual + ')' : ''); });
+      var t = stale ? 'Ship data is out of date.' : 'Distinct vessels broadcasting AIS in a 90-second listen, by area: ' + parts.join('; ') + '. This is a floor: coverage is volunteer receivers, and ships can switch AIS off. A sharp drop against the usual count is the signal. Source: AISstream.';
+      SENS.ships = { label: 'Ships (AIS)', value: val, color: stale ? 'var(--faint)' : (low.length ? 'var(--sev)' : 'var(--muted)'), title: t };
+      renderSens();
+    }).catch(function () { delete SENS.ships; renderSens(); });
+  }
+  function loadSensors() { loadSpace(); loadOutages(); loadAir(); loadShips(); }
   /* ---------- collapsible sections: tap the arrow to shrink a section to its title; remembered per device ---------- */
   (function () {
     var KEY = 'watchfloor.collapsed', st = {};
@@ -1938,14 +1957,16 @@ body { margin: 0; }
 
   /* search and filters */
   function setupFilters() {
-    var q = $('#f-q'), sv = $('#f-sev'), rg = $('#f-reg'), clr = $('#f-clear'), n = $('#f-n'), t = 0;
+    var q = $('#f-q'), sv = $('#f-sev'), rg = $('#f-reg'), clr = $('#f-clear'), n = $('#f-n'), t = 0, FK = 'watchfloor.filt', wantReg = '';
+    try { var sf = JSON.parse(localStorage.getItem(FK) || '{}') || {}; if (sf.sev && sv.querySelector('option[value="' + sf.sev + '"]')) { sv.value = String(sf.sev); FIL.sev = Number(sv.value) || 1; } wantReg = String(sf.reg || ''); } catch (e) { }
     function regions() {
       var set = {}; KINDS.forEach(function (k) { (data[k] || []).forEach(function (it) { var r = String(it.region || it.sector || ''); if (r) set[r] = 1; }); });
-      var cur = rg.value; rg.innerHTML = '<option value="">All regions</option>' + Object.keys(set).sort().map(function (r) { return '<option>' + esc(r) + '</option>'; }).join('');
-      rg.value = set[cur] ? cur : '';
+      var cur = rg.value || wantReg; if (Object.keys(set).length) wantReg = ''; rg.innerHTML = '<option value="">All regions</option>' + Object.keys(set).sort().map(function (r) { return '<option>' + esc(r) + '</option>'; }).join('');
+      rg.value = set[cur] ? cur : ''; FIL.reg = rg.value;
     }
     function apply() {
       FIL.q = q.value.trim().toLowerCase(); FIL.sev = Number(sv.value) || 1; FIL.reg = rg.value;
+      try { localStorage.setItem(FK, JSON.stringify({ sev: sv.value, reg: rg.options.length > 1 ? rg.value : wantReg })); } catch (e) { }
       clr.hidden = !filtering();
       var c = 0, tot = 0; KINDS.forEach(function (k) { (data[k] || []).forEach(function (it) { tot++; if (passes(k, it)) c++; }); });
       n.textContent = filtering() ? c + ' of ' + tot + ' items match' : '';
@@ -1959,7 +1980,7 @@ body { margin: 0; }
 
   /* ---------- boot ---------- */
   function tickClock() { var d = new Date(); $('#clock').textContent = 'UTC ' + d.toISOString().slice(11, 19); }
-  buildGrid(); buildRegions(); setupFilters(); setupShare(); setupAlerts(); applyHash(); loadQuakes(); setInterval(loadQuakes, 900000); loadNatural(); setInterval(loadNatural, 1800000); loadTimeline(); setInterval(loadTimeline, 600000); S2.init(); setupAnalyst(); setupPlayer(); loadPizza(); setInterval(loadPizza, 600000); loadSensors(); setInterval(loadSensors, 600000); loadFeeds(); setInterval(loadFeeds, 300000);
+  buildGrid(); buildRegions(); setupFilters(); setupShare(); setupAlerts(); applyHash(); if (!location.hash) restoreView(); loadQuakes(); setInterval(loadQuakes, 900000); loadNatural(); setInterval(loadNatural, 1800000); loadTimeline(); setInterval(loadTimeline, 600000); S2.init(); setupAnalyst(); setupPlayer(); loadPizza(); setInterval(loadPizza, 600000); loadSensors(); setInterval(loadSensors, 600000); loadFeeds(); setInterval(loadFeeds, 300000);
   tickClock(); setInterval(tickClock, 1000); setInterval(renderMeta, 60000);
   $('#layers').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
