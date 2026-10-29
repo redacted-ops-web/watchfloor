@@ -124,6 +124,8 @@ h1, h2, h3, h4 { margin: 0; text-wrap: balance; }
 .lyr button[data-l="incidents"] .dot { clip-path: polygon(50% 0, 100% 100%, 0 100%); }
 .lyr button[data-l="nat"] .dot { border-radius: 50%; background: var(--c); opacity: .8; }
 .lyr button[data-l="quakes"] .dot { border-radius: 50%; background: transparent; border: 1.5px solid var(--c); }
+.lyr button[data-l="flock"] .dot { border-radius: 50%; background: var(--c); width: 5px; height: 5px; margin: 0 8px 1px 1px; }
+.fl { fill: none; stroke: #8b5cf6; stroke-opacity: .6; stroke-width: 2.4; stroke-linecap: round; vector-effect: non-scaling-stroke; }
 .lyr button[aria-pressed="false"] { opacity: .55; }
 .map-wrap { position: relative; aspect-ratio: 2.25 / 1; min-height: 240px; background: var(--sea); border-radius: 0 0 8px 8px; overflow: hidden; touch-action: pan-y; cursor: grab; }
 .map-wrap.zoomed { touch-action: none; }
@@ -332,6 +334,7 @@ body { margin: 0; }
           <button data-l="incidents" aria-pressed="true" style="--c:var(--elev)"><span class="dot"></span>Cyber</button>
           <button data-l="quakes" aria-pressed="false" style="--c:var(--faint)"><span class="dot"></span>Quakes</button>
           <button data-l="nat" aria-pressed="false" style="--c:var(--sev)"><span class="dot"></span>Fires and storms</button>
+          <button data-l="flock" aria-pressed="false" style="--c:#8b5cf6"><span class="dot"></span>Flock cameras (US)</button>
         </div>
       </div>
       <div class="map-wrap" id="mapwrap">
@@ -341,6 +344,7 @@ body { margin: 0; }
           <g id="lyr-s2"></g>
           <g id="lyr-quakes" style="display:none"></g>
           <g id="lyr-nat" style="display:none"></g>
+          <g id="lyr-flock" style="display:none"></g>
           <g id="lyr-incidents"></g>
           <g id="lyr-chokepoints"></g>
           <g id="lyr-hotspots"></g>
@@ -435,7 +439,7 @@ body { margin: 0; }
 
   var data = { hotspots: null, chokepoints: null, incidents: null };
   var meta = null;
-  var layers = { hotspots: true, chokepoints: true, incidents: true, quakes: false, nat: false };
+  var layers = { hotspots: true, chokepoints: true, incidents: true, quakes: false, nat: false, flock: false }, flockLoaded = false;
   var openRows = {};
   var selected = null;
   var canEdit = false, noDb = false, isOwner = false, dbRef = null;
@@ -1725,6 +1729,20 @@ body { margin: 0; }
     }).catch(function () { });
   }
 
+  /* Flock cameras: community-mapped ALPRs from OpenStreetMap, drawn as one path and loaded the first time the layer is switched on */
+  function loadFlock() {
+    if (flockLoaded) return; flockLoaded = true;
+    var st = $('#rstatus');
+    function say(t) { st.textContent = t; st.hidden = false; clearTimeout(loadFlock.t); loadFlock.t = setTimeout(function () { st.hidden = true; }, 12000); }
+    fetch('data/flock.json', { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) {
+      var p = j.pts || [], d = [], i;
+      for (i = 0; i + 1 < p.length; i += 2) d.push('M' + X(p[i + 1]).toFixed(1) + ' ' + Y(p[i]).toFixed(1) + 'h0');
+      var el = document.createElementNS(NS, 'path'); el.setAttribute('class', 'fl'); el.setAttribute('d', d.join(''));
+      var g = $('#lyr-flock'); g.textContent = ''; g.appendChild(el);
+      say('Flock cameras: ' + (j.n || p.length / 2).toLocaleString() + ' mapped in the US. Community-mapped on OpenStreetMap, so real numbers are higher. Data: OpenStreetMap contributors (ODbL), updated ' + String(j.updatedAt || '').slice(0, 10) + '.');
+    }).catch(function () { flockLoaded = false; say('Flock camera data is not available yet.'); });
+  }
+
   /* earthquakes: USGS M4.5+ in the past day, loaded in the visitor's browser */
   function loadQuakes() {
     fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson').then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) {
@@ -1804,6 +1822,7 @@ body { margin: 0; }
     var b = e.target.closest('button'); if (!b) return;
     var l = b.dataset.l; layers[l] = !layers[l]; b.setAttribute('aria-pressed', layers[l]);
     $('#lyr-' + l).style.display = layers[l] ? '' : 'none';
+    if (l === 'flock' && layers[l]) loadFlock();
     if (!layers[l] && selected && selected.kind === l) hidePop();
   });
   if (window.ResizeObserver) new ResizeObserver(measure).observe(mapWrap); else window.addEventListener('resize', measure);
