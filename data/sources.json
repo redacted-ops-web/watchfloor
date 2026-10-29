@@ -167,5 +167,19 @@
   "type": "rss",
   "url": "https://maritime-executive.com/articles.rss",
   "cat": "Shipping"
+ },
+ {
+  "id": "who",
+  "name": "WHO News",
+  "type": "rss",
+  "url": "https://www.who.int/rss-feeds/news-english.xml",
+  "cat": "Health"
+ },
+ {
+  "id": "cdc",
+  "name": "CDC Newsroom",
+  "type": "rss",
+  "url": "https://tools.cdc.gov/api/v2/resources/media/132608.rss",
+  "cat": "Health"
  }
 ]
