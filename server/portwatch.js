@@ -1,6 +1,6 @@
 // INTSUM chokepoint transit collector (IMF PortWatch daily chokepoint data, public ArcGIS service, no key).
 // Satellite-derived daily vessel transit counts, published with a lag of days. Run from repo root: node server/portwatch.js
-// Writes data/portwatch.json: per chokepoint, latest 7-day average vs the average of the earlier days in a 120-day window.
+// Writes data/portwatch.json: per chokepoint, latest 7-day average vs the average of the earlier days in a roughly 13-month window.
 const fs = require('fs');
 const OUT = 'data/portwatch.json';
 const BASE = 'https://services9.arcgis.com/weJ1QsnbMYJlCHdG/ArcGIS/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query';
@@ -41,12 +41,14 @@ async function main() {
     const names = (await q({ where: '1=1', outFields: 'portname', returnDistinctValues: 'true' })).features.map(f => f.attributes.portname);
     const pick = WANT.map(([id, re]) => ({ id, name: names.find(n => re.test(n)) })).filter(x => x.name);
     if (!pick.length) throw new Error('no chokepoint names matched: ' + names.slice(0, 8).join('|'));
-    const since = new Date(now - 120 * 864e5).toISOString().slice(0, 10) + ' 00:00:00';
-    const where = "portname IN (" + pick.map(p => "'" + p.name.replace(/'/g, "''") + "'").join(',') + ") AND date >= timestamp '" + since + "'";
-    const j = await q({ where, outFields: 'portname,date,n_total,n_tanker', orderByFields: 'date DESC', resultRecordCount: '2000' });
-    const rows = j.features.map(f => f.attributes), ports = [];
-    pick.forEach(p => { const s = summarize(rows.filter(r => r.portname === p.name)); if (s) ports.push(Object.assign({ id: p.id, name: p.name }, s)); });
-    if (!ports.length) throw new Error('no usable rows (' + rows.length + ') sample ' + JSON.stringify(rows[0]));
+    const since = new Date(now - 400 * 864e5).toISOString().slice(0, 10) + ' 00:00:00', ports = []; let sample = null;
+    for (const p of pick) {
+      const where = "portname = '" + p.name.replace(/'/g, "''") + "' AND date >= timestamp '" + since + "'";
+      const j = await q({ where, outFields: 'portname,date,n_total,n_tanker', orderByFields: 'date DESC', resultRecordCount: '1000' });
+      const rows = j.features.map(f => f.attributes); sample = sample || rows[0];
+      const s = summarize(rows); if (s) ports.push(Object.assign({ id: p.id, name: p.name }, s));
+    }
+    if (!ports.length) throw new Error('no usable rows, sample ' + JSON.stringify(sample));
     res = { ok: true, checkedAt, ports };
   } catch (e) { res = Object.assign(old || { ports: [] }, { ok: false, checkedAt, error: String(e.message || e) }); }
   fs.writeFileSync(OUT + '.tmp', JSON.stringify(res)); fs.renameSync(OUT + '.tmp', OUT); fs.chmodSync(OUT, 0o644);

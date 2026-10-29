@@ -1548,7 +1548,7 @@ body { margin: 0; }
       var pc = function (p) { return p.pct == null ? '' : (p.pct > 0 ? '+' : '') + p.pct + '%'; };
       var val = stale ? 'data stale' : hz.name.replace(/^Strait of /, '') + ' ' + Math.round(hz.avg7) + '/day ' + pc(hz);
       var lvl = hz.pct == null ? 0 : hz.pct <= -50 ? 5 : hz.pct <= -25 ? 3 : hz.pct <= -10 ? 1 : 0;
-      var t = stale ? 'Transit data is out of date.' : 'Vessels crossing each chokepoint per day, last 7 days, against the earlier average (data through ' + hz.asOf + '): ' + ps.map(function (p) { return p.name + ' ' + p.avg7 + '/day vs ' + p.base + ' (' + pc(p) + ', tankers ' + p.tanker7 + ' vs ' + p.tankerBase + ')'; }).join('; ') + '. Satellite-derived and published with a delay of several days. Source: IMF PortWatch.';
+      var t = stale ? 'Transit data is out of date.' : 'Vessels crossing each chokepoint per day, last 7 days, against the average of the prior year or so, which already includes recent disruption, so the true drop from pre-crisis levels is larger (data through ' + hz.asOf + '): ' + ps.map(function (p) { return p.name + ' ' + p.avg7 + '/day vs ' + p.base + ' (' + pc(p) + ', tankers ' + p.tanker7 + ' vs ' + p.tankerBase + ')'; }).join('; ') + '. Satellite-derived and published with a delay of several days. Source: IMF PortWatch.';
       SENS.transits = { label: 'Transits', value: val, color: stale ? 'var(--faint)' : SENS_COL(lvl), title: t };
       renderSens();
     }).catch(function () { delete SENS.transits; renderSens(); });
