@@ -284,6 +284,9 @@ footer ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 12.5p
 .sens { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; }
 .sn { font: 500 12px var(--font-mono, monospace); letter-spacing: .02em; display: inline-flex; gap: 8px; align-items: baseline; padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--muted); cursor: pointer; }
 .sn b { font-weight: 700; }
+.sn[aria-pressed="true"] { border-color: var(--accent); color: var(--fg); }
+.sensd { margin: 8px 0 0; padding: 10px 14px; border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 6px; background: var(--panel); font-size: 13px; line-height: 1.45; color: var(--fg); }
+.sensd b { display: block; margin-bottom: 4px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
 .cx { background: transparent; border: 0; color: var(--muted); cursor: pointer; font-size: 15px; line-height: 1; padding: 2px 8px 2px 0; margin: 0; }
 .cx:hover { color: var(--fg); }
 .card > h2 .cx { padding-left: 0; }
@@ -326,6 +329,7 @@ body { margin: 0; }
 
   <section class="strip" id="strip" aria-label="Posture"></section>
   <div class="sens" id="sens" aria-label="Live sensors" hidden></div>
+  <div class="sensd" id="sensd" hidden></div>
   <div class="filters" id="filters" role="search">
     <input type="search" id="f-q" placeholder="Search hotspots, chokepoints, incidents and news" aria-label="Search" autocomplete="off">
     <select id="f-sev" aria-label="Severity"><option value="1">All severities</option><option value="3">Elevated and up</option><option value="4">Severe and critical</option><option value="5">Critical only</option></select>
@@ -1472,7 +1476,7 @@ body { margin: 0; }
   }
 
   /* ---------- live sensors: small chips fed by server collectors (space weather now; outages, aircraft, ships as added) ---------- */
-  var SENS = {}, SENS_ORDER = ['space', 'outages', 'air', 'ships', 'transits'], sensTimer = 0;
+  var sensOpen = '', SENS = {}, SENS_ORDER = ['space', 'outages', 'air', 'ships', 'transits'], sensTimer = 0;
   var SENS_COL = function (n) { return n >= 5 ? 'var(--crit)' : n >= 3 ? 'var(--sev)' : n >= 1 ? 'var(--elev)' : 'var(--muted)'; };
   function sensAgeMs(j) { var t = Date.parse((j && (j.checkedAt || j.updatedAt)) || ''); return t ? Date.now() - t : Infinity; }
   var SENS_NAMES = { space: 'Space weather', outages: 'Internet outages', air: 'Military aircraft', ships: 'Ship traffic (AIS)', transits: 'Chokepoint transits' }, hideSens = {};
@@ -1485,10 +1489,14 @@ body { margin: 0; }
       var a = document.createElement('span'); a.textContent = s.label;
       var b = document.createElement('b'); b.textContent = s.value; b.style.color = s.color;
       c.appendChild(a); c.appendChild(b);
-      c.addEventListener('click', function () { var st = $('#rstatus'); st.textContent = s.label + ': ' + (s.title || s.value); st.hidden = false; clearTimeout(sensTimer); sensTimer = setTimeout(function () { st.hidden = true; }, 14000); });
+      c.setAttribute('aria-pressed', sensOpen === k ? 'true' : 'false');
+      c.addEventListener('click', function () { sensOpen = sensOpen === k ? '' : k; renderSens(); });
       box.appendChild(c);
     });
     box.hidden = !box.children.length;
+    var d = $('#sensd'), cur = sensOpen && SENS[sensOpen] && !hideSens[sensOpen] ? SENS[sensOpen] : null;
+    if (!cur) { d.hidden = true; return; }
+    d.textContent = ''; var hb = document.createElement('b'); hb.textContent = cur.label; d.appendChild(hb); d.appendChild(document.createTextNode(cur.title || cur.value)); d.hidden = false;
   }
   function loadSpace() {
     fetch('data/space.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) {
