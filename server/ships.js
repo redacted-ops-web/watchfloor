@@ -20,15 +20,16 @@ async function main() {
   if (!KEY) { console.log(new Date().toISOString() + ' ships skipped (no key)'); return; }
   if (typeof WebSocket === 'undefined') { console.log(new Date().toISOString() + ' ships FAIL no WebSocket in this Node'); return; }
   const now = Date.now(), checkedAt = new Date(now).toISOString(), seen = {}; REGIONS.forEach(r => { seen[r.id] = new Set(); });
-  let msgs = 0, err = null;
+  let msgs = 0, raw = 0, err = null, firstRaw = '', opened = false, closeInfo = '';
   await new Promise(resolve => {
-    const ws = new WebSocket('wss://stream.aisstream.io/v0/stream');
+    const ws = new WebSocket('wss://stream.aisstream.io/v0/stream'); ws.binaryType = 'arraybuffer';
     const done = () => { try { ws.close(); } catch (e) { /* ignore */ } resolve(); };
     const t = setTimeout(done, LISTEN_MS);
-    ws.onopen = () => ws.send(JSON.stringify({ APIKey: KEY, BoundingBoxes: REGIONS.map(r => [[r.box[0], r.box[1]], [r.box[2], r.box[3]]]), FilterMessageTypes: ['PositionReport'] }));
+    ws.onopen = () => { opened = true; ws.send(JSON.stringify({ APIKey: KEY, BoundingBoxes: REGIONS.map(r => [[r.box[0], r.box[1]], [r.box[2], r.box[3]]]), FilterMessageTypes: ['PositionReport'] })); };
     ws.onmessage = ev => {
       try {
-        const m = JSON.parse(typeof ev.data === 'string' ? ev.data : Buffer.from(ev.data).toString());
+        raw++; const txt = typeof ev.data === 'string' ? ev.data : new TextDecoder().decode(ev.data); if (!firstRaw) firstRaw = txt.slice(0, 160).replace(/"APIKey"[^,}]*/g, '');
+        const m = JSON.parse(txt);
         if (m.error) { err = String(m.error); clearTimeout(t); return done(); }
         const p = m.Message && m.Message.PositionReport, mm = m.MetaData; if (!p || !mm) return;
         const lat = Number(p.Latitude != null ? p.Latitude : mm.latitude), lon = Number(p.Longitude != null ? p.Longitude : mm.longitude), id = mm.MMSI || p.UserID;
@@ -36,8 +37,8 @@ async function main() {
         REGIONS.forEach(r => { const b = r.box; if (lat >= b[0] && lat <= b[2] && lon >= b[1] && lon <= b[3]) seen[r.id].add(id); });
       } catch (e) { /* skip bad frame */ }
     };
-    ws.onerror = () => { err = err || 'websocket error'; clearTimeout(t); done(); };
-    ws.onclose = () => { clearTimeout(t); resolve(); };
+    ws.onerror = e => { err = err || 'websocket error ' + String((e && e.message) || ''); clearTimeout(t); done(); };
+    ws.onclose = e => { closeInfo = 'close ' + (e && e.code) + ' ' + (e && e.reason || ''); clearTimeout(t); resolve(); };
   });
   let old = null; try { old = JSON.parse(fs.readFileSync(OUT, 'utf8')); } catch (e) { /* none */ }
   let hist = []; try { hist = JSON.parse(fs.readFileSync(HIST, 'utf8')); } catch (e) { /* none */ }
@@ -47,7 +48,7 @@ async function main() {
     const base = {}; REGIONS.forEach(r => { const v = hist.map(h => h.r && h.r[r.id]).filter(v => typeof v === 'number'); base[r.id] = v.length >= 24 ? median(v) : null; });
     res = { ok: true, checkedAt, msgs, regions: REGIONS.map(r => ({ id: r.id, name: r.name, n: seen[r.id].size, usual: base[r.id] })) };
     fs.writeFileSync(HIST + '.tmp', JSON.stringify(hist)); fs.renameSync(HIST + '.tmp', HIST); fs.chmodSync(HIST, 0o644);
-  } else res = Object.assign(old || { regions: [] }, { ok: false, checkedAt, error: err || 'no messages received' });
+  } else res = Object.assign(old || { regions: [] }, { ok: false, checkedAt, error: err || ('no messages received (opened=' + opened + ' raw=' + raw + ' ' + closeInfo + ' first=' + firstRaw + ')') });
   fs.writeFileSync(OUT + '.tmp', JSON.stringify(res)); fs.renameSync(OUT + '.tmp', OUT); fs.chmodSync(OUT, 0o644);
   console.log(checkedAt + ' ships ' + (res.ok ? 'OK msgs=' + msgs + ' ' + res.regions.map(r => r.id + '=' + r.n).join(' ') : 'FAIL ' + res.error));
 }
