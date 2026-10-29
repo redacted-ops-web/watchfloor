@@ -133,6 +133,13 @@ h1, h2, h3, h4 { margin: 0; text-wrap: balance; }
 .osmc { position: absolute; left: 6px; bottom: 4px; z-index: 3; font-size: 10.5px; color: #333; background: rgba(255,255,255,.75); padding: 1px 5px; border-radius: 3px; }
 .osmc a { color: inherit; }
 .cn { fill: #8b5cf6; fill-opacity: .26; stroke: #7c3aed; stroke-opacity: .75; stroke-width: 1; vector-effect: non-scaling-stroke; pointer-events: none; }
+.lyr button[data-l="air"] .dot { clip-path: polygon(50% 0, 100% 100%, 50% 75%, 0 100%); }
+.lyr button[data-l="ships"] .dot { clip-path: polygon(50% 0, 100% 100%, 0 100%); transform: rotate(180deg) scale(.9); }
+.tk { cursor: pointer; }
+.tk path { stroke: var(--bg); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.tk.air path { fill: #0ea5e9; } .tk.ship path { fill: #14b8a6; }
+.tk:hover path { stroke: var(--fg); }
+.pop .tkm { color: var(--muted); font-size: 12.5px; margin: 0 0 4px; }
 .fls { fill: none; stroke: #8b5cf6; stroke-opacity: .9; stroke-width: 14; stroke-linecap: round; vector-effect: non-scaling-stroke; pointer-events: none; }
 .pop .fkm { color: var(--muted); font-size: 12.5px; margin: 0 0 6px; }
 .fl { fill: none; stroke: #8b5cf6; stroke-opacity: .6; stroke-width: 2.4; stroke-linecap: round; vector-effect: non-scaling-stroke; }
@@ -349,6 +356,8 @@ body { margin: 0; }
           <button data-l="quakes" aria-pressed="false" style="--c:var(--faint)"><span class="dot"></span>Quakes</button>
           <button data-l="nat" aria-pressed="false" style="--c:var(--sev)"><span class="dot"></span>Fires and storms</button>
           <button data-l="flock" aria-pressed="false" style="--c:#8b5cf6"><span class="dot"></span>Flock cameras (US)</button>
+          <button data-l="air" aria-pressed="false" style="--c:#0ea5e9"><span class="dot"></span>Military aircraft</button>
+          <button data-l="ships" aria-pressed="false" style="--c:#14b8a6"><span class="dot"></span>Ships (AIS)</button>
         </div>
       </div>
       <div class="map-wrap" id="mapwrap">
@@ -365,6 +374,8 @@ body { margin: 0; }
           <g id="lyr-incidents"></g>
           <g id="lyr-chokepoints"></g>
           <g id="lyr-hotspots"></g>
+          <g id="lyr-ships" style="display:none"></g>
+          <g id="lyr-air" style="display:none"></g>
         </svg>
         <div class="zoomctl"><button type="button" id="zin" aria-label="Zoom in">+</button><button type="button" id="zout" aria-label="Zoom out">&minus;</button></div>
         <div class="plcs" id="plcs" hidden></div>
@@ -372,6 +383,7 @@ body { margin: 0; }
         <div class="pop" id="pop" hidden></div>
         <div class="pop" id="s2pop" hidden></div>
         <div class="pop" id="fkpop" hidden></div>
+        <div class="pop" id="trkpop" hidden></div>
         <div class="map-empty" id="mapempty">Loading markers…</div>
       </div>
       <div class="legend">
@@ -459,7 +471,7 @@ body { margin: 0; }
 
   var data = { hotspots: null, chokepoints: null, incidents: null };
   var meta = null;
-  var fk = null, flockW = 2.4, layers = { hotspots: true, chokepoints: true, incidents: true, quakes: false, nat: false, flock: false }, flockLoaded = false;
+  var trkNodes = { air: [], ships: [] }, fk = null, flockW = 2.4, layers = { hotspots: true, chokepoints: true, incidents: true, quakes: false, nat: false, flock: false, air: false, ships: false }, flockLoaded = false;
   var openRows = {};
   var selected = null;
   var canEdit = false, noDb = false, isOwner = false, dbRef = null;
@@ -768,6 +780,7 @@ body { margin: 0; }
     for (var i = 0; i < markers.length; i++) markers[i].g.setAttribute('transform', 'translate(' + markers[i].x + ' ' + markers[i].y + ') scale(' + k + ')');
     if (typeof S2 !== 'undefined' && S2) S2.scale();
     for (var q = 0; q < quakeNodes.length; q++) quakeNodes[q].g.setAttribute('transform', 'translate(' + quakeNodes[q].x + ' ' + quakeNodes[q].y + ') scale(' + k + ')');
+    ['air', 'ships'].forEach(function (kk) { var a = trkNodes[kk]; for (var u = 0; u < a.length; u++) a[u].g.setAttribute('transform', 'translate(' + a[u].x + ' ' + a[u].y + ') scale(' + k + ')'); });
     for (var w = 0; w < natNodes.length; w++) natNodes[w].g.setAttribute('transform', 'translate(' + natNodes[w].x + ' ' + natNodes[w].y + ') scale(' + k + ')');
   }
   function markSelected() {
@@ -1894,6 +1907,58 @@ body { margin: 0; }
     }).catch(function () { flockLoaded = false; say('Flock camera data is not available yet.'); });
   }
 
+  /* military aircraft and ships: snapshot layers from the collectors; tap one for its navigation data */
+  (function () {
+    var tp = $('#trkpop'), NAV = { 0: 'Under way (engine)', 1: 'At anchor', 2: 'Not under command', 3: 'Restricted manoeuvrability', 4: 'Constrained by draught', 5: 'Moored', 6: 'Aground', 7: 'Fishing', 8: 'Under way (sailing)', 15: 'Not defined' };
+    var LOADED = { air: 0, ships: 0 };
+    function hide() { tp.hidden = true; }
+    mapWrap.addEventListener('pointerdown', function (e) { if (!e.target.closest || !e.target.closest('#trkpop')) hide(); });
+    function show(node, html) {
+      tp.innerHTML = '<button class="x" aria-label="Close">\u00d7</button>' + html; tp.hidden = false; tp.querySelector('.x').addEventListener('click', hide);
+      var pw = Math.min(300, cw - 16), ph = tp.offsetHeight || 150, mx = (node.x - vb.x) / vb.w * cw, my = (node.y - vb.y) / vb.h * ch;
+      tp.style.left = Math.max(8, Math.min(cw - pw - 8, mx - pw / 2)) + 'px';
+      tp.style.top = Math.max(8, Math.min(ch - ph - 8, my + 16 + ph > ch ? my - ph - 16 : my + 16)) + 'px';
+    }
+    function shape(kind, deg) {
+      var g = document.createElementNS(NS, 'g'), p = document.createElementNS(NS, 'path');
+      p.setAttribute('d', kind === 'air' ? 'M0,-8L5,6L0,3.5L-5,6Z' : 'M0,-7L4.5,6L-4.5,6Z'); p.setAttribute('transform', 'rotate(' + (deg || 0) + ')');
+      g.setAttribute('class', 'tk ' + (kind === 'air' ? 'air' : 'ship')); g.appendChild(p); return g;
+    }
+    function when(iso) { return String(iso || '').slice(11, 16) + ' UTC'; }
+    function build(kind, j) {
+      var root = $('#lyr-' + kind); root.textContent = ''; trkNodes[kind] = [];
+      var snap = 'Snapshot ' + when(j.checkedAt) + ', not live.';
+      (kind === 'air' ? j.ac || [] : j.ships || []).forEach(function (it) {
+        var lat, lon, deg, html;
+        if (kind === 'air') {
+          lat = it.lat; lon = it.lon; deg = it.trk;
+          html = '<span class="rg">Military aircraft</span><h3>' + esc(it.fl || it.r || it.hex) + '</h3>'
+            + '<p class="tkm">' + esc([it.t, it.desc].filter(Boolean).join(' \u00b7 ') || 'Type not listed') + (it.op ? ' \u00b7 ' + esc(it.op) : '') + '</p>'
+            + '<p class="tkm">Altitude ' + (it.alt === 'ground' ? 'on ground' : it.alt != null ? it.alt.toLocaleString() + ' ft' : 'n/a') + ' \u00b7 Speed ' + (it.gs != null ? it.gs + ' kt' : 'n/a') + ' \u00b7 Track ' + (it.trk != null ? it.trk + '\u00b0' : 'n/a') + (it.sq ? ' \u00b7 Squawk ' + esc(it.sq) : '') + '</p>'
+            + '<p class="tkm">' + lat.toFixed(3) + ', ' + lon.toFixed(3) + (it.r ? ' \u00b7 Reg ' + esc(it.r) : '') + ' \u00b7 ' + snap + '</p>'
+            + '<div class="acts"><a class="top-btn" target="_blank" rel="noopener" href="https://adsb.lol/?icao=' + encodeURIComponent(it.hex) + '">Live on adsb.lol</a></div>';
+        } else {
+          lat = it[2]; lon = it[3]; deg = it[6] != null ? it[6] : it[5];
+          html = '<span class="rg">Ship (AIS)</span><h3>' + esc(it[1] || 'Unnamed vessel') + '</h3>'
+            + '<p class="tkm">MMSI ' + esc(it[0]) + ' \u00b7 ' + esc(NAV[it[7]] || 'Status not reported') + '</p>'
+            + '<p class="tkm">Speed ' + (it[4] != null ? it[4] + ' kn' : 'n/a') + ' \u00b7 Course ' + (it[5] != null ? it[5] + '\u00b0' : 'n/a') + ' \u00b7 Heading ' + (it[6] != null ? it[6] + '\u00b0' : 'n/a') + '</p>'
+            + '<p class="tkm">' + lat.toFixed(3) + ', ' + lon.toFixed(3) + ' \u00b7 ' + snap + '</p>'
+            + '<div class="acts"><a class="top-btn" target="_blank" rel="noopener" href="https://www.marinetraffic.com/en/ais/details/ships/mmsi:' + encodeURIComponent(it[0]) + '">MarineTraffic</a></div>';
+        }
+        if (!isFinite(lat) || !isFinite(lon)) return;
+        var g = shape(kind, deg), node = { g: g, x: X(lon), y: Y(lat) };
+        g.addEventListener('click', function (e) { e.stopPropagation(); show(node, html); });
+        root.appendChild(g); trkNodes[kind].push(node);
+      });
+      scaleMarkers();
+    }
+    function load(kind) {
+      fetch(kind === 'air' ? 'data/air-pos.json' : 'data/ships-pos.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) { LOADED[kind] = Date.now(); build(kind, j); }).catch(function () { });
+    }
+    window.loadTrack = function (kind) { if (Date.now() - LOADED[kind] > 60000) load(kind); };
+    setInterval(function () { ['air', 'ships'].forEach(function (k) { if (layers[k]) load(k); }); }, 300000);
+  })();
+
   /* tap a Flock camera (zoomed in): nearest dot within a few pixels, then details and links */
   (function () {
     var fp = $('#fkpop'), sel = null;
@@ -1902,7 +1967,7 @@ body { margin: 0; }
     mapWrap.addEventListener('pointerdown', function (e) { if (!e.target.closest || !e.target.closest('#fkpop')) hide(); });
     mapWrap.addEventListener('click', function (e) {
       if (!fk || !layers.flock || suppressClick) return;
-      if (e.target.closest && e.target.closest('.pop, .zoomctl, button, #lyr-hotspots, #lyr-chokepoints, #lyr-incidents, #lyr-s2')) return;
+      if (e.target.closest && e.target.closest('.pop, .zoomctl, button, #lyr-hotspots, #lyr-chokepoints, #lyr-incidents, #lyr-s2, #lyr-air, #lyr-ships')) return;
       if (vb.w > 1000 * 40 / 360) return;
       var r = mapWrap.getBoundingClientRect(), px = e.clientX - r.left, py = e.clientY - r.top;
       var sx = vb.x + px / cw * vb.w, sy = vb.y + py / ch * vb.h, rad = Math.max(14, flockW / 2 + 6) / cw * vb.w, best = -1, bd = rad * rad, i, dx, dy, dd;
@@ -2008,6 +2073,7 @@ body { margin: 0; }
     var l = b.dataset.l; layers[l] = !layers[l]; b.setAttribute('aria-pressed', layers[l]);
     $('#lyr-' + l).style.display = layers[l] ? '' : 'none';
     if (l === 'flock') { if (layers[l]) loadFlock(); viewFx(); }
+    if ((l === 'air' || l === 'ships') && layers[l]) window.loadTrack(l);
     if (!layers[l] && selected && selected.kind === l) hidePop();
   });
   if (window.ResizeObserver) new ResizeObserver(measure).observe(mapWrap); else window.addEventListener('resize', measure);

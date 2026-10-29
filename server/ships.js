@@ -20,6 +20,7 @@ async function main() {
   if (!KEY) { console.log(new Date().toISOString() + ' ships skipped (no key)'); return; }
   if (typeof WebSocket === 'undefined') { console.log(new Date().toISOString() + ' ships FAIL no WebSocket in this Node'); return; }
   const now = Date.now(), checkedAt = new Date(now).toISOString(), seen = {}; REGIONS.forEach(r => { seen[r.id] = new Set(); });
+  const track = {};
   let msgs = 0, raw = 0, err = null, firstRaw = '', opened = false, closeInfo = '';
   await new Promise(resolve => {
     const ws = new WebSocket('wss://stream.aisstream.io/v0/stream'); ws.binaryType = 'arraybuffer';
@@ -34,6 +35,7 @@ async function main() {
         const p = m.Message && m.Message.PositionReport, mm = m.MetaData; if (!p || !mm) return;
         const lat = Number(p.Latitude != null ? p.Latitude : mm.latitude), lon = Number(p.Longitude != null ? p.Longitude : mm.longitude), id = mm.MMSI || p.UserID;
         if (!isFinite(lat) || !isFinite(lon) || !id) return; msgs++;
+        track[id] = [id, String(mm.ShipName || '').trim().slice(0, 30), Math.round(lat * 1e4) / 1e4, Math.round(lon * 1e4) / 1e4, typeof p.Sog === 'number' ? Math.round(p.Sog * 10) / 10 : null, typeof p.Cog === 'number' ? Math.round(p.Cog) : null, typeof p.TrueHeading === 'number' && p.TrueHeading < 360 ? p.TrueHeading : null, typeof p.NavigationalStatus === 'number' ? p.NavigationalStatus : null];
         REGIONS.forEach(r => { const b = r.box; if (lat >= b[0] && lat <= b[2] && lon >= b[1] && lon <= b[3]) seen[r.id].add(id); });
       } catch (e) { /* skip bad frame */ }
     };
@@ -47,6 +49,7 @@ async function main() {
     hist = hist.filter(x => x && now - Date.parse(x.t) < 7 * 864e5); hist.push({ t: checkedAt, r: Object.fromEntries(REGIONS.map(r => [r.id, seen[r.id].size])) });
     const base = {}; REGIONS.forEach(r => { const v = hist.map(h => h.r && h.r[r.id]).filter(v => typeof v === 'number'); base[r.id] = v.length >= 24 ? median(v) : null; });
     res = { ok: true, checkedAt, msgs, regions: REGIONS.map(r => ({ id: r.id, name: r.name, n: seen[r.id].size, usual: base[r.id] })) };
+    fs.writeFileSync('data/ships-pos.json.tmp', JSON.stringify({ checkedAt, ships: Object.values(track) })); fs.renameSync('data/ships-pos.json.tmp', 'data/ships-pos.json'); fs.chmodSync('data/ships-pos.json', 0o644);
     fs.writeFileSync(HIST + '.tmp', JSON.stringify(hist)); fs.renameSync(HIST + '.tmp', HIST); fs.chmodSync(HIST, 0o644);
   } else res = Object.assign(old || { regions: [] }, { ok: false, checkedAt, error: err || ('no messages received (opened=' + opened + ' raw=' + raw + ' ' + closeInfo + ' first=' + firstRaw + ')') });
   fs.writeFileSync(OUT + '.tmp', JSON.stringify(res)); fs.renameSync(OUT + '.tmp', OUT); fs.chmodSync(OUT, 0o644);

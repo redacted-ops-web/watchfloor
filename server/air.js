@@ -29,14 +29,14 @@ async function main() {
   const now = Date.now(), checkedAt = new Date(now).toISOString();
   let old = null; try { old = JSON.parse(fs.readFileSync(OUT, 'utf8')); } catch (e) { /* none */ }
   let hist = []; try { hist = JSON.parse(fs.readFileSync(HIST, 'utf8')); } catch (e) { /* none */ }
-  let c, err;
+  let c, err, ac = [];
   for (let i = 0; i < 2 && !c; i++) {
     try {
       const r = await fetch(URL, { headers: { 'User-Agent': 'intsum-dashboard/1.0', Accept: 'application/json' }, signal: AbortSignal.timeout(30000) });
       if (!r.ok) throw new Error('HTTP ' + r.status);
       const j = await r.json();
       if (!j || !Array.isArray(j.ac)) throw new Error('unrecognised format');
-      c = count(j.ac);
+      c = count(j.ac); ac = j.ac;
     } catch (e) { err = String(e.message || e); await new Promise(s => setTimeout(s, 3000)); }
   }
   let res;
@@ -45,6 +45,13 @@ async function main() {
     const base = {}; REGIONS.forEach(r => { const v = hist.map(h => h.r && h.r[r.id]).filter(v => typeof v === 'number'); base[r.id] = v.length >= 24 ? median(v) : null; });
     res = { ok: true, checkedAt, total: c.total, regions: REGIONS.map(r => ({ id: r.id, name: r.name, n: c.regions[r.id], usual: base[r.id] })), samples: hist.length };
     fs.writeFileSync(HIST + '.tmp', JSON.stringify(hist)); fs.renameSync(HIST + '.tmp', HIST); fs.chmodSync(HIST, 0o644);
+    // snapshot of every tracked military aircraft for the map layer (no history kept)
+    const pos = ac.filter(a => a && typeof a.lat === 'number' && typeof a.lon === 'number').slice(0, 800).map(a => ({
+      hex: a.hex, fl: String(a.flight || '').trim(), t: a.t || '', r: a.r || '', desc: a.desc || '', op: a.ownOp || '',
+      alt: typeof a.alt_baro === 'number' ? Math.round(a.alt_baro) : (a.alt_baro === 'ground' ? 'ground' : null),
+      gs: typeof a.gs === 'number' ? Math.round(a.gs) : null, trk: typeof a.track === 'number' ? Math.round(a.track) : null,
+      sq: a.squawk || '', lat: Math.round(a.lat * 1e4) / 1e4, lon: Math.round(a.lon * 1e4) / 1e4 }));
+    fs.writeFileSync('data/air-pos.json.tmp', JSON.stringify({ checkedAt, ac: pos })); fs.renameSync('data/air-pos.json.tmp', 'data/air-pos.json'); fs.chmodSync('data/air-pos.json', 0o644);
   } else res = Object.assign(old || { regions: [] }, { ok: false, checkedAt, error: err });
   fs.writeFileSync(OUT + '.tmp', JSON.stringify(res)); fs.renameSync(OUT + '.tmp', OUT); fs.chmodSync(OUT, 0o644);
   console.log(checkedAt + ' air ' + (res.ok ? 'OK total=' + res.total + ' ' + res.regions.map(r => r.id + '=' + r.n).join(' ') : 'FAIL ' + err));
