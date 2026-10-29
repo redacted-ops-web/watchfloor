@@ -1533,9 +1533,9 @@ body { margin: 0; }
       var stale = sensAgeMs(j) > 2 * 3600e3 || j.ok === false, rg = j.regions || [];
       var low = rg.filter(function (r) { return r.usual != null && r.usual >= 8 && r.n <= r.usual * 0.5; });
       var hm = rg.filter(function (r) { return r.id === 'hormuz'; })[0];
-      var val = stale ? 'data stale' : (hm ? 'Hormuz ' + hm.n + (hm.usual != null ? ' (usual ' + hm.usual + ')' : '') : rg.length + ' areas') + (low.length ? ' · drop ' + low.length : '');
+      var val = stale ? 'data stale' : (hm ? 'Hormuz ' + (hm.n === 0 && !(hm.usual > 0) ? 'no signal' : hm.n + (hm.usual != null ? ' (usual ' + hm.usual + ')' : '')) : rg.length + ' areas') + (low.length ? ' · drop ' + low.length : '');
       var parts = rg.map(function (r) { return r.name + ' ' + r.n + (r.usual != null ? ' (usual ' + r.usual + ')' : ''); });
-      var t = stale ? 'Ship data is out of date.' : 'Distinct vessels broadcasting AIS in a 90-second listen, by area: ' + parts.join('; ') + '. This is a floor: coverage is volunteer receivers, and ships can switch AIS off. A sharp drop against the usual count is the signal. Source: AISstream.';
+      var t = stale ? 'Ship data is out of date.' : 'Distinct vessels broadcasting AIS in a 90-second listen, by area: ' + parts.join('; ') + '. This is a floor: coverage is volunteer receivers, so the Gulf and Red Sea often show nothing at all, and ships can switch AIS off. A sharp drop against the usual count is the signal. Source: AISstream.';
       SENS.ships = { label: 'Ships (AIS)', value: val, color: stale ? 'var(--faint)' : (low.length ? 'var(--sev)' : 'var(--muted)'), title: t };
       renderSens();
     }).catch(function () { delete SENS.ships; renderSens(); });
