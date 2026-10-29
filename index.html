@@ -125,6 +125,8 @@ h1, h2, h3, h4 { margin: 0; text-wrap: balance; }
 .lyr button[data-l="nat"] .dot { border-radius: 50%; background: var(--c); opacity: .8; }
 .lyr button[data-l="quakes"] .dot { border-radius: 50%; background: transparent; border: 1.5px solid var(--c); }
 .lyr button[data-l="flock"] .dot { border-radius: 50%; background: var(--c); width: 5px; height: 5px; margin: 0 8px 1px 1px; }
+.fkhint { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 3; font-size: 12px; padding: 4px 10px; border-radius: 12px; background: rgba(15,23,42,.78); color: #fff; pointer-events: none; white-space: nowrap; }
+.fkcv { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
 .plcs { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 2; }
 .plc { position: absolute; transform: translate(-50%, -100%); white-space: nowrap; font: 600 11px/1 var(--font-body); color: var(--fg); text-shadow: 0 0 3px var(--bg), 0 0 3px var(--bg), 0 0 2px var(--bg); }
 .plc.big { font-size: 12.5px; font-weight: 700; }
@@ -378,6 +380,8 @@ body { margin: 0; }
           <g id="lyr-air" style="display:none"></g>
         </svg>
         <div class="zoomctl"><button type="button" id="zin" aria-label="Zoom in">+</button><button type="button" id="zout" aria-label="Zoom out">&minus;</button></div>
+        <canvas class="fkcv" id="fkcv" style="display:none"></canvas>
+        <div class="fkhint" id="fkhint" hidden>Zoom in to a state or large city to see Flock cameras</div>
         <div class="plcs" id="plcs" hidden></div>
         <div class="osmc" id="osmc" hidden>© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</div>
         <div class="pop" id="pop" hidden></div>
@@ -528,7 +532,7 @@ body { margin: 0; }
   function measure() {
     var r = mapWrap.getBoundingClientRect();
     if (r.width < 10) return;
-    cw = r.width; ch = r.height; AR = cw / ch;
+    cw = r.width; ch = r.height; AR = cw / ch; if (typeof viewFx === 'function') viewFx();
     cancelAnimationFrame(tween);
     setVB(vbFor(curView));
   }
@@ -570,11 +574,30 @@ body { margin: 0; }
     if (!tileRaf) tileRaf = requestAnimationFrame(function () { tileRaf = 0; flockSize(); if (vb.w / 1000 * 360 > tspan()) updateTiles(); stageFx(); updateCones(); });
     clearTimeout(tileT); tileT = setTimeout(function () { updateTiles(); stageFx(); updateCones(); saveView(); }, 160);
   }
+  var fkcv = $('#fkcv'), fkctx = fkcv.getContext && fkcv.getContext('2d'), fkShown = false;
   function flockSize() {
     var span = vb.w / 1000 * 360, w = span >= 20 ? 2.4 : Math.min(16, 2.4 + Math.pow(20 / span, 0.55));
-    var el = document.querySelector('#lyr-flock .fl'); if (el) el.style.strokeWidth = w.toFixed(1);
     var se = document.querySelector('#lyr-flock .fls'); if (se) se.style.strokeWidth = (w + 8).toFixed(1);
-    flockW = w;
+    flockW = w; drawFlock();
+  }
+  /* cameras are painted on a canvas, and only those inside the current view, so panning and zooming stay fast */
+  function drawFlock() {
+    if (!fkctx) return;
+    var spanD = vb.w / 1000 * 360, tooWide = spanD > 12;
+    $('#fkhint').hidden = !(layers.flock && tooWide);
+    if (!fk || !layers.flock || tooWide) { if (fkShown) { fkctx.setTransform(1, 0, 0, 1, 0, 0); fkctx.clearRect(0, 0, fkcv.width, fkcv.height); fkcv.style.display = 'none'; fkShown = false; } return; }
+    var dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(cw * dpr), H = Math.round(ch * dpr);
+    if (fkcv.width !== W || fkcv.height !== H) { fkcv.width = W; fkcv.height = H; }
+    fkcv.style.display = ''; fkShown = true;
+    fkctx.setTransform(dpr, 0, 0, dpr, 0, 0); fkctx.clearRect(0, 0, cw, ch);
+    var k = cw / vb.w, r = Math.max(1, flockW / 2), pad = r / k + 1 / k, x0 = vb.x - pad, x1 = vb.x + vb.w + pad, y0 = vb.y - pad, y1 = vb.y + vb.h + pad, i, x, y, xs = fk.x, ys = fk.y, n = fk.n, round = r > 3;
+    fkctx.fillStyle = 'rgba(139,92,246,0.62)'; fkctx.beginPath();
+    for (i = 0; i < n; i++) {
+      x = xs[i]; if (x < x0 || x > x1) continue; y = ys[i]; if (y < y0 || y > y1) continue;
+      if (round) { fkctx.moveTo((x - vb.x) * k + r, (y - vb.y) * k); fkctx.arc((x - vb.x) * k, (y - vb.y) * k, r, 0, 6.2832); }
+      else fkctx.rect((x - vb.x) * k - r, (y - vb.y) * k - r, 2 * r, 2 * r);
+    }
+    fkctx.fill();
   }
   /* Flock map only: state outlines (25 deg wide or less), city names (6), town names (1.5), then street tiles replace them (0.4) */
   function loadGeo() {
@@ -1911,12 +1934,11 @@ body { margin: 0; }
     var st = $('#rstatus');
     function say(t) { st.textContent = t; st.hidden = false; clearTimeout(loadFlock.t); loadFlock.t = setTimeout(function () { st.hidden = true; }, 12000); }
     fetch('data/flock.json', { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) {
-      var p = j.pts || [], d = [], i, n = p.length >> 1;
+      var p = j.pts || [], i, n = p.length >> 1;
       fk = { n: n, x: new Float64Array(n), y: new Float64Array(n), lat: p, ids: j.ids || [], dir: j.dir || [], op: j.op || {} };
-      for (i = 0; i < n; i++) { fk.x[i] = X(p[2 * i + 1]); fk.y[i] = Y(p[2 * i]); d.push('M' + fk.x[i].toFixed(5) + ' ' + fk.y[i].toFixed(5) + 'h0'); }
-      var el = document.createElementNS(NS, 'path'); el.setAttribute('class', 'fl'); el.setAttribute('d', d.join(''));
-      var g = $('#lyr-flock'); g.textContent = ''; g.appendChild(el); flockSize(); viewFx();
-      say('Flock cameras: ' + (j.n || n).toLocaleString() + ' mapped in the US. Zoom in for state lines, cities, towns, then streets; tap a camera for details. Community-mapped on OpenStreetMap, so real numbers are higher. Data: OpenStreetMap contributors (ODbL); place names: GeoNames (CC BY 4.0); updated ' + String(j.updatedAt || '').slice(0, 10) + '.');
+      for (i = 0; i < n; i++) { fk.x[i] = X(p[2 * i + 1]); fk.y[i] = Y(p[2 * i]); }
+      $('#lyr-flock').textContent = ''; flockSize(); viewFx();
+      say('Flock cameras: ' + (j.n || n).toLocaleString() + ' mapped in the US. Cameras appear once you zoom to a state or large city; keep zooming for cities, towns, then streets, and tap a camera for details. Community-mapped on OpenStreetMap, so real numbers are higher. Data: OpenStreetMap contributors (ODbL); place names: GeoNames (CC BY 4.0); updated ' + String(j.updatedAt || '').slice(0, 10) + '.');
     }).catch(function () { flockLoaded = false; say('Flock camera data is not available yet.'); });
   }
 
