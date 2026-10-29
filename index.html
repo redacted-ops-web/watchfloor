@@ -1377,7 +1377,18 @@ body { margin: 0; }
       renderSens();
     }).catch(function () { delete SENS.outages; renderSens(); });
   }
-  function loadSensors() { loadSpace(); loadOutages(); }
+  function loadAir() {
+    fetch('data/air.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) {
+      var stale = sensAgeMs(j) > 2 * 3600e3 || j.ok === false, rg = j.regions || [];
+      var hot = rg.filter(function (r) { return r.usual != null && r.n >= 3 && r.n >= r.usual * 2; });
+      var val = stale ? 'data stale' : j.total + ' tracked' + (hot.length ? ' · surge ' + hot.length : '');
+      var parts = rg.map(function (r) { return r.name + ' ' + r.n + (r.usual != null ? ' (usual ' + r.usual + ')' : ''); });
+      var t = stale ? 'Aircraft data is out of date.' : 'Military aircraft broadcasting ADS-B worldwide: ' + j.total + '. By region: ' + parts.join('; ') + '. This is a floor, since many military flights do not broadcast. Source: adsb.lol volunteer network.';
+      SENS.air = { label: 'Military aircraft', value: val, color: stale ? 'var(--faint)' : (hot.length ? 'var(--sev)' : 'var(--muted)'), title: t };
+      renderSens();
+    }).catch(function () { delete SENS.air; renderSens(); });
+  }
+  function loadSensors() { loadSpace(); loadOutages(); loadAir(); }
 
   /* ---------- live feeds (collected by the server from public sources) ---------- */
   var feedItems = [], feedErrs = {};
