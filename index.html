@@ -1472,10 +1472,10 @@ body { margin: 0; }
   }
 
   /* ---------- live sensors: small chips fed by server collectors (space weather now; outages, aircraft, ships as added) ---------- */
-  var SENS = {}, SENS_ORDER = ['space', 'outages', 'air', 'ships'], sensTimer = 0;
+  var SENS = {}, SENS_ORDER = ['space', 'outages', 'air', 'ships', 'transits'], sensTimer = 0;
   var SENS_COL = function (n) { return n >= 5 ? 'var(--crit)' : n >= 3 ? 'var(--sev)' : n >= 1 ? 'var(--elev)' : 'var(--muted)'; };
   function sensAgeMs(j) { var t = Date.parse((j && (j.checkedAt || j.updatedAt)) || ''); return t ? Date.now() - t : Infinity; }
-  var SENS_NAMES = { space: 'Space weather', outages: 'Internet outages', air: 'Military aircraft', ships: 'Ship traffic (AIS)' }, hideSens = {};
+  var SENS_NAMES = { space: 'Space weather', outages: 'Internet outages', air: 'Military aircraft', ships: 'Ship traffic (AIS)', transits: 'Chokepoint transits' }, hideSens = {};
   try { hideSens = JSON.parse(localStorage.getItem('watchfloor.hidesens') || '{}') || {}; } catch (e) { hideSens = {}; }
   function renderSens() {
     var box = $('#sens'); box.textContent = '';
@@ -1540,7 +1540,20 @@ body { margin: 0; }
       renderSens();
     }).catch(function () { delete SENS.ships; renderSens(); });
   }
-  function loadSensors() { loadSpace(); loadOutages(); loadAir(); loadShips(); }
+  function loadTransits() {
+    fetch('data/portwatch.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) {
+      var stale = sensAgeMs(j) > 36 * 3600e3 || j.ok === false, ps = j.ports || [];
+      var hz = ps.filter(function (p) { return p.id === 'hormuz'; })[0] || ps[0];
+      if (!hz) throw 0;
+      var pc = function (p) { return p.pct == null ? '' : (p.pct > 0 ? '+' : '') + p.pct + '%'; };
+      var val = stale ? 'data stale' : hz.name.replace(/^Strait of /, '') + ' ' + Math.round(hz.avg7) + '/day ' + pc(hz);
+      var lvl = hz.pct == null ? 0 : hz.pct <= -50 ? 5 : hz.pct <= -25 ? 3 : hz.pct <= -10 ? 1 : 0;
+      var t = stale ? 'Transit data is out of date.' : 'Vessels crossing each chokepoint per day, last 7 days, against the earlier average (data through ' + hz.asOf + '): ' + ps.map(function (p) { return p.name + ' ' + p.avg7 + '/day vs ' + p.base + ' (' + pc(p) + ', tankers ' + p.tanker7 + ' vs ' + p.tankerBase + ')'; }).join('; ') + '. Satellite-derived and published with a delay of several days. Source: IMF PortWatch.';
+      SENS.transits = { label: 'Transits', value: val, color: stale ? 'var(--faint)' : SENS_COL(lvl), title: t };
+      renderSens();
+    }).catch(function () { delete SENS.transits; renderSens(); });
+  }
+  function loadSensors() { loadSpace(); loadOutages(); loadAir(); loadShips(); loadTransits(); }
   /* ---------- collapsible sections: tap the arrow to shrink a section to its title; remembered per device ---------- */
   (function () {
     var KEY = 'watchfloor.collapsed', st = {};
