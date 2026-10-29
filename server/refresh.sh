@@ -13,6 +13,17 @@ if [ -d "$LOCK" ] && [ -z "$(find "$LOCK" -maxdepth 0 -mmin +90 2>/dev/null)" ];
   echo "$(date) $MODE skipped, another run is active" >> "$LOG"; exit 0
 fi
 rm -rf "$LOCK"; mkdir "$LOCK"
+# one rotating region per day for the light refresh to cover (read by the prompt from data/region-of-day.txt)
+case "$(date -u +%u)" in
+  1) R="Taiwan Strait and the Korean peninsula" ;;
+  2) R="India-Pakistan, Afghanistan and Myanmar" ;;
+  3) R="Sudan, the Sahel and the Horn of Africa" ;;
+  4) R="DR Congo, Ethiopia-Eritrea and Somalia" ;;
+  5) R="Venezuela, Haiti and Latin America security" ;;
+  6) R="the Balkans, the Caucasus and the Arctic" ;;
+  *) R="the South China Sea and the Philippines" ;;
+esac
+echo "$R" > "$REPO/data/region-of-day.txt"
 echo "$(date) $MODE start" >> "$LOG"
 docker run --rm -v "$CH":/root -v "$REPO":/work -w /work claude-refresh sh -c "
   rm -f data/live.new.json data/patch.json
