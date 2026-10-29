@@ -4,10 +4,12 @@ const fs = require('fs');
 const OUT = 'data/outages.json';
 const BASE = 'https://api.ioda.inetintel.cc.gatech.edu/v2/outages/summary';
 
+// Tiny territories and micro-states: IODA's relative score ranks them first on routine blips, which drowns real national events.
+const SMALL = new Set('AS AI AW BM BQ CC CK CW CX FK FO GI GL GU IM JE GG KY MP MS NC NF NU PF PM PN PR SH SX TC TK VG VI WF YT MF BL GF GP MQ RE AX SJ TV NR PW MH FM KI VA MC LI SM AD'.split(' '));
 function parse(j) {
   if (!j || !Array.isArray(j.data)) return null;
-  const rows = j.data.filter(x => x && x.entity && x.entity.name && Number(x.event_cnt) > 0 && x.scores && Number(x.scores.overall) > 0)
-    .sort((a, b) => b.scores.overall - a.scores.overall).slice(0, 8)
+  const rows = j.data.filter(x => x && x.entity && x.entity.name && !SMALL.has(String(x.entity.code || '').toUpperCase()) && Number(x.event_cnt) > 0 && x.scores && Number(x.scores.overall) > 0)
+    .sort((a, b) => b.scores.overall - a.scores.overall).slice(0, 6)
     .map(x => ({ code: String(x.entity.code || ''), name: String(x.entity.name), events: Number(x.event_cnt) }));
   return rows;
 }
