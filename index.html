@@ -789,11 +789,24 @@ body { margin: 0; }
   function find(kind, id) { var a = data[kind] || []; for (var i = 0; i < a.length; i++) if (a[i].id === id) return a[i]; return null; }
 
   /* ---------- popover ---------- */
+  /* chokepoint popups also carry IMF PortWatch transit counts (data/portwatch.json, written by the sensors collector) */
+  var PWMAP = { hormuz: 'hormuz', 'bab-el-mandeb': 'babel', suez: 'suez', malacca: 'malacca', panama: 'panama', taiwan: 'taiwan', 'black-sea': 'bosporus' }, pwData = {}, pwAsOf = '';
+  function loadPW() {
+    fetch('data/portwatch.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) {
+      pwData = {}; (j.ports || []).forEach(function (p) { pwData[p.id] = p; }); pwAsOf = j.ok === false ? '' : 'ok';
+    }).catch(function () { });
+  }
+  function pwLine(kind, id) {
+    if (kind !== 'chokepoints' || !pwAsOf) return '';
+    var p = pwData[PWMAP[id]]; if (!p) return '';
+    var pc = p.pct == null ? '' : ' (' + (p.pct > 0 ? '+' : '') + p.pct + '% vs prior-year average)';
+    return '<p class="tkm"><b>Transits (satellite, to ' + esc(p.asOf) + '):</b> ' + p.avg7 + ' vessels a day over the last 7 days' + pc + '; tankers ' + p.tanker7 + ' a day vs ' + p.tankerBase + '. Source: IMF PortWatch' + (id === 'black-sea' ? ' (Bosporus)' : '') + '. Different trackers count different vessel types and methods, so figures above can differ.</p>';
+  }
   function select(kind, id) {
     var it = find(kind, id); if (!it) return;
     selected = { kind: kind, id: id }; markSelected();
     var L = lv(it.sev);
-    pop.innerHTML = '<button class="x" aria-label="Close">×</button><span class="pill c-' + L[1] + '">' + L[0] + '</span> <span class="rg">' + esc(KIND_NAME[kind]) + '</span><h3>' + esc(it.name || it.title) + '</h3><p>' + esc(it.summary) + '</p><div class="acts"><button class="btn" data-a="details">Details</button>' + (sample ? '<button class="btn pri" data-a="analyze">Analyze</button>' : '') + '</div>';
+    pop.innerHTML = '<button class="x" aria-label="Close">×</button><span class="pill c-' + L[1] + '">' + L[0] + '</span> <span class="rg">' + esc(KIND_NAME[kind]) + '</span><h3>' + esc(it.name || it.title) + '</h3><p>' + esc(it.summary) + '</p>' + pwLine(kind, id) + '<div class="acts"><button class="btn" data-a="details">Details</button>' + (sample ? '<button class="btn pri" data-a="analyze">Analyze</button>' : '') + '</div>';
     pop.hidden = false; placePop(); syncHash();
   }
   function hidePop() { pop.hidden = true; selected = null; markSelected(); syncHash(); }
@@ -2066,7 +2079,7 @@ body { margin: 0; }
 
   /* ---------- boot ---------- */
   function tickClock() { var d = new Date(); $('#clock').textContent = 'UTC ' + d.toISOString().slice(11, 19); }
-  buildGrid(); buildRegions(); setupFilters(); setupShare(); setupAlerts(); applyHash(); if (!location.hash) restoreView(); loadQuakes(); setInterval(loadQuakes, 900000); loadNatural(); setInterval(loadNatural, 1800000); loadTimeline(); setInterval(loadTimeline, 600000); S2.init(); setupAnalyst(); setupPlayer(); loadPizza(); setInterval(loadPizza, 600000); loadSensors(); setInterval(loadSensors, 600000); loadFeeds(); setInterval(loadFeeds, 300000);
+  buildGrid(); buildRegions(); setupFilters(); setupShare(); setupAlerts(); applyHash(); if (!location.hash) restoreView(); loadQuakes(); setInterval(loadQuakes, 900000); loadNatural(); setInterval(loadNatural, 1800000); loadTimeline(); setInterval(loadTimeline, 600000); loadPW(); setInterval(loadPW, 1800000); S2.init(); setupAnalyst(); setupPlayer(); loadPizza(); setInterval(loadPizza, 600000); loadSensors(); setInterval(loadSensors, 600000); loadFeeds(); setInterval(loadFeeds, 300000);
   tickClock(); setInterval(tickClock, 1000); setInterval(renderMeta, 60000);
   $('#layers').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
