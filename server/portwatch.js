@@ -10,7 +10,7 @@ const avg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
 
 function summarize(rows) {
   // rows: [{portname, date(ms), n_total, n_tanker}] for one chokepoint
-  const byDay = {}; rows.forEach(r => { if (typeof r.date === 'number' && isFinite(Number(r.n_total))) byDay[r.date] = r; });
+  const byDay = {}; rows.forEach(r => { const d = typeof r.date === 'number' ? r.date : Date.parse(r.date); if (isFinite(d) && isFinite(Number(r.n_total))) byDay[d] = r; });
   const days = Object.keys(byDay).map(Number).sort((a, b) => b - a);
   if (days.length < 20) return null;
   const rec = days.slice(0, 7).map(d => Number(byDay[d].n_total)), old = days.slice(7).map(d => Number(byDay[d].n_total));
@@ -46,7 +46,7 @@ async function main() {
     const j = await q({ where, outFields: 'portname,date,n_total,n_tanker', orderByFields: 'date DESC', resultRecordCount: '2000' });
     const rows = j.features.map(f => f.attributes), ports = [];
     pick.forEach(p => { const s = summarize(rows.filter(r => r.portname === p.name)); if (s) ports.push(Object.assign({ id: p.id, name: p.name }, s)); });
-    if (!ports.length) throw new Error('no usable rows (' + rows.length + ')');
+    if (!ports.length) throw new Error('no usable rows (' + rows.length + ') sample ' + JSON.stringify(rows[0]));
     res = { ok: true, checkedAt, ports };
   } catch (e) { res = Object.assign(old || { ports: [] }, { ok: false, checkedAt, error: String(e.message || e) }); }
   fs.writeFileSync(OUT + '.tmp', JSON.stringify(res)); fs.renameSync(OUT + '.tmp', OUT); fs.chmodSync(OUT, 0o644);
