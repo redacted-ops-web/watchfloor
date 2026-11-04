@@ -1,0 +1,123 @@
+{
+ "at": "8:35 PM Central",
+ "senate": {
+  "wd": "CO NM IL VA NC GA NH MA RI NJ DE",
+  "ld": "TX KS IA MI OH SC ME",
+  "wr": "WY KY WV FL",
+  "lr": "SD OK AR LA MS AL TN",
+  "li": "NE",
+  "pe": "OR ID MT MN AK"
+ },
+ "governor": {
+  "wd": "CO IL GA PA NY MA RI CT MD",
+  "ld": "NM TX KS NE IA MI OH ME TN",
+  "wr": "WY FL",
+  "lr": "SD WI OK AR AL SC VT NH",
+  "pe": "OR ID NV CA AZ MN AK HI"
+ },
+ "bars": {
+  "senate": [
+   45,
+   35,
+   "51 controls"
+  ],
+  "house": [
+   85,
+   46,
+   "218 controls"
+  ],
+  "governor": [
+   15,
+   10,
+   "called so far"
+  ]
+ },
+ "key": {
+  "senate": [
+   [
+    "GA Senate",
+    "Jon Ossoff (D) wins reelection",
+    "wd"
+   ],
+   [
+    "NC Senate",
+    "Roy Cooper (D) wins, flipping the seat",
+    "wd"
+   ],
+   [
+    "VA Senate",
+    "Mark Warner (D) wins reelection",
+    "wd"
+   ],
+   [
+    "SC Senate",
+    "Not called, leans Democrat",
+    "ld"
+   ],
+   [
+    "ME Senate",
+    "Not called, leans Democrat",
+    "ld"
+   ],
+   [
+    "MI Senate",
+    "Not called, leans Democrat",
+    "ld"
+   ],
+   [
+    "TX Senate",
+    "Not called, leans Democrat",
+    "ld"
+   ],
+   [
+    "OH Senate",
+    "Not called, leans Democrat",
+    "ld"
+   ]
+  ],
+  "governor": [
+   [
+    "GA Governor",
+    "Keisha Lance Bottoms (D) wins",
+    "wd"
+   ],
+   [
+    "WI Governor",
+    "Not called, leans Republican",
+    "lr"
+   ],
+   [
+    "AZ Governor",
+    "Not called",
+    "pe"
+   ],
+   [
+    "MI Governor",
+    "Not called, leans Democrat",
+    "ld"
+   ],
+   [
+    "OH Governor",
+    "Not called, leans Democrat",
+    "ld"
+   ],
+   [
+    "NV Governor",
+    "Not called",
+    "pe"
+   ]
+  ],
+  "house": [
+   [
+    "FL-20",
+    "Debbie Wasserman Schultz (D) wins",
+    "wd"
+   ],
+   [
+    "Balance",
+    "Democrats 85, Republicans 46, 218 needed",
+    "no"
+   ]
+  ]
+ }
+}

@@ -2096,6 +2096,16 @@ body { margin: 0; }
       governor: [['GA Governor', 'Keisha Lance Bottoms (D) wins', '#3b8de8'], ['WI Governor', 'Not called, leans Republican', '#f2959f'], ['AZ Governor', 'Not called', '#dfe3ee'], ['MI Governor', 'Not called, leans Democrat', '#9dc4f3'], ['OH Governor', 'Not called, leans Democrat', '#9dc4f3'], ['NV Governor', 'Not called', '#dfe3ee']],
       house: [['FL-20', 'Debbie Wasserman Schultz (D) wins', '#3b8de8'], ['Balance', 'Democrats 85, Republicans 46, 218 needed', '#8a8f98']]
     };
+    function applyData(j) {
+      if (!j || !j.senate || !j.governor) return;
+      SNAP_AT = j.at || SNAP_AT; SEN = {}; GOV = {};
+      [[SEN, j.senate], [GOV, j.governor]].forEach(function (p) { Object.keys(p[1]).forEach(function (c) { String(p[1][c]).split(' ').forEach(function (a) { if (a) p[0][a] = c; }); }); });
+      if (j.bars) BARS = j.bars;
+      if (j.key) { KEY = {}; Object.keys(j.key).forEach(function (m) { KEY[m] = j.key[m].map(function (k) { return [k[0], k[1], SCOL[k[2]] || k[2]]; }); }); }
+    }
+    function pull() {
+      fetch('data/election.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) { applyData(j); if (built) setMode(mode); }).catch(function () { });
+    }
     function stKey(a) { return (mode === 'governor' ? GOV : mode === 'senate' ? SEN : {})[a] || (mode === 'house' ? 'pe' : 'no'); }
     function lean(a) { return SCOL[stKey(a)]; }
     function stLabel(a) { return mode === 'house' ? 'The House is decided by district, so there is no state-level call. See the PBS map.' : (mode === 'governor' ? 'Governor' : 'Senate') + ': ' + SLAB[stKey(a)] + ' (PBS/AP map as of ' + SNAP_AT + ', not live)'; }
@@ -2151,7 +2161,7 @@ body { margin: 0; }
         setInterval(paint, 60000);
         var st = $('#rstatus'); st.textContent = 'Election night: states are shaded to match the PBS Senate map as of ' + SNAP_AT + ' (a hand-copied snapshot, not live): solid blue or red is a win, light blue or red a lean, teal an independent lean, pale grey not yet called, dark grey no Senate race. Dots: amber means polls still open, green means closed. Tap a state for live results (PBS, Associated Press data) and official links. Zoom to the Americas to see the states.'; st.hidden = false; setTimeout(function () { st.hidden = true; }, 12000);
       }
-      paint(); scaleMarkers(); setMode(mode); $('#vpanel').hidden = false;
+      paint(); scaleMarkers(); setMode(mode); $('#vpanel').hidden = false; pull(); if (!pull.t) pull.t = setInterval(function () { if (layers.vote) pull(); }, 120000);
     };
   })();
 
