@@ -311,6 +311,7 @@ footer ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 12.5p
 .setp h3 { margin: 0 0 8px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .setp label { display: flex; gap: 8px; align-items: center; padding: 3px 0; }
 .setp .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.setp input[type=text] { flex: 1 1 160px; min-width: 0; padding: 7px 9px; border: 1px solid var(--line); border-radius: 6px; background: transparent; color: var(--fg); font: inherit; }
 [hidden] { display: none !important; }
 img { max-width: 100%; }
 body { margin: 0; }
@@ -423,7 +424,7 @@ body { margin: 0; }
         <div class="frame"><iframe id="p-frame" title="Live news player" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"></iframe></div>
         <p class="fine" id="p-hint" style="margin:6px 0 0"></p>
       </div>
-      <p class="fine" style="padding:0 14px 12px;margin:0">Pick a channel to play it here. Star channels to keep them first. Stars stay in this browser.</p>
+      <p class="fine" style="padding:0 14px 12px;margin:0">Pick a channel to play it here. Star channels to keep them first. Choose which channels show, or add your own, under Settings. Choices stay in this browser.</p>
     </section>
     <section class="card feeds vids" aria-label="Channel videos">
       <div class="card-h"><h2>Channel videos</h2><span class="count" id="vd-meta">Loading…</span></div>
@@ -483,6 +484,16 @@ body { margin: 0; }
   try { blockedCh = JSON.parse(localStorage.getItem('watchfloor.blocked') || '{}') || {}; } catch (e) { blockedCh = {}; }
   function noEmbed(c) { var l = liveInfo[c.channelId]; return c.embed === false || !!blockedCh[c.channelId] || !!(l && l.live && l.embeddable === false); }
   try { favs = JSON.parse(localStorage.getItem('watchfloor.fav') || '{}') || {}; } catch (e) { favs = {}; }
+  /* live news channels the visitor hid, and channels the visitor added (both stay in this browser) */
+  var hideCh = {}, customCh = [];
+  try { hideCh = JSON.parse(localStorage.getItem('watchfloor.hidech') || '{}') || {}; } catch (e) { hideCh = {}; }
+  try { customCh = JSON.parse(localStorage.getItem('watchfloor.customch') || '[]') || []; if (!Array.isArray(customCh)) customCh = []; } catch (e) { customCh = []; }
+  function chList() {
+    return (channels || []).concat(customCh.filter(function (c) { return c && /^UC[\w-]{22}$/.test(c.channelId || ''); }).map(function (c) {
+      return { id: 'u' + c.channelId, name: String(c.name || '').slice(0, 60), note: 'Added by you', channelId: c.channelId, url: 'https://www.youtube.com/channel/' + c.channelId + '/live', custom: true };
+    }));
+  }
+  function saveCh() { try { localStorage.setItem('watchfloor.hidech', JSON.stringify(hideCh)); localStorage.setItem('watchfloor.customch', JSON.stringify(customCh)); } catch (e) { } }
 
   /* ---------- map geometry ---------- */
   var MAPH = 1000 * 141 / 360;
@@ -1185,9 +1196,9 @@ body { margin: 0; }
     var box = $('#ch-list');
     if (channels === null) { box.innerHTML = '<span class="fine">Loading channels…</span>'; return; }
     function rank(c) { var l = liveInfo[c.channelId]; return (favs[c.id] ? 4 : 0) + (l && l.live ? 2 : 0) + (l && l.live === false ? -1 : 0); }
-    var list = channels.slice().sort(function (a, b) { return rank(b) - rank(a); });
+    var list = chList().filter(function (c) { return !hideCh[c.id]; }).sort(function (a, b) { return rank(b) - rank(a); });
     if (favOnly) list = list.filter(function (c) { return favs[c.id]; });
-    if (!list.length) { box.innerHTML = '<span class="fine">' + (favOnly ? 'No starred channels yet. Star one to keep it here.' : 'No channels listed. Add some in data/channels.json.') + '</span>'; return; }
+    if (!list.length) { box.innerHTML = '<span class="fine">' + (favOnly ? 'No starred channels yet. Star one to keep it here.' : 'No channels shown. Turn some on under Settings, Live news channels.') + '</span>'; return; }
     box.innerHTML = list.map(function (c) {
       var f = !!favs[c.id];
       var l = liveInfo[c.channelId], tag = '';
@@ -1199,7 +1210,7 @@ body { margin: 0; }
     }).join('');
   }
   function play(id) {
-    var c = null; (channels || []).forEach(function (x) { if (x.id === id) c = x; });
+    var c = null; chList().forEach(function (x) { if (x.id === id) c = x; });
     if (!c) return;
     activeCh = id; renderChannels();
     var open = safeUrl(c.url);
@@ -1641,6 +1652,29 @@ body { margin: 0; }
         cb.addEventListener('change', function () { if (cb.checked) delete hideSens[k]; else hideSens[k] = 1; try { localStorage.setItem('watchfloor.hidesens', JSON.stringify(hideSens)); } catch (e) { } renderSens(); });
         l.appendChild(cb); l.appendChild(document.createTextNode(SENS_NAMES[k])); panel.appendChild(l);
       });
+      var h2 = document.createElement('h3'); h2.textContent = 'Live news channels'; h2.style.marginTop = '14px'; panel.appendChild(h2);
+      chList().forEach(function (c) {
+        var l = document.createElement('label'), cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !hideCh[c.id];
+        cb.addEventListener('change', function () { if (cb.checked) delete hideCh[c.id]; else { hideCh[c.id] = 1; if (activeCh === c.id) stopPlayer(); } saveCh(); renderChannels(); });
+        l.appendChild(cb); l.appendChild(document.createTextNode(c.name));
+        if (c.custom) {
+          var rm = document.createElement('button'); rm.type = 'button'; rm.className = 'top-btn'; rm.textContent = 'Remove'; rm.style.marginLeft = 'auto';
+          rm.addEventListener('click', function (ev) { ev.preventDefault(); customCh = customCh.filter(function (x) { return x.channelId !== c.channelId; }); delete hideCh[c.id]; if (activeCh === c.id) stopPlayer(); saveCh(); renderChannels(); build(); });
+          l.appendChild(rm);
+        }
+        panel.appendChild(l);
+      });
+      var add = document.createElement('div'); add.className = 'row';
+      var nm = document.createElement('input'); nm.type = 'text'; nm.placeholder = 'Channel name'; nm.maxLength = 60; nm.setAttribute('aria-label', 'Channel name');
+      var idi = document.createElement('input'); idi.type = 'text'; idi.placeholder = 'YouTube channel ID (starts with UC)'; idi.maxLength = 24; idi.setAttribute('aria-label', 'YouTube channel ID');
+      var ab = document.createElement('button'); ab.type = 'button'; ab.className = 'top-btn'; ab.textContent = 'Add channel';
+      ab.addEventListener('click', function () {
+        var n = nm.value.trim(), i = idi.value.trim();
+        if (!n || !/^UC[\w-]{22}$/.test(i)) { rstatus('Enter a name and a channel ID that starts with UC (24 characters).'); return; }
+        if (chList().some(function (c) { return c.channelId === i; })) { rstatus('That channel is already in the list.'); return; }
+        customCh.push({ name: n, channelId: i }); saveCh(); renderChannels(); build(); rstatus('');
+      });
+      add.appendChild(nm); add.appendChild(idi); add.appendChild(ab); panel.appendChild(add);
       var row = document.createElement('div'); row.className = 'row';
       var ex = document.createElement('button'); ex.type = 'button'; ex.className = 'top-btn'; ex.textContent = 'Export settings';
       var im = document.createElement('button'); im.type = 'button'; im.className = 'top-btn'; im.textContent = 'Import settings';
