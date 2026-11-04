@@ -178,7 +178,7 @@ svg.labels .lbl, .mk.on .lbl, .mk:hover .lbl, .mk:focus-visible .lbl { display: 
 .vpanel { border-top: 1px solid var(--line); padding: 10px 14px 12px; }
 .vtabs { display: flex; gap: 6px; margin-bottom: 8px; } .vtabs button { background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 6px 14px; cursor: pointer; font: 600 12px/1.2 var(--font-body); color: var(--fg); } .vtabs button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
 .vbar { display: flex; justify-content: space-between; align-items: baseline; font: 700 20px/1 var(--font-display); } .vbar .d { color: #3b8de8; } .vbar .r { color: #e8283c; } .vbar small { font: 500 11px/1 var(--font-body); color: var(--muted); }
-.map-wrap.pbs { aspect-ratio: auto; height: min(80vh, 780px); min-height: 520px; touch-action: auto; cursor: auto; } #vmapf { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #fff; z-index: 20; } #vmapf[hidden] { display: none; }
+.map-wrap { aspect-ratio: auto; height: min(80vh, 780px); min-height: 520px; } .map-wrap.pbs { touch-action: auto; cursor: auto; } #vmapf { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #fff; z-index: 20; } #vmapf[hidden] { display: none; }
 .vnote { font-size: 11.5px; color: var(--muted); margin: 6px 0 8px; }
 .vkey { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 6px; } .vkey div { border: 1px solid var(--line); border-left: 4px solid var(--c, var(--line)); border-radius: 6px; padding: 6px 8px; font-size: 12px; } .vkey b { display: block; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 .s2 { border-top: 1px solid var(--line); }
@@ -299,7 +299,7 @@ footer ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 12.5p
   .lower .feeds .vbody { flex: 1 1 auto; min-height: 0; overflow: auto; }
 }
 @media (max-width: 980px) { .main { grid-template-columns: minmax(0, 1fr); } .log { max-height: none; } }
-@media (max-width: 560px) { .vbody iframe { height: 420px; } .map-wrap { aspect-ratio: 1.45 / 1; } .brand h1 { font-size: 19px; } }
+@media (max-width: 560px) { .vbody iframe { height: 420px; } .map-wrap { aspect-ratio: auto; } .brand h1 { font-size: 19px; } }
 .sens { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; }
 .sn { font: 500 12px var(--font-mono, monospace); letter-spacing: .02em; display: inline-flex; gap: 8px; align-items: baseline; padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--muted); cursor: pointer; }
 .sn b { font-weight: 700; }
