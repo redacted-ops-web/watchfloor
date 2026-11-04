@@ -364,7 +364,7 @@ async function refreshElection() {
   try {
     const day = '2026-11-03', base = 'race/search?startDate=' + day + '&endDate=' + day, sen = {}, gov = {}, house = { d: 0, r: 0, o: 0, n: 0 };
     const first = await civic(base + '&limit=100&offset=0');
-    const limit = first.limit || (first.races || []).length || 20, count = first.count || 0;
+    const limit = first.limit || (first.races || []).length || 100;
     const take = (races) => {
       for (const r of races || []) {
         const t = String(r.type || '').toLowerCase();
@@ -378,11 +378,16 @@ async function refreshElection() {
       }
     };
     take(first.races);
-    const offs = []; for (let o = limit; o < count; o += limit) offs.push(o);
-    let k = 0, failed = 0;
-    await Promise.all(Array.from({ length: 4 }, async () => {
-      while (k < offs.length) { const o = offs[k++]; try { take((await civic(base + '&limit=' + limit + '&offset=' + o)).races); } catch (e) { failed++; } }
-    }));
+    /* the API's "count" is the size of the page, so keep paging until a short page comes back */
+    let next = limit, failed = 0, more = (first.races || []).length >= limit, pages = 1;
+    while (more && pages < 120) {
+      const offs = [0, 1, 2, 3].map(n => next + n * limit); next += 4 * limit;
+      const rs = await Promise.all(offs.map(o => civic(base + '&limit=' + limit + '&offset=' + o).catch(() => { failed++; return null; })));
+      pages += 4; more = false;
+      for (const r of rs) { if (!r) continue; take(r.races); if ((r.races || []).length >= limit) more = true; }
+      if (rs.every(r => !r)) break;
+    }
+    const count = pages;
     election = { at: new Date().toISOString(), error: null, count, failedPages: failed, senate: sen, governor: gov, house, source: 'civicapi.org (unofficial)' };
     console.log('Election: ' + Object.keys(sen).length + ' senate, ' + Object.keys(gov).length + ' governor, ' + house.n + ' house races, ' + failed + ' failed pages');
   } catch (e) { election.error = String(e.message || e).slice(0, 60); } finally { electionBusy = false; }
