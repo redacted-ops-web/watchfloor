@@ -1,29 +1,29 @@
 {
- "at": "8:35 PM Central",
+ "at": "9:58 PM Central",
  "senate": {
   "wd": "CO NM IL VA NC GA NH MA RI NJ DE",
   "ld": "TX KS IA MI OH SC ME",
-  "wr": "WY KY WV FL",
-  "lr": "SD OK AR LA MS AL TN",
+  "wr": "WY KY WV FL OK",
+  "lr": "SD AR LA MS AL TN",
   "li": "NE",
   "pe": "OR ID MT MN AK"
  },
  "governor": {
   "wd": "CO IL GA PA NY MA RI CT MD",
-  "ld": "NM TX KS NE IA MI OH ME TN",
+  "ld": "NM TX KS NE IA MI OH ME WI",
   "wr": "WY FL",
-  "lr": "SD WI OK AR AL SC VT NH",
+  "lr": "SD OK AR AL SC VT NH TN",
   "pe": "OR ID NV CA AZ MN AK HI"
  },
  "bars": {
   "senate": [
    45,
-   35,
+   36,
    "51 controls"
   ],
   "house": [
-   85,
-   46,
+   101,
+   53,
    "218 controls"
   ],
   "governor": [
@@ -73,6 +73,11 @@
     "OH Senate",
     "Not called, leans Democrat",
     "ld"
+   ],
+   [
+    "OK Senate",
+    "Republican wins",
+    "wr"
    ]
   ],
   "governor": [
@@ -83,8 +88,8 @@
    ],
    [
     "WI Governor",
-    "Not called, leans Republican",
-    "lr"
+    "Not called, leans Democrat",
+    "ld"
    ],
    [
     "AZ Governor",
@@ -115,7 +120,7 @@
    ],
    [
     "Balance",
-    "Democrats 85, Republicans 46, 218 needed",
+    "Democrats 101, Republicans 53, 218 needed",
     "no"
    ]
   ]
