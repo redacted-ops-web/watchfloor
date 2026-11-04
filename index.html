@@ -175,6 +175,11 @@ svg.labels .lbl, .mk.on .lbl, .mk:hover .lbl, .mk:focus-visible .lbl { display: 
 .pop .x { position: absolute; top: 6px; right: 8px; background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 18px; line-height: 1; padding: 2px 4px; }
 .map-empty { position: absolute; inset: auto 0 12px 0; text-align: center; color: var(--muted); font-size: 12.5px; pointer-events: none; }
 
+.vpanel { border-top: 1px solid var(--line); padding: 10px 14px 12px; }
+.vtabs { display: flex; gap: 6px; margin-bottom: 8px; } .vtabs button { background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 6px 14px; cursor: pointer; font: 600 12px/1.2 var(--font-body); color: var(--fg); } .vtabs button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.vbar { display: flex; justify-content: space-between; align-items: baseline; font: 700 20px/1 var(--font-display); } .vbar .d { color: #3b8de8; } .vbar .r { color: #e8283c; } .vbar small { font: 500 11px/1 var(--font-body); color: var(--muted); }
+.vnote { font-size: 11.5px; color: var(--muted); margin: 6px 0 8px; }
+.vkey { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 6px; } .vkey div { border: 1px solid var(--line); border-left: 4px solid var(--c, var(--line)); border-radius: 6px; padding: 6px 8px; font-size: 12px; } .vkey b { display: block; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 .s2 { border-top: 1px solid var(--line); }
 .s2 summary { cursor: pointer; padding: 10px 14px; font: 600 12px/1.2 var(--font-display); letter-spacing: .16em; text-transform: uppercase; display: flex; justify-content: space-between; gap: 8px; }
 .s2b { padding: 0 14px 14px; }
@@ -402,6 +407,12 @@ body { margin: 0; }
         <span>Circle: hotspot · Diamond: chokepoint · Triangle: cyber incident</span>
       </div>
       <div class="tools"><span>Live trackers:</span><a href="https://gpsjam.org/" target="_blank" rel="noopener noreferrer">GPS jamming</a><a href="https://radar.cloudflare.com/outage-center" target="_blank" rel="noopener noreferrer">Internet outages</a><a href="https://globe.adsbexchange.com/" target="_blank" rel="noopener noreferrer">Flights (ADS-B)</a><a href="https://www.marinetraffic.com/" target="_blank" rel="noopener noreferrer">Ships (MarineTraffic)</a><a href="https://www.vesselfinder.com/" target="_blank" rel="noopener noreferrer">Ships (VesselFinder)</a><a href="https://www.windy.com/" target="_blank" rel="noopener noreferrer">Weather (Windy)</a></div>
+      <div class="vpanel" id="vpanel" hidden>
+        <div class="vtabs" id="vtabs"><button data-m="senate" aria-pressed="true">Senate</button><button data-m="house" aria-pressed="false">House</button><button data-m="governor" aria-pressed="false">Governor</button></div>
+        <div class="vbar" id="vbar"></div>
+        <div class="vnote" id="vnote"></div>
+        <div class="vkey" id="vkey"></div>
+      </div>
       <details class="s2" id="s2"><summary>S2 Underground map layers <span class="count" id="s2n"></span></summary><div class="s2b" id="s2b"></div></details>
     </section>
 
@@ -2076,7 +2087,27 @@ body { margin: 0; }
     [['wd','CO NM IL VA NC GA NH MA RI NJ DE'],['ld','TX KS IA MI OH SC ME'],['wr','WY KY WV FL'],['lr','SD OK AR LA MS AL TN'],['li','NE'],['pe','OR ID MT MN AK']].forEach(function (g) { g[1].split(' ').forEach(function (a) { SEN[a] = g[0]; }); });
     var SCOL = { wd: '#3b8de8', ld: '#9dc4f3', wr: '#e8283c', lr: '#f2959f', li: '#7ee3cc', pe: '#dfe3ee', no: '#8a8f98' };
     var SLAB = { wd: 'Democrat wins', ld: 'Leans Democrat', wr: 'Republican wins', lr: 'Leans Republican', li: 'Leans independent', pe: 'Race not yet called', no: 'No Senate race' };
-    function lean(a) { return SCOL[SEN[a] || 'no']; }
+    var GOV = {};
+    [['wd','CO IL GA PA NY MA RI CT MD'],['ld','NM TX KS NE IA MI OH ME TN'],['wr','WY FL'],['lr','SD WI OK AR AL SC VT NH'],['pe','OR ID NV CA AZ MN AK HI']].forEach(function (g) { g[1].split(' ').forEach(function (a) { GOV[a] = g[0]; }); });
+    var mode = 'senate', fills = {};
+    var BARS = { senate: [45, 35, '51 controls'], house: [85, 46, '218 controls'], governor: [15, 10, 'called so far'] };
+    var KEY = {
+      senate: [['GA Senate', 'Jon Ossoff (D) wins reelection', '#3b8de8'], ['NC Senate', 'Roy Cooper (D) wins, flipping the seat', '#3b8de8'], ['VA Senate', 'Mark Warner (D) wins reelection', '#3b8de8'], ['SC Senate', 'Not called, leans Democrat', '#9dc4f3'], ['ME Senate', 'Not called, leans Democrat', '#9dc4f3'], ['MI Senate', 'Not called, leans Democrat', '#9dc4f3'], ['TX Senate', 'Not called, leans Democrat', '#9dc4f3'], ['OH Senate', 'Not called, leans Democrat', '#9dc4f3']],
+      governor: [['GA Governor', 'Keisha Lance Bottoms (D) wins', '#3b8de8'], ['WI Governor', 'Not called, leans Republican', '#f2959f'], ['AZ Governor', 'Not called', '#dfe3ee'], ['MI Governor', 'Not called, leans Democrat', '#9dc4f3'], ['OH Governor', 'Not called, leans Democrat', '#9dc4f3'], ['NV Governor', 'Not called', '#dfe3ee']],
+      house: [['FL-20', 'Debbie Wasserman Schultz (D) wins', '#3b8de8'], ['Balance', 'Democrats 85, Republicans 46, 218 needed', '#8a8f98']]
+    };
+    function stKey(a) { return (mode === 'governor' ? GOV : mode === 'senate' ? SEN : {})[a] || (mode === 'house' ? 'pe' : 'no'); }
+    function lean(a) { return SCOL[stKey(a)]; }
+    function stLabel(a) { return mode === 'house' ? 'The House is decided by district, so there is no state-level call. See the PBS map.' : (mode === 'governor' ? 'Governor' : 'Senate') + ': ' + SLAB[stKey(a)] + ' (PBS/AP map as of ' + SNAP_AT + ', not live)'; }
+    function setMode(m) {
+      mode = m;
+      Object.keys(fills).forEach(function (a) { fills[a].setAttribute('fill', lean(a)); });
+      Array.prototype.forEach.call($('#vtabs').children, function (b) { b.setAttribute('aria-pressed', b.dataset.m === m ? 'true' : 'false'); });
+      var b = BARS[m]; $('#vbar').innerHTML = '<span class="d">' + b[0] + ' <small>Democrat</small></span><small>' + esc(b[2]) + '</small><span class="r"><small>Republican</small> ' + b[1] + '</span>';
+      $('#vnote').textContent = (m === 'house' ? 'House balance and key calls' : 'Key races') + ', copied from PBS News (Associated Press data) at ' + SNAP_AT + '. A snapshot, not live. ' + (m === 'house' ? 'Map shading is not available for the House because it is decided by 435 districts.' : '');
+      $('#vkey').innerHTML = KEY[m].map(function (k) { return '<div style="--c:' + k[2] + '"><b>' + esc(k[0]) + '</b>' + esc(k[1]) + '</div>'; }).join('');
+    }
+    $('#vtabs').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) setMode(b.dataset.m); });
     function closeMs(c) { return Date.UTC(2026, 10, 3, 0, 0, 0) + (c + 5) * 3600000; }
     function hm(c) { var h = Math.floor(c) % 24, m = Math.round((c % 1) * 60); return (h % 12 || 12) + (m ? ':' + (m < 10 ? '0' : '') + m : '') + (h < 12 ? ' AM' : ' PM') + ' ET'; }
     function paint() {
@@ -2094,7 +2125,7 @@ body { margin: 0; }
             var d = rings.map(function (r) { return 'M' + r.map(function (c) { return X(c[0]).toFixed(1) + ' ' + Y(c[1]).toFixed(1); }).join('L') + 'Z'; }).join('');
             var el = document.createElementNS(NS, 'path'); el.setAttribute('d', d); el.setAttribute('fill', lean(q[0])); el.setAttribute('fill-opacity', '.9');
             el.setAttribute('stroke', 'var(--fg)'); el.setAttribute('stroke-width', '0.8'); el.setAttribute('stroke-opacity', '.7'); el.setAttribute('stroke-linejoin', 'round'); el.style.vectorEffect = 'non-scaling-stroke'; el.style.pointerEvents = 'none';
-            fillG.appendChild(el);
+            fillG.appendChild(el); fills[q[0]] = el;
           });
         }).catch(function () { });
         ST.forEach(function (q) {
@@ -2107,7 +2138,7 @@ body { margin: 0; }
             var done = Date.now() >= node.close;
             tp.innerHTML = '<button class="x" aria-label="Close">×</button><span class="rg">Election night</span><h3>' + esc(q[1]) + '</h3>'
               + '<p class="tkm">' + (done ? 'Polls have closed (last polls about ' + hm(q[4]) + ').' : 'Polls still open until about ' + hm(q[4]) + '.') + ' Times are approximate.</p>'
-              + '<p class="tkm">Senate: ' + SLAB[SEN[q[0]] || 'no'] + ' (PBS/AP map as of ' + SNAP_AT + ', not live).</p>'
+              + '<p class="tkm">' + esc(stLabel(q[0])) + '</p>'
               + '<p class="tkm">No vote counts here. Results are published by the state; unofficial tallies come from news organizations.</p>'
               + '<div class="acts"><a class="top-btn" target="_blank" rel="noopener" href="https://www.pbs.org/newshour/elections-2026/results">Live results (PBS/AP)</a> <a class="top-btn" target="_blank" rel="noopener" href="https://www.usa.gov/election-results">Official state sites</a> <a class="top-btn" target="_blank" rel="noopener" href="https://ballotpedia.org/Elections_in_' + encodeURIComponent(q[1].replace(/ /g, '_')) + ',_2026">Ballotpedia</a></div>';
             tp.hidden = false; tp.querySelector('.x').addEventListener('click', function () { tp.hidden = true; });
@@ -2120,7 +2151,7 @@ body { margin: 0; }
         setInterval(paint, 60000);
         var st = $('#rstatus'); st.textContent = 'Election night: states are shaded to match the PBS Senate map as of ' + SNAP_AT + ' (a hand-copied snapshot, not live): solid blue or red is a win, light blue or red a lean, teal an independent lean, pale grey not yet called, dark grey no Senate race. Dots: amber means polls still open, green means closed. Tap a state for live results (PBS, Associated Press data) and official links. Zoom to the Americas to see the states.'; st.hidden = false; setTimeout(function () { st.hidden = true; }, 12000);
       }
-      paint(); scaleMarkers();
+      paint(); scaleMarkers(); setMode(mode); $('#vpanel').hidden = false;
     };
   })();
 
@@ -2239,7 +2270,7 @@ body { margin: 0; }
     $('#lyr-' + l).style.display = layers[l] ? '' : 'none';
     if (l === 'flock') { if (layers[l]) loadFlock(); viewFx(); }
     if ((l === 'air' || l === 'ships') && layers[l]) window.loadTrack(l);
-    if (l === 'vote' && layers[l]) window.loadVote();
+    if (l === 'vote') { if (layers[l]) window.loadVote(); else $('#vpanel').hidden = true; }
     if (!layers[l] && selected && selected.kind === l) hidePop();
   });
   if (window.ResizeObserver) new ResizeObserver(measure).observe(mapWrap); else window.addEventListener('resize', measure);
