@@ -135,6 +135,8 @@ h1, h2, h3, h4 { margin: 0; text-wrap: balance; }
 .osmc { position: absolute; left: 6px; bottom: 4px; z-index: 3; font-size: 10.5px; color: #333; background: rgba(255,255,255,.75); padding: 1px 5px; border-radius: 3px; }
 .osmc a { color: inherit; }
 .cn { fill: #8b5cf6; fill-opacity: .26; stroke: #7c3aed; stroke-opacity: .75; stroke-width: 1; vector-effect: non-scaling-stroke; pointer-events: none; }
+.lyr button[data-l="vote"] .dot { border-radius: 50%; background: var(--c); }
+.vt { cursor: pointer; } .vt circle { stroke: var(--bg); stroke-width: 1; vector-effect: non-scaling-stroke; } .vt:hover circle { stroke: var(--fg); } .vt text { font-size: 7px; font-weight: 700; fill: #000; text-anchor: middle; pointer-events: none; }
 .lyr button[data-l="air"] .dot { clip-path: polygon(50% 0, 100% 100%, 50% 75%, 0 100%); }
 .lyr button[data-l="ships"] .dot { clip-path: polygon(50% 0, 100% 100%, 0 100%); transform: rotate(180deg) scale(.9); }
 .tk { cursor: pointer; }
@@ -362,6 +364,7 @@ body { margin: 0; }
           <button data-l="nat" aria-pressed="false" style="--c:var(--sev)"><span class="dot"></span>Fires and storms</button>
           <button data-l="flock" aria-pressed="false" style="--c:#8b5cf6"><span class="dot"></span>Flock cameras (US)</button>
           <button data-l="air" aria-pressed="false" style="--c:#0ea5e9"><span class="dot"></span>Military aircraft</button>
+          <button data-l="vote" aria-pressed="false" style="--c:#f59e0b"><span class="dot"></span>Election night (US)</button>
           <button data-l="ships" aria-pressed="false" style="--c:#14b8a6"><span class="dot"></span>Ships (AIS)</button>
         </div>
       </div>
@@ -379,6 +382,7 @@ body { margin: 0; }
           <g id="lyr-incidents"></g>
           <g id="lyr-chokepoints"></g>
           <g id="lyr-hotspots"></g>
+          <g id="lyr-vote" style="display:none"></g>
           <g id="lyr-ships" style="display:none"></g>
           <g id="lyr-air" style="display:none"></g>
         </svg>
@@ -484,7 +488,7 @@ body { margin: 0; }
 
   var data = { hotspots: null, chokepoints: null, incidents: null };
   var meta = null;
-  var trkNodes = { air: [], ships: [] }, fk = null, flockW = 2.4, layers = { hotspots: true, chokepoints: true, incidents: true, quakes: false, nat: false, flock: false, air: false, ships: false }, flockLoaded = false;
+  var trkNodes = { air: [], ships: [], vote: [] }, fk = null, flockW = 2.4, layers = { hotspots: true, chokepoints: true, incidents: true, quakes: false, nat: false, flock: false, air: false, ships: false, vote: false }, flockLoaded = false;
   var openRows = {};
   var selected = null;
   var canEdit = false, noDb = false, isOwner = false, dbRef = null;
@@ -822,7 +826,7 @@ body { margin: 0; }
     for (var i = 0; i < markers.length; i++) markers[i].g.setAttribute('transform', 'translate(' + markers[i].x + ' ' + markers[i].y + ') scale(' + k + ')');
     if (typeof S2 !== 'undefined' && S2) S2.scale();
     for (var q = 0; q < quakeNodes.length; q++) quakeNodes[q].g.setAttribute('transform', 'translate(' + quakeNodes[q].x + ' ' + quakeNodes[q].y + ') scale(' + k + ')');
-    ['air', 'ships'].forEach(function (kk) { var a = trkNodes[kk]; for (var u = 0; u < a.length; u++) a[u].g.setAttribute('transform', 'translate(' + a[u].x + ' ' + a[u].y + ') scale(' + k + ')'); });
+    ['air', 'ships', 'vote'].forEach(function (kk) { var a = trkNodes[kk]; for (var u = 0; u < a.length; u++) a[u].g.setAttribute('transform', 'translate(' + a[u].x + ' ' + a[u].y + ') scale(' + k + ')'); });
     for (var w = 0; w < natNodes.length; w++) natNodes[w].g.setAttribute('transform', 'translate(' + natNodes[w].x + ' ' + natNodes[w].y + ') scale(' + k + ')');
   }
   function markSelected() {
@@ -2060,6 +2064,48 @@ body { margin: 0; }
     setInterval(function () { ['air', 'ships'].forEach(function (k) { if (layers[k]) load(k); }); }, 300000);
   })();
 
+
+  /* Election night (US): one dot per state, coloured by whether polls are still open. Close times are approximate (last polls to close, US Eastern, standard time). No vote counts here; links go to official sources. */
+  (function () {
+    var ST = [['AL','Alabama',32.8,-86.8,20],['AK','Alaska',64.2,-152.5,24],['AZ','Arizona',34.2,-111.7,21],['AR','Arkansas',34.9,-92.4,20.5],['CA','California',37.2,-119.6,23],['CO','Colorado',39.0,-105.5,21],['CT','Connecticut',41.6,-72.7,20],['DE','Delaware',39.0,-75.5,20],['DC','District of Columbia',38.9,-77.0,20],['FL','Florida',28.6,-82.4,20],['GA','Georgia',32.7,-83.4,19],['HI','Hawaii',20.8,-156.3,24],['ID','Idaho',44.4,-114.6,22],['IL','Illinois',40.0,-89.2,20],['IN','Indiana',39.9,-86.3,19],['IA','Iowa',42.1,-93.5,22],['KS','Kansas',38.5,-98.4,21],['KY','Kentucky',37.5,-85.3,19],['LA','Louisiana',31.0,-92.0,21],['ME','Maine',45.4,-69.2,20],['MD','Maryland',39.0,-76.8,20],['MA','Massachusetts',42.3,-71.8,20],['MI','Michigan',44.3,-85.4,21],['MN','Minnesota',46.3,-94.3,21],['MS','Mississippi',32.7,-89.7,20],['MO','Missouri',38.4,-92.5,20],['MT','Montana',47.0,-109.6,22],['NE','Nebraska',41.5,-99.8,21],['NV','Nevada',39.3,-116.6,22],['NH','New Hampshire',43.7,-71.6,20],['NJ','New Jersey',40.2,-74.7,20],['NM','New Mexico',34.4,-106.1,21],['NY','New York',42.9,-75.5,21],['NC','North Carolina',35.6,-79.4,19.5],['ND','North Dakota',47.5,-100.5,21],['OH','Ohio',40.3,-82.8,19.5],['OK','Oklahoma',35.6,-97.5,20],['OR','Oregon',43.9,-120.6,23],['PA','Pennsylvania',40.9,-77.8,20],['RI','Rhode Island',41.7,-71.5,21],['SC','South Carolina',33.9,-80.9,19],['SD','South Dakota',44.4,-100.2,21],['TN','Tennessee',35.9,-86.4,21],['TX','Texas',31.5,-99.3,21],['UT','Utah',39.3,-111.7,22],['VT','Vermont',44.0,-72.7,19],['VA','Virginia',37.5,-78.8,19],['WA','Washington',47.4,-120.5,23],['WV','West Virginia',38.6,-80.6,19.5],['WI','Wisconsin',44.6,-89.8,21],['WY','Wyoming',43.0,-107.5,21]];
+    /* close hour is US Eastern (EST) on 3 Nov; 24 = midnight, which is 00:00 on 4 Nov */
+    var built = false;
+    function closeMs(c) { return Date.UTC(2026, 10, 3, 0, 0, 0) + (c + 5) * 3600000; }
+    function hm(c) { var h = Math.floor(c) % 24, m = Math.round((c % 1) * 60); return (h % 12 || 12) + (m ? ':' + (m < 10 ? '0' : '') + m : '') + (h < 12 ? ' AM' : ' PM') + ' ET'; }
+    function paint() {
+      var now = Date.now();
+      trkNodes.vote.forEach(function (n) { n.g.querySelector('circle').setAttribute('fill', now >= n.close ? '#22c55e' : '#f59e0b'); n.closed = now >= n.close; });
+    }
+    window.loadVote = function () {
+      if (!built) {
+        built = true;
+        var root = $('#lyr-vote'), tp = $('#trkpop');
+        ST.forEach(function (q) {
+          var g = document.createElementNS(NS, 'g'), c = document.createElementNS(NS, 'circle'), t = document.createElementNS(NS, 'text');
+          c.setAttribute('r', 9); t.setAttribute('y', 2.5); t.textContent = q[0];
+          g.setAttribute('class', 'vt'); g.appendChild(c); g.appendChild(t);
+          var node = { g: g, x: X(q[3]), y: Y(q[2]), close: closeMs(q[4]) };
+          g.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var done = Date.now() >= node.close;
+            tp.innerHTML = '<button class="x" aria-label="Close">×</button><span class="rg">Election night</span><h3>' + esc(q[1]) + '</h3>'
+              + '<p class="tkm">' + (done ? 'Polls have closed (last polls about ' + hm(q[4]) + ').' : 'Polls still open until about ' + hm(q[4]) + '.') + ' Times are approximate.</p>'
+              + '<p class="tkm">No vote counts here. Results are published by the state; unofficial tallies come from news organizations.</p>'
+              + '<div class="acts"><a class="top-btn" target="_blank" rel="noopener" href="https://www.usa.gov/election-results">Official results sites</a> <a class="top-btn" target="_blank" rel="noopener" href="https://ballotpedia.org/Elections_in_' + encodeURIComponent(q[1].replace(/ /g, '_')) + ',_2026">Ballotpedia</a></div>';
+            tp.hidden = false; tp.querySelector('.x').addEventListener('click', function () { tp.hidden = true; });
+            var pw = Math.min(300, cw - 16), ph = tp.offsetHeight || 150, mx = (node.x - vb.x) / vb.w * cw, my = (node.y - vb.y) / vb.h * ch;
+            tp.style.left = Math.max(8, Math.min(cw - pw - 8, mx - pw / 2)) + 'px';
+            tp.style.top = Math.max(8, Math.min(ch - ph - 8, my + 16 + ph > ch ? my - ph - 16 : my + 16)) + 'px';
+          });
+          root.appendChild(g); trkNodes.vote.push(node);
+        });
+        setInterval(paint, 60000);
+        var st = $('#rstatus'); st.textContent = 'Election night: amber means polls still open, green means closed. Times are approximate and there are no vote counts yet. Tap a state for official results links. Zoom to the Americas to see the states.'; st.hidden = false; setTimeout(function () { st.hidden = true; }, 12000);
+      }
+      paint(); scaleMarkers();
+    };
+  })();
+
   /* tap a Flock camera (zoomed in): nearest dot within a few pixels, then details and links */
   (function () {
     var fp = $('#fkpop'), sel = null;
@@ -2175,6 +2221,7 @@ body { margin: 0; }
     $('#lyr-' + l).style.display = layers[l] ? '' : 'none';
     if (l === 'flock') { if (layers[l]) loadFlock(); viewFx(); }
     if ((l === 'air' || l === 'ships') && layers[l]) window.loadTrack(l);
+    if (l === 'vote' && layers[l]) window.loadVote();
     if (!layers[l] && selected && selected.kind === l) hidePop();
   });
   if (window.ResizeObserver) new ResizeObserver(measure).observe(mapWrap); else window.addEventListener('resize', measure);
