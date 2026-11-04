@@ -408,12 +408,6 @@ body { margin: 0; }
         <span>Circle: hotspot · Diamond: chokepoint · Triangle: cyber incident</span>
       </div>
       <div class="tools"><span>Live trackers:</span><a href="https://gpsjam.org/" target="_blank" rel="noopener noreferrer">GPS jamming</a><a href="https://radar.cloudflare.com/outage-center" target="_blank" rel="noopener noreferrer">Internet outages</a><a href="https://globe.adsbexchange.com/" target="_blank" rel="noopener noreferrer">Flights (ADS-B)</a><a href="https://www.marinetraffic.com/" target="_blank" rel="noopener noreferrer">Ships (MarineTraffic)</a><a href="https://www.vesselfinder.com/" target="_blank" rel="noopener noreferrer">Ships (VesselFinder)</a><a href="https://www.windy.com/" target="_blank" rel="noopener noreferrer">Weather (Windy)</a></div>
-      <div class="vpanel" id="vpanel" hidden>
-        <div class="vtabs" id="vtabs"><button data-m="pbs" aria-pressed="true">Live map (PBS)</button><button data-m="senate" aria-pressed="false">Senate</button><button data-m="house" aria-pressed="false">House</button><button data-m="governor" aria-pressed="false">Governor</button></div>
-        <div class="vbar" id="vbar"></div>
-        <div class="vnote" id="vnote"></div>
-        <div class="vkey" id="vkey"></div>
-      </div>
       <details class="s2" id="s2"><summary>S2 Underground map layers <span class="count" id="s2n"></span></summary><div class="s2b" id="s2b"></div></details>
     </section>
 
@@ -2156,25 +2150,8 @@ body { margin: 0; }
       if (!f) { f = document.createElement('iframe'); f.id = 'vmapf'; f.src = 'https://elections.mapcreator.io/usa2026/pbs_web#race=senate'; f.title = 'PBS News live election map (Associated Press data)'; f.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin'); f.hidden = true; mapWrap.appendChild(f); }
       return f;
     }
-    window.hideVote = function () { mapWrap.classList.remove('pbs'); var f = $('#vmapf'); if (f) f.hidden = true; $('#vpanel').hidden = true; };
-    function setMode(m) {
-      curTab = m;
-      var fr = vmapf(), isPbs = m === 'pbs';
-      fr.hidden = !isPbs; mapWrap.classList.toggle('pbs', isPbs);
-      ['#vbar', '#vnote', '#vkey'].forEach(function (q) { $(q).style.display = isPbs ? 'none' : ''; });
-      Array.prototype.forEach.call($('#vtabs').children, function (b) { b.setAttribute('aria-pressed', b.dataset.m === m ? 'true' : 'false'); });
-      if (isPbs) {
-        return;
-      }
-      setTimeout(setTitles, 0);
-      mode = m;
-      Object.keys(fills).forEach(function (a) { fills[a].setAttribute('fill', lean(a)); });
-      Array.prototype.forEach.call($('#vtabs').children, function (b) { b.setAttribute('aria-pressed', b.dataset.m === m ? 'true' : 'false'); });
-      var b = liveBar(m) || BARS[m]; $('#vbar').innerHTML = '<span class="d">' + b[0] + ' <small>Democrat</small></span><small>' + esc(b[2]) + '</small><span class="r"><small>Republican</small> ' + b[1] + '</span>';
-      $('#vnote').textContent = live ? 'Live, unofficial results from civicAPI (civicapi.org), updated ' + new Date(live.at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) + '. Where civicAPI has no data, the PBS snapshot from ' + SNAP_AT + ' is used.' : (m === 'house' ? 'House balance and key calls' : 'Key races') + ', copied from PBS News (Associated Press data) at ' + SNAP_AT + '. A snapshot, not live. ' + (m === 'house' ? 'Map shading is not available for the House because it is decided by 435 districts.' : '');
-      $('#vkey').innerHTML = (liveKey(m) || KEY[m]).map(function (k) { return '<div style="--c:' + k[2] + '"><b>' + esc(k[0]) + '</b>' + esc(k[1]) + '</div>'; }).join('');
-    }
-    $('#vtabs').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) setMode(b.dataset.m); });
+    window.hideVote = function () { mapWrap.classList.remove('pbs'); var f = $('#vmapf'); if (f) f.hidden = true; };
+    function setMode() { vmapf().hidden = false; mapWrap.classList.add('pbs'); }
     function closeMs(c) { return Date.UTC(2026, 10, 3, 0, 0, 0) + (c + 5) * 3600000; }
     function hm(c) { var h = Math.floor(c) % 24, m = Math.round((c % 1) * 60); return (h % 12 || 12) + (m ? ':' + (m < 10 ? '0' : '') + m : '') + (h < 12 ? ' AM' : ' PM') + ' ET'; }
     function paint() {
@@ -2220,7 +2197,7 @@ body { margin: 0; }
         setInterval(paint, 60000);
         var st = $('#rstatus'); st.textContent = 'Election night: states are shaded to match the PBS Senate map as of ' + SNAP_AT + ' (a hand-copied snapshot, not live): solid blue or red is a win, light blue or red a lean, teal an independent lean, pale grey not yet called, dark grey no Senate race. Dots: amber means polls still open, green means closed. Tap a state for live results (PBS, Associated Press data) and official links. Zoom to the Americas to see the states.'; st.hidden = false; setTimeout(function () { st.hidden = true; }, 12000);
       }
-      paint(); scaleMarkers(); if (!loadVote.started) { loadVote.started = 1; setMode('pbs'); } else setMode(curTab); $('#vpanel').hidden = false; $('#vpanel').scrollIntoView({ block: 'nearest' }); pull(); pullLive(); if (!pullLive.t) pullLive.t = setInterval(function () { if (layers.vote) pullLive(); }, 60000); if (!pull.t) pull.t = setInterval(function () { if (layers.vote) pull(); }, 120000);
+      paint(); scaleMarkers(); setMode(); pull(); pullLive(); if (!pullLive.t) pullLive.t = setInterval(function () { if (layers.vote) pullLive(); }, 60000); if (!pull.t) pull.t = setInterval(function () { if (layers.vote) pull(); }, 120000);
     };
   })();
 
