@@ -363,8 +363,8 @@ async function refreshElection() {
   if (electionBusy) return; electionBusy = true;
   try {
     const day = '2026-11-03', base = 'race/search?startDate=' + day + '&endDate=' + day, sen = {}, gov = {}, house = { d: 0, r: 0, o: 0, n: 0 };
-    const first = await civic(base + '&limit=100&offset=0');
-    const limit = first.limit || (first.races || []).length || 100;
+    const first = await civic(base + '&limit=20&offset=0');
+    const limit = first.limit || (first.races || []).length || 20;
     const take = (races) => {
       for (const r of races || []) {
         const t = String(r.type || '').toLowerCase();
@@ -377,14 +377,16 @@ async function refreshElection() {
         else if (/house|represent|congress/.test(t)) { house.n++; if (sm.c[0] === 'w') house[sm.c[1] === 'd' ? 'd' : sm.c[1] === 'r' ? 'r' : 'o']++; }
       }
     };
-    take(first.races);
+    const publish = (pages, failed) => { election = { at: new Date().toISOString(), error: null, count: pages, failedPages: failed, senate: Object.assign({}, sen), governor: Object.assign({}, gov), house: Object.assign({}, house), source: 'civicapi.org (unofficial)' }; };
+    take(first.races); publish(1, 0);
     /* the API's "count" is the size of the page, so keep paging until a short page comes back */
     let next = limit, failed = 0, more = (first.races || []).length >= limit, pages = 1;
-    while (more && pages < 120) {
+    while (more && pages < 400) {
       const offs = [0, 1, 2, 3].map(n => next + n * limit); next += 4 * limit;
       const rs = await Promise.all(offs.map(o => civic(base + '&limit=' + limit + '&offset=' + o).catch(() => { failed++; return null; })));
       pages += 4; more = false;
       for (const r of rs) { if (!r) continue; take(r.races); if ((r.races || []).length >= limit) more = true; }
+      publish(pages, failed);
       if (rs.every(r => !r)) break;
     }
     const count = pages;
