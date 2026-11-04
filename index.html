@@ -362,9 +362,9 @@ body { margin: 0; }
       <div class="card-h">
         <div class="seg" id="regions" role="group" aria-label="Region"></div>
         <div class="seg lyr" id="layers" role="group" aria-label="Layers">
-          <button data-l="hotspots" aria-pressed="true" style="--c:var(--crit)"><span class="dot"></span>Hotspots</button>
-          <button data-l="chokepoints" aria-pressed="true" style="--c:var(--accent)"><span class="dot"></span>Chokepoints</button>
-          <button data-l="incidents" aria-pressed="true" style="--c:var(--elev)"><span class="dot"></span>Cyber</button>
+          <button data-l="hotspots" aria-pressed="false" style="--c:var(--crit)"><span class="dot"></span>Hotspots</button>
+          <button data-l="chokepoints" aria-pressed="false" style="--c:var(--accent)"><span class="dot"></span>Chokepoints</button>
+          <button data-l="incidents" aria-pressed="false" style="--c:var(--elev)"><span class="dot"></span>Cyber</button>
           <button data-l="quakes" aria-pressed="false" style="--c:var(--faint)"><span class="dot"></span>Quakes</button>
           <button data-l="nat" aria-pressed="false" style="--c:var(--sev)"><span class="dot"></span>Fires and storms</button>
           <button data-l="flock" aria-pressed="false" style="--c:#8b5cf6"><span class="dot"></span>Flock cameras (US)</button>
@@ -384,9 +384,9 @@ body { margin: 0; }
           <g id="lyr-nat" style="display:none"></g>
           <g id="lyr-cones" style="display:none"></g>
           <g id="lyr-flock" style="display:none"></g>
-          <g id="lyr-incidents"></g>
-          <g id="lyr-chokepoints"></g>
-          <g id="lyr-hotspots"></g>
+          <g id="lyr-incidents" style="display:none"></g>
+          <g id="lyr-chokepoints" style="display:none"></g>
+          <g id="lyr-hotspots" style="display:none"></g>
           <g id="lyr-vote" style="display:none"></g>
           <g id="lyr-ships" style="display:none"></g>
           <g id="lyr-air" style="display:none"></g>
@@ -499,7 +499,7 @@ body { margin: 0; }
 
   var data = { hotspots: null, chokepoints: null, incidents: null };
   var meta = null;
-  var trkNodes = { air: [], ships: [], vote: [] }, fk = null, flockW = 2.4, layers = { hotspots: true, chokepoints: true, incidents: true, quakes: false, nat: false, flock: false, air: false, ships: false, vote: false }, flockLoaded = false;
+  var trkNodes = { air: [], ships: [], vote: [] }, fk = null, flockW = 2.4, layers = { hotspots: false, chokepoints: false, incidents: false, quakes: false, nat: false, flock: false, air: false, ships: false, vote: false }, flockLoaded = false;
   var openRows = {};
   var selected = null;
   var canEdit = false, noDb = false, isOwner = false, dbRef = null;
@@ -1311,9 +1311,9 @@ body { margin: 0; }
     var CAT = [], ci = 0;
     function L(group, label, url, o) { o = o || {}; o.group = group; o.label = label; o.url = url; o.color = PAL[ci++ % PAL.length]; CAT.push(o); }
     var G1 = 'Conflict and security', G2 = 'Infrastructure', G3 = 'Hazards and weather';
-    L(G1, 'Iran kinetic events', O + 'Iran_Kinetic_Events/FeatureServer/3', { on: 1, timed: 1 });
-    L(G1, 'Kinetic activity, outside US', O + 'KineticActivitiesTrackerOCONUS/FeatureServer/21', { on: 1, timed: 1 });
-    L(G1, 'Kinetic activity, Europe', O + 'Kinetic_Activity_Tracker_Europe/FeatureServer/22', { on: 1, timed: 1 });
+    L(G1, 'Iran kinetic events', O + 'Iran_Kinetic_Events/FeatureServer/3', { timed: 1 });
+    L(G1, 'Kinetic activity, outside US', O + 'KineticActivitiesTrackerOCONUS/FeatureServer/21', { timed: 1 });
+    L(G1, 'Kinetic activity, Europe', O + 'Kinetic_Activity_Tracker_Europe/FeatureServer/22', { timed: 1 });
     L(G1, 'Drone reports', O + 'Drone_Reports/FeatureServer/23', { timed: 1 });
     L(G1, 'Iran common intelligence picture', O + 'Iran_Common_Intelligence_Picture/FeatureServer/2');
     L(G1, 'Persian Gulf critical infrastructure', O + 'Persian_Gulf_Critical_Infrastructure/FeatureServer/22');
