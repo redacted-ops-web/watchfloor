@@ -1,5 +1,5 @@
 {
- "at": "9:58 PM Central",
+ "at": "9:08 PM Central",
  "senate": {
   "wd": "CO NM IL VA NC GA NH MA RI NJ DE",
   "ld": "TX KS IA MI OH SC ME",
@@ -22,8 +22,8 @@
    "51 controls"
   ],
   "house": [
-   101,
-   53,
+   102,
+   60,
    "218 controls"
   ],
   "governor": [
@@ -119,8 +119,13 @@
     "wd"
    ],
    [
+    "NC House",
+    "Jamie Ager (D) flips seat",
+    "wd"
+   ],
+   [
     "Balance",
-    "Democrats 101, Republicans 53, 218 needed",
+    "Democrats 102, Republicans 60, 218 needed",
     "no"
    ]
   ]
