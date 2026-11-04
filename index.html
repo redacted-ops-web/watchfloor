@@ -178,7 +178,7 @@ svg.labels .lbl, .mk.on .lbl, .mk:hover .lbl, .mk:focus-visible .lbl { display: 
 .vpanel { border-top: 1px solid var(--line); padding: 10px 14px 12px; }
 .vtabs { display: flex; gap: 6px; margin-bottom: 8px; } .vtabs button { background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 6px 14px; cursor: pointer; font: 600 12px/1.2 var(--font-body); color: var(--fg); } .vtabs button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
 .vbar { display: flex; justify-content: space-between; align-items: baseline; font: 700 20px/1 var(--font-display); } .vbar .d { color: #3b8de8; } .vbar .r { color: #e8283c; } .vbar small { font: 500 11px/1 var(--font-body); color: var(--muted); }
-.vframe iframe { width: 100%; height: 640px; border: 1px solid var(--line); border-radius: 6px; background: #fff; display: block; }
+.vframe iframe { width: 100%; height: 760px; border: 1px solid var(--line); border-radius: 6px; background: #fff; display: block; }
 .vnote { font-size: 11.5px; color: var(--muted); margin: 6px 0 8px; }
 .vkey { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 6px; } .vkey div { border: 1px solid var(--line); border-left: 4px solid var(--c, var(--line)); border-radius: 6px; padding: 6px 8px; font-size: 12px; } .vkey b { display: block; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 .s2 { border-top: 1px solid var(--line); }
@@ -409,7 +409,7 @@ body { margin: 0; }
       </div>
       <div class="tools"><span>Live trackers:</span><a href="https://gpsjam.org/" target="_blank" rel="noopener noreferrer">GPS jamming</a><a href="https://radar.cloudflare.com/outage-center" target="_blank" rel="noopener noreferrer">Internet outages</a><a href="https://globe.adsbexchange.com/" target="_blank" rel="noopener noreferrer">Flights (ADS-B)</a><a href="https://www.marinetraffic.com/" target="_blank" rel="noopener noreferrer">Ships (MarineTraffic)</a><a href="https://www.vesselfinder.com/" target="_blank" rel="noopener noreferrer">Ships (VesselFinder)</a><a href="https://www.windy.com/" target="_blank" rel="noopener noreferrer">Weather (Windy)</a></div>
       <div class="vpanel" id="vpanel" hidden>
-        <div class="vtabs" id="vtabs"><button data-m="senate" aria-pressed="true">Senate</button><button data-m="house" aria-pressed="false">House</button><button data-m="governor" aria-pressed="false">Governor</button><button data-m="pbs" aria-pressed="false">PBS live map</button></div>
+        <div class="vtabs" id="vtabs"><button data-m="pbs" aria-pressed="true">Live map (PBS)</button><button data-m="senate" aria-pressed="false">Senate</button><button data-m="house" aria-pressed="false">House</button><button data-m="governor" aria-pressed="false">Governor</button></div>
         <div class="vframe" id="vframe" hidden><div class="vnote">Live map from PBS News (Associated Press data), embedded from Mapcreator. If it stays blank, PBS has blocked embedding: <a href="https://www.pbs.org/newshour/elections-2026/results" target="_blank" rel="noopener noreferrer">open it on PBS</a>.</div></div>
         <div class="vbar" id="vbar"></div>
         <div class="vnote" id="vnote"></div>
@@ -2106,7 +2106,7 @@ body { margin: 0; }
       if (j.key) { KEY = {}; Object.keys(j.key).forEach(function (m) { KEY[m] = j.key[m].map(function (k) { return [k[0], k[1], SCOL[k[2]] || k[2]]; }); }); }
     }
     function pull() {
-      fetch('data/election.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) { applyData(j); if (built) setMode(mode); }).catch(function () { });
+      fetch('data/election.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) { applyData(j); if (built) setMode(curTab); }).catch(function () { });
     }
     var live = null;
     function liveRace(a) { return live && mode !== 'house' && live[mode] ? live[mode][a] : null; }
@@ -2124,7 +2124,7 @@ body { margin: 0; }
       return rows.slice(0, 12).map(function (x) { var L = x[1], t = L.top || []; return [x[0] + (m === 'governor' ? ' Governor' : ' Senate'), (t[0] ? t[0].n + ' ' + (t[0].pct != null ? t[0].pct + '%' : '') : 'No votes yet') + ' (' + L.pr + '% in)' + (L.c[0] === 'w' ? ', called' : ''), SCOL[L.c] || '#8a8f98']; });
     }
     function pullLive() {
-      fetch('/api/election', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { live = j && !j.error && j.at ? j : null; if (built) setMode(mode); }).catch(function () { });
+      fetch('/api/election', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { live = j && !j.error && j.at ? j : null; if (built) setMode(curTab); }).catch(function () { });
     }
     function stKey(a) {
       var L = liveRace(a); if (L) return L.c; return (mode === 'governor' ? GOV : mode === 'senate' ? SEN : {})[a] || (mode === 'house' ? 'pe' : 'no'); }
@@ -2151,7 +2151,9 @@ body { margin: 0; }
         t.textContent = q[1] + (d.length ? '\n' + d.map(function (r) { return r.head + (r.called ? ' (called)' : '') + '\n' + r.rows.join('\n'); }).join('\n') : '\n' + stLabel(a));
       });
     }
+    var curTab = 'pbs';
     function setMode(m) {
+      curTab = m;
       var fr = $('#vframe'), isPbs = m === 'pbs';
       fr.hidden = !isPbs;
       ['#vbar', '#vnote', '#vkey'].forEach(function (q) { $(q).style.display = isPbs ? 'none' : ''; });
@@ -2214,7 +2216,7 @@ body { margin: 0; }
         setInterval(paint, 60000);
         var st = $('#rstatus'); st.textContent = 'Election night: states are shaded to match the PBS Senate map as of ' + SNAP_AT + ' (a hand-copied snapshot, not live): solid blue or red is a win, light blue or red a lean, teal an independent lean, pale grey not yet called, dark grey no Senate race. Dots: amber means polls still open, green means closed. Tap a state for live results (PBS, Associated Press data) and official links. Zoom to the Americas to see the states.'; st.hidden = false; setTimeout(function () { st.hidden = true; }, 12000);
       }
-      paint(); scaleMarkers(); setMode(mode); $('#vpanel').hidden = false; pull(); pullLive(); if (!pullLive.t) pullLive.t = setInterval(function () { if (layers.vote) pullLive(); }, 60000); if (!pull.t) pull.t = setInterval(function () { if (layers.vote) pull(); }, 120000);
+      paint(); scaleMarkers(); if (!loadVote.started) { loadVote.started = 1; setMode('pbs'); } else setMode(curTab); $('#vpanel').hidden = false; $('#vpanel').scrollIntoView({ block: 'nearest' }); pull(); pullLive(); if (!pullLive.t) pullLive.t = setInterval(function () { if (layers.vote) pullLive(); }, 60000); if (!pull.t) pull.t = setInterval(function () { if (layers.vote) pull(); }, 120000);
     };
   })();
 
