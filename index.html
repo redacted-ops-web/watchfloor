@@ -265,6 +265,8 @@ svg.labels .lbl, .mk.on .lbl, .mk:hover .lbl, .mk:focus-visible .lbl { display: 
 .frame { position: relative; aspect-ratio: 16 / 9; max-width: 100%; background: #000; border-radius: 6px; overflow: hidden; }
 .frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .vbody { padding: 10px 14px 14px; }
+#vp { padding: 0 0 10px; }
+#vp-frame { height: 100%; border: 0; border-radius: 0; display: block; }
 .vbody iframe { display: block; width: 100%; height: 520px; max-width: 100%; border: 1px solid var(--line); border-radius: 6px; background: var(--panel-2); }
 .ch-form { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 8px; }
 .ch-form input { flex: 1 1 160px; min-width: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 7px 10px; }
@@ -428,8 +430,14 @@ body { margin: 0; }
     </section>
     <section class="card feeds vids" aria-label="Channel videos">
       <div class="card-h"><h2>Channel videos</h2><span class="count" id="vd-meta">Loading…</span></div>
-      <div class="vbody"><div id="vd-chips"></div><div id="vd-list" class="fd"></div>
-      <p class="fine">Latest videos from YouTube channels the site owner follows. Content belongs to its authors and is not verified by this dashboard.</p></div>
+      <div class="vbody">
+      <div class="player" id="vp" hidden>
+        <div class="pbar"><span id="vp-name"></span><span class="acts"><a id="vp-open" href="#" target="_blank" rel="noopener noreferrer">Open on YouTube</a><button class="btn" id="vp-stop">Close</button></span></div>
+        <div class="frame"><iframe id="vp-frame" title="Video player" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"></iframe></div>
+        <p class="fine" id="vp-hint" style="margin:6px 0 0"></p>
+      </div>
+      <div id="vd-chips"></div><div id="vd-list" class="fd"></div>
+      <p class="fine">Latest videos from YouTube channels the site owner follows. Click a video to play it here. Content belongs to its authors and is not verified by this dashboard.</p></div>
     </section>
     <section class="card feeds" aria-label="News feeds">
       <div class="card-h"><h2>News feeds</h2><span class="count" id="fd-meta">Loading…</span></div>
@@ -1725,6 +1733,16 @@ body { margin: 0; }
     { key: 'news', chips: '#fd-chips', list: '#fd-list', meta: '#fd-meta', sel: 'all', cat: 'all', pred: function (i) { return !isVid(i); }, per: 3, perOne: 12, empty: 'No news items yet.' },
     { key: 'vids', chips: '#vd-chips', list: '#vd-list', meta: '#vd-meta', sel: 'all', cat: 'all', pred: isVid, per: 3, perOne: 12, empty: 'No channel videos yet.' }
   ];
+  /* play a channel video on this page instead of leaving for YouTube */
+  function playVideo(id, title, url) {
+    $('#vp-name').textContent = title || '';
+    $('#vp-open').href = url;
+    $('#vp-frame').src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0&origin=' + encodeURIComponent(location.origin);
+    $('#vp-hint').textContent = 'If the picture does not appear, the creator may not allow playing here. Use Open on YouTube.';
+    $('#vp').hidden = false; $('#vp').scrollIntoView({ block: 'nearest' });
+  }
+  function stopVideo() { $('#vp-frame').removeAttribute('src'); $('#vp').hidden = true; }
+  $('#vp-stop').addEventListener('click', stopVideo);
   function renderFeeds() { FMODS.forEach(renderFeedMod); }
   function renderFeedMod(M) {
     var chips = $(M.chips), list = $(M.list), names = {}, order = [], cats = [], catOf = {}, items = feedItems.filter(M.pred).filter(function (i) { return !FIL.q || (String(i.title || '') + ' ' + String(i.text || '') + ' ' + String(i.name || '')).toLowerCase().indexOf(FIL.q) >= 0; });
@@ -1755,6 +1773,8 @@ body { margin: 0; }
     }).forEach(function (i) {
       var u = safeUrl(i.url); if (!u) return;
       var a = document.createElement('a'); a.href = u; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.className = i.kind === 'video' ? 'video' : 'post';
+      var vm = i.kind === 'video' ? String(u).match(/^https:\/\/www\.youtube\.com\/watch\?v=([\w-]{11})$/) : null;
+      if (vm) a.addEventListener('click', function (ev) { if (ev.ctrlKey || ev.metaKey || ev.shiftKey || ev.button) return; ev.preventDefault(); playVideo(vm[1], i.title || '', u); });
       if (i.kind === 'video' && /^https:\/\/i\.ytimg\.com\//.test(i.thumb || '')) { var im = document.createElement('img'); im.src = i.thumb; im.alt = ''; im.loading = 'lazy'; im.referrerPolicy = 'no-referrer'; a.appendChild(im); }
       var t = document.createElement('div'); t.className = 't'; t.textContent = i.title || i.text || ''; a.appendChild(t);
       var m = document.createElement('div'); m.className = 'm'; m.textContent = i.name + (i.ts ? ' · ' + agoText(i.ts) : '') + (i.kind === 'video' ? ' · video' : ''); a.appendChild(m);
