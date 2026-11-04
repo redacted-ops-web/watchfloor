@@ -1269,7 +1269,11 @@ body { margin: 0; }
     $('#fav-only').addEventListener('click', function () { favOnly = !favOnly; this.setAttribute('aria-pressed', favOnly); renderChannels(); });
     $('#p-stop').addEventListener('click', stopPlayer);
     function loadLive() {
-      fetch('/api/live', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) { liveInfo = j.channels || {}; renderChannels(); }).catch(function () {});
+      fetch('/api/live', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) {
+        liveInfo = j.channels || {};
+        (channels || []).forEach(function (c) { if (!c.channelId && j.resolved && /^UC[\w-]{22}$/.test(j.resolved[c.id] || '')) c.channelId = j.resolved[c.id]; });
+        renderChannels();
+      }).catch(function () {});
     }
     fetch('data/channels.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) {
       channels = (j.channels || []).map(function (c, i) { return Object.assign({ id: 'c' + i }, c); }); renderChannels(); loadLive();
@@ -1665,16 +1669,24 @@ body { margin: 0; }
         panel.appendChild(l);
       });
       var add = document.createElement('div'); add.className = 'row';
-      var nm = document.createElement('input'); nm.type = 'text'; nm.placeholder = 'Channel name'; nm.maxLength = 60; nm.setAttribute('aria-label', 'Channel name');
-      var idi = document.createElement('input'); idi.type = 'text'; idi.placeholder = 'YouTube channel ID (starts with UC)'; idi.maxLength = 24; idi.setAttribute('aria-label', 'YouTube channel ID');
-      var ab = document.createElement('button'); ab.type = 'button'; ab.className = 'top-btn'; ab.textContent = 'Add channel';
-      ab.addEventListener('click', function () {
-        var n = nm.value.trim(), i = idi.value.trim();
-        if (!n || !/^UC[\w-]{22}$/.test(i)) { rstatus('Enter a name and a channel ID that starts with UC (24 characters).'); return; }
+      var q = document.createElement('input'); q.type = 'text'; q.placeholder = 'Channel name, @handle, or YouTube link'; q.maxLength = 120; q.setAttribute('aria-label', 'Channel name, handle, or YouTube link');
+      var ab = document.createElement('button'); ab.type = 'button'; ab.className = 'top-btn'; ab.textContent = 'Find and add';
+      function addFound(n, i) {
         if (chList().some(function (c) { return c.channelId === i; })) { rstatus('That channel is already in the list.'); return; }
-        customCh.push({ name: n, channelId: i }); saveCh(); renderChannels(); build(); rstatus('');
-      });
-      add.appendChild(nm); add.appendChild(idi); add.appendChild(ab); panel.appendChild(add);
+        customCh.push({ name: n, channelId: i }); saveCh(); renderChannels(); build(); rstatus('Added ' + n + '.');
+      }
+      function findIt() {
+        var t = q.value.trim(); if (!t) return;
+        if (/^UC[\w-]{22}$/.test(t)) { addFound(t, t); return; }
+        ab.disabled = true; ab.textContent = 'Searching…';
+        fetch('/api/resolve?q=' + encodeURIComponent(t), { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) {
+          if (!j || !/^UC[\w-]{22}$/.test(j.channelId || '')) throw 0;
+          addFound(j.name || t, j.channelId);
+        }).catch(function () { rstatus('Could not find that channel. Try its @handle or paste its YouTube link.'); ab.disabled = false; ab.textContent = 'Find and add'; });
+      }
+      ab.addEventListener('click', findIt);
+      q.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); findIt(); } });
+      add.appendChild(q); add.appendChild(ab); panel.appendChild(add);
       var row = document.createElement('div'); row.className = 'row';
       var ex = document.createElement('button'); ex.type = 'button'; ex.className = 'top-btn'; ex.textContent = 'Export settings';
       var im = document.createElement('button'); im.type = 'button'; im.className = 'top-btn'; im.textContent = 'Import settings';

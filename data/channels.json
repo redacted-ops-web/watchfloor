@@ -63,6 +63,69 @@
    "note": "China",
    "channelId": "UCgrNz-aDmcr2uuto8_DL2jg",
    "url": "https://www.youtube.com/@CGTNOfficial/live"
+  },
+  {
+   "id": "cnn",
+   "name": "CNN",
+   "note": "United States",
+   "handle": "CNN",
+   "url": "https://www.youtube.com/@CNN/live"
+  },
+  {
+   "id": "abc",
+   "name": "ABC News Live",
+   "note": "United States",
+   "handle": "ABCNews",
+   "url": "https://www.youtube.com/@ABCNews/live"
+  },
+  {
+   "id": "nbc",
+   "name": "NBC News",
+   "note": "United States",
+   "handle": "NBCNews",
+   "url": "https://www.youtube.com/@NBCNews/live"
+  },
+  {
+   "id": "cspan",
+   "name": "C-SPAN",
+   "note": "United States",
+   "handle": "cspan",
+   "url": "https://www.youtube.com/@cspan/live"
+  },
+  {
+   "id": "reuters",
+   "name": "Reuters",
+   "note": "Global wire",
+   "handle": "Reuters",
+   "url": "https://www.youtube.com/@Reuters/live"
+  },
+  {
+   "id": "sky",
+   "name": "Sky News",
+   "note": "United Kingdom",
+   "handle": "SkyNews",
+   "url": "https://www.youtube.com/@SkyNews/live"
+  },
+  {
+   "id": "bbc",
+   "name": "BBC News",
+   "note": "United Kingdom",
+   "handle": "BBCNews",
+   "url": "https://www.youtube.com/@BBCNews/live"
+  },
+  {
+   "id": "pbs",
+   "name": "PBS NewsHour",
+   "note": "United States",
+   "handle": "PBSNewsHour",
+   "url": "https://www.youtube.com/@PBSNewsHour/live"
+  },
+  {
+   "id": "newsnation",
+   "name": "NewsNation",
+   "note": "United States",
+   "handle": "NewsNation",
+   "url": "https://www.youtube.com/@NewsNation/live"
   }
  ]
 }

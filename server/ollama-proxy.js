@@ -297,16 +297,42 @@ async function resolveLive(c) {
   }
   return out;
 }
+// ---- find a YouTube channel from a name, an @handle, a link, or a channel ID ----
+async function chanName(id) {
+  const page = await getText('https://www.youtube.com/channel/' + encodeURIComponent(id));
+  const t = page.match(/<meta property="og:title" content="([^"]*)"/);
+  return t ? short(strip(t[1]), 60) : '';
+}
+async function findChannel(q) {
+  q = String(q || '').trim().slice(0, 120); if (!q) throw new Error('empty');
+  let m = q.match(/(UC[\w-]{22})/);
+  if (m) return { channelId: m[1], name: await chanName(m[1]).catch(() => '') };
+  m = q.match(/youtube\.com\/@([\w.-]+)/i) || q.match(/^@([\w.-]+)$/) || (/^[\w.-]+$/.test(q) ? [null, q] : null);
+  if (m) {
+    try { const id = await ytId({ handle: m[1] }); return { channelId: id, name: await chanName(id).catch(() => m[1]) }; } catch (e) { /* fall through to search */ }
+  }
+  const page = await getText('https://www.youtube.com/results?search_query=' + encodeURIComponent(q) + '&sp=EgIQAg%3D%3D');
+  const r = page.match(/"channelRenderer":\{"channelId":"(UC[\w-]{22})"[\s\S]{0,1500}?"title":\{"simpleText":"([^"]+)"/);
+  if (!r) throw new Error('not found');
+  return { channelId: r[1], name: short(strip(r[2]), 60) };
+}
+const resolveHits = [];
+function resolveOk() { const n = Date.now(); while (resolveHits.length && n - resolveHits[0] > 60000) resolveHits.shift(); if (resolveHits.length >= 20) return false; resolveHits.push(n); return true; }
+
 let livePolling = false;
 async function refreshLive() {
   if (livePolling) return; livePolling = true;
   try {
-    const j = JSON.parse(await getText(CH_URL)), res = {};
-    for (const c of (j.channels || []).slice(0, 40)) {
-      if (!c || !/^UC[\w-]{20,24}$/.test(c.channelId || '')) continue;
+    const j = JSON.parse(await getText(CH_URL)), res = {}, resolved = {};
+    for (let c of (j.channels || []).slice(0, 60)) {
+      if (!c) continue;
+      if (!/^UC[\w-]{20,24}$/.test(c.channelId || '') && (c.handle || c.name)) {
+        try { const id = c.handle ? await ytId({ handle: c.handle }).catch(() => null) : null; const f = id ? { channelId: id } : await findChannel(c.name); resolved[c.id] = f.channelId; c = Object.assign({}, c, { channelId: f.channelId }); } catch (e) { continue; }
+      }
+      if (!/^UC[\w-]{20,24}$/.test(c.channelId || '')) continue;
       try { res[c.channelId] = await resolveLive(c); } catch (e) { res[c.channelId] = { live: null, error: String(e.message || e).slice(0, 60) }; }
     }
-    live = { at: new Date().toISOString(), channels: res };
+    live = { at: new Date().toISOString(), channels: res, resolved };
     console.log('Live status: ' + Object.keys(res).filter(k => res[k].live).length + ' of ' + Object.keys(res).length + ' channels live');
   } catch (e) { /* site unreachable; keep old */ } finally { livePolling = false; }
 }
@@ -324,6 +350,11 @@ const server = http.createServer(async (req, res) => {
   }
   if (req.method === 'GET' && path === '/feeds') return send(res, 200, feeds);
   if (req.method === 'GET' && path === '/live') return send(res, 200, live);
+  if (req.method === 'GET' && path === '/resolve') {
+    if (!resolveOk()) return send(res, 429, { error: 'slow down' });
+    let q = ''; try { q = new URL(req.url, 'http://x').searchParams.get('q') || ''; } catch (e) { }
+    try { return send(res, 200, await findChannel(q)); } catch (e) { return send(res, 404, { error: 'not found' }); }
+  }
   if (req.method === 'GET' && path === '/answers') return send(res, 200, { dataAsOf: cache.dataAsOf, at: cache.at, items: cache.items || [] });
   if (req.method === 'POST' && path === '/ask') return ask(req, res, ip);
   res.writeHead(404); res.end();
