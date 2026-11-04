@@ -2072,7 +2072,7 @@ body { margin: 0; }
     var built = false;
     /* 2024 presidential margin in points (positive = Democratic), the baseline used for shading until live counts are wired in */
     var M24 = { AL:-30,AK:-13,AZ:-5.5,AR:-30,CA:20,CO:11,CT:15,DE:15,DC:85,FL:-13,GA:-2,HI:25,ID:-36,IL:11,IN:-19,IA:-13,KS:-16,KY:-30,LA:-22,ME:7,MD:29,MA:25,MI:-1.4,MN:4,MS:-20,MO:-18,MT:-20,NE:-20,NV:-3.1,NH:2.8,NJ:6,NM:6,NY:13,NC:-3.2,ND:-36,OH:-11,OK:-34,OR:14,PA:-1.7,RI:14,SC:-18,SD:-29,TN:-30,TX:-14,UT:-21,VT:31,VA:6,WA:18,WV:-42,WI:-0.9,WY:-47 };
-    function lean(m) { return m >= 10 ? '#1d4ed8' : m >= 3 ? '#60a5fa' : m > -3 ? '#8b5cf6' : m > -10 ? '#f87171' : '#b91c1c'; }
+    function lean(m) { return m >= 10 ? '#2f7fe6' : m >= 3 ? '#9cc7f5' : m > -3 ? '#8b5cf6' : m > -10 ? '#f4a3ab' : '#e8283c'; }
     function closeMs(c) { return Date.UTC(2026, 10, 3, 0, 0, 0) + (c + 5) * 3600000; }
     function hm(c) { var h = Math.floor(c) % 24, m = Math.round((c % 1) * 60); return (h % 12 || 12) + (m ? ':' + (m < 10 ? '0' : '') + m : '') + (h < 12 ? ' AM' : ' PM') + ' ET'; }
     function paint() {
