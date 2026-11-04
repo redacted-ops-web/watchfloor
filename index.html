@@ -2085,7 +2085,7 @@ body { margin: 0; }
     var SNAP_AT = '8:35 PM Central';
     var SEN = {};
     [['wd','CO NM IL VA NC GA NH MA RI NJ DE'],['ld','TX KS IA MI OH SC ME'],['wr','WY KY WV FL'],['lr','SD OK AR LA MS AL TN'],['li','NE'],['pe','OR ID MT MN AK']].forEach(function (g) { g[1].split(' ').forEach(function (a) { SEN[a] = g[0]; }); });
-    var SCOL = { wd: '#3b8de8', ld: '#9dc4f3', wr: '#e8283c', lr: '#f2959f', li: '#7ee3cc', pe: '#dfe3ee', no: '#8a8f98' };
+    var SCOL = { wd: '#3b8de8', ld: '#9dc4f3', wr: '#e8283c', lr: '#f2959f', li: '#7ee3cc', wi: '#2bb894', pe: '#dfe3ee', no: '#8a8f98' };
     var SLAB = { wd: 'Democrat wins', ld: 'Leans Democrat', wr: 'Republican wins', lr: 'Leans Republican', li: 'Leans independent', pe: 'Race not yet called', no: 'No Senate race' };
     var GOV = {};
     [['wd','CO IL GA PA NY MA RI CT MD'],['ld','NM TX KS NE IA MI OH ME TN'],['wr','WY FL'],['lr','SD WI OK AR AL SC VT NH'],['pe','OR ID NV CA AZ MN AK HI']].forEach(function (g) { g[1].split(' ').forEach(function (a) { GOV[a] = g[0]; }); });
@@ -2106,16 +2106,40 @@ body { margin: 0; }
     function pull() {
       fetch('data/election.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) { applyData(j); if (built) setMode(mode); }).catch(function () { });
     }
-    function stKey(a) { return (mode === 'governor' ? GOV : mode === 'senate' ? SEN : {})[a] || (mode === 'house' ? 'pe' : 'no'); }
+    var live = null;
+    function liveRace(a) { return live && mode !== 'house' && live[mode] ? live[mode][a] : null; }
+    function liveBar(m) {
+      if (!live) return null;
+      if (m === 'house') return live.house && live.house.n ? [live.house.d, live.house.r, 'called of ' + live.house.n + ' races'] : null;
+      var o = live[m] || {}, d = 0, r = 0; Object.keys(o).forEach(function (k) { if (o[k].c === 'wd') d++; else if (o[k].c === 'wr') r++; });
+      return [d, r, 'races called (live)'];
+    }
+    function liveKey(m) {
+      if (!live) return null;
+      if (m === 'house') return live.house && live.house.n ? [['House', 'Called so far: Democrats ' + live.house.d + ', Republicans ' + live.house.r + ', other ' + (live.house.o || 0) + ', of ' + live.house.n + ' races', '#8a8f98']] : null;
+      var o = live[m] || {}, rows = Object.keys(o).map(function (k) { return [k, o[k]]; });
+      rows.sort(function (a, b) { return (b[1].c[0] === 'w') - (a[1].c[0] === 'w') || b[1].pr - a[1].pr; });
+      return rows.slice(0, 12).map(function (x) { var L = x[1], t = L.top || []; return [x[0] + (m === 'governor' ? ' Governor' : ' Senate'), (t[0] ? t[0].n + ' ' + (t[0].pct != null ? t[0].pct + '%' : '') : 'No votes yet') + ' (' + L.pr + '% in)' + (L.c[0] === 'w' ? ', called' : ''), SCOL[L.c] || '#8a8f98']; });
+    }
+    function pullLive() {
+      fetch('/api/election', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { live = j && !j.error && j.at ? j : null; if (built) setMode(mode); }).catch(function () { });
+    }
+    function stKey(a) {
+      var L = liveRace(a); if (L) return L.c; return (mode === 'governor' ? GOV : mode === 'senate' ? SEN : {})[a] || (mode === 'house' ? 'pe' : 'no'); }
     function lean(a) { return SCOL[stKey(a)]; }
-    function stLabel(a) { return mode === 'house' ? 'The House is decided by district, so there is no state-level call. See the PBS map.' : (mode === 'governor' ? 'Governor' : 'Senate') + ': ' + SLAB[stKey(a)] + ' (PBS/AP map as of ' + SNAP_AT + ', not live)'; }
+    function stLabel(a) {
+      var L = liveRace(a);
+      if (L) { var t = L.top || [], nm = mode === 'governor' ? 'Governor' : 'Senate'; return nm + ': ' + (t[0] ? t[0].n + ' ' + t[0].pct + '%' : 'no votes yet') + (t[1] ? ' vs ' + t[1].n + ' ' + t[1].pct + '%' : '') + ', ' + L.pr + '% reporting (civicAPI, unofficial)'; }
+      return stLabel0(a);
+    }
+    function stLabel0(a) { return mode === 'house' ? 'The House is decided by district, so there is no state-level call. See the PBS map.' : (mode === 'governor' ? 'Governor' : 'Senate') + ': ' + SLAB[stKey(a)] + ' (PBS/AP map as of ' + SNAP_AT + ', not live)'; }
     function setMode(m) {
       mode = m;
       Object.keys(fills).forEach(function (a) { fills[a].setAttribute('fill', lean(a)); });
       Array.prototype.forEach.call($('#vtabs').children, function (b) { b.setAttribute('aria-pressed', b.dataset.m === m ? 'true' : 'false'); });
-      var b = BARS[m]; $('#vbar').innerHTML = '<span class="d">' + b[0] + ' <small>Democrat</small></span><small>' + esc(b[2]) + '</small><span class="r"><small>Republican</small> ' + b[1] + '</span>';
-      $('#vnote').textContent = (m === 'house' ? 'House balance and key calls' : 'Key races') + ', copied from PBS News (Associated Press data) at ' + SNAP_AT + '. A snapshot, not live. ' + (m === 'house' ? 'Map shading is not available for the House because it is decided by 435 districts.' : '');
-      $('#vkey').innerHTML = KEY[m].map(function (k) { return '<div style="--c:' + k[2] + '"><b>' + esc(k[0]) + '</b>' + esc(k[1]) + '</div>'; }).join('');
+      var b = liveBar(m) || BARS[m]; $('#vbar').innerHTML = '<span class="d">' + b[0] + ' <small>Democrat</small></span><small>' + esc(b[2]) + '</small><span class="r"><small>Republican</small> ' + b[1] + '</span>';
+      $('#vnote').textContent = live ? 'Live, unofficial results from civicAPI (civicapi.org), updated ' + new Date(live.at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) + '. Where civicAPI has no data, the PBS snapshot from ' + SNAP_AT + ' is used.' : (m === 'house' ? 'House balance and key calls' : 'Key races') + ', copied from PBS News (Associated Press data) at ' + SNAP_AT + '. A snapshot, not live. ' + (m === 'house' ? 'Map shading is not available for the House because it is decided by 435 districts.' : '');
+      $('#vkey').innerHTML = (liveKey(m) || KEY[m]).map(function (k) { return '<div style="--c:' + k[2] + '"><b>' + esc(k[0]) + '</b>' + esc(k[1]) + '</div>'; }).join('');
     }
     $('#vtabs').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) setMode(b.dataset.m); });
     function closeMs(c) { return Date.UTC(2026, 10, 3, 0, 0, 0) + (c + 5) * 3600000; }
@@ -2161,7 +2185,7 @@ body { margin: 0; }
         setInterval(paint, 60000);
         var st = $('#rstatus'); st.textContent = 'Election night: states are shaded to match the PBS Senate map as of ' + SNAP_AT + ' (a hand-copied snapshot, not live): solid blue or red is a win, light blue or red a lean, teal an independent lean, pale grey not yet called, dark grey no Senate race. Dots: amber means polls still open, green means closed. Tap a state for live results (PBS, Associated Press data) and official links. Zoom to the Americas to see the states.'; st.hidden = false; setTimeout(function () { st.hidden = true; }, 12000);
       }
-      paint(); scaleMarkers(); setMode(mode); $('#vpanel').hidden = false; pull(); if (!pull.t) pull.t = setInterval(function () { if (layers.vote) pull(); }, 120000);
+      paint(); scaleMarkers(); setMode(mode); $('#vpanel').hidden = false; pull(); pullLive(); if (!pullLive.t) pullLive.t = setInterval(function () { if (layers.vote) pullLive(); }, 60000); if (!pull.t) pull.t = setInterval(function () { if (layers.vote) pull(); }, 120000);
     };
   })();
 

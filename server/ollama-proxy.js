@@ -338,6 +338,57 @@ async function refreshLive() {
 }
 setTimeout(refreshLive, 12000); setInterval(refreshLive, (Number(process.env.LIVE_MIN) || 10) * 60 * 1000);
 
+/* Live election results from civicAPI (https://civicapi.org, free, unofficial, credit civicapi.org). Pages through today's races, keeps the federal and governor races, and caches a compact summary. */
+let election = { at: null, error: 'not loaded yet', senate: {}, governor: {}, house: { d: 0, r: 0, o: 0, n: 0 } };
+let electionBusy = false;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function civic(q) {
+  for (let i = 0; i < 4; i++) {
+    try { const r = await fetch('https://civicapi.org/api/v2/' + q, { signal: AbortSignal.timeout(25000), headers: { 'user-agent': 'intsum-dashboard' } }); if (r.ok) return await r.json(); } catch (e) { }
+    await sleep(1500 * (i + 1));
+  }
+  throw new Error('civicapi unavailable');
+}
+function partyOf(c) { const p = String(c.party || c.name || ''); return /^dem/i.test(p) ? 'd' : /^rep/i.test(p) ? 'r' : 'i'; }
+function summarize(r) {
+  const cs = (r.candidates || []).slice().sort((a, b) => (b.votes || 0) - (a.votes || 0));
+  const lead = cs[0], tot = cs.reduce((n, c) => n + (c.votes || 0), 0);
+  const win = cs.find(c => c.winner);
+  const top = win || lead;
+  let cls = 'pe';
+  if (top && ((top.votes || 0) > 0 || win)) cls = (win ? 'w' : 'l') + partyOf(top);
+  return { id: r.id, c: cls, pr: r.percent_reporting || 0, tot, name: r.election_name || '', top: cs.slice(0, 3).map(c => ({ n: c.name, p: partyOf(c), v: c.votes || 0, pct: c.percent })) };
+}
+async function refreshElection() {
+  if (electionBusy) return; electionBusy = true;
+  try {
+    const day = '2026-11-03', base = 'race/search?startDate=' + day + '&endDate=' + day, sen = {}, gov = {}, house = { d: 0, r: 0, o: 0, n: 0 };
+    const first = await civic(base + '&limit=100&offset=0');
+    const limit = first.limit || (first.races || []).length || 20, count = first.count || 0;
+    const take = (races) => {
+      for (const r of races || []) {
+        const t = String(r.type || '').toLowerCase();
+        if (r.country && r.country !== 'US') continue;
+        if (/\bstate\b|lieutenant|attorney|secretary|treasurer|auditor|comptroller|superintendent|commissioner|judge|justice|referendum|county|city|school/.test(t)) continue;
+        const st = r.province; if (!st) continue;
+        const sm = summarize(r);
+        if (/governor/.test(t)) { if (!gov[st] || sm.tot > gov[st].tot) gov[st] = sm; }
+        else if (/senate/.test(t)) { if (!sen[st] || sm.tot > sen[st].tot) sen[st] = sm; }
+        else if (/house|represent|congress/.test(t)) { house.n++; if (sm.c[0] === 'w') house[sm.c[1] === 'd' ? 'd' : sm.c[1] === 'r' ? 'r' : 'o']++; }
+      }
+    };
+    take(first.races);
+    const offs = []; for (let o = limit; o < count; o += limit) offs.push(o);
+    let k = 0, failed = 0;
+    await Promise.all(Array.from({ length: 4 }, async () => {
+      while (k < offs.length) { const o = offs[k++]; try { take((await civic(base + '&limit=' + limit + '&offset=' + o)).races); } catch (e) { failed++; } }
+    }));
+    election = { at: new Date().toISOString(), error: null, count, failedPages: failed, senate: sen, governor: gov, house, source: 'civicapi.org (unofficial)' };
+    console.log('Election: ' + Object.keys(sen).length + ' senate, ' + Object.keys(gov).length + ' governor, ' + house.n + ' house races, ' + failed + ' failed pages');
+  } catch (e) { election.error = String(e.message || e).slice(0, 60); } finally { electionBusy = false; }
+}
+setTimeout(refreshElection, 6000); setInterval(refreshElection, 3 * 60 * 1000);
+
 const server = http.createServer(async (req, res) => {
   const { sock, ip } = clientIp(req);
   if (!ALLOW.includes(sock)) { res.writeHead(403); return res.end(); }
@@ -350,6 +401,7 @@ const server = http.createServer(async (req, res) => {
   }
   if (req.method === 'GET' && path === '/feeds') return send(res, 200, feeds);
   if (req.method === 'GET' && path === '/live') return send(res, 200, live);
+  if (req.method === 'GET' && path === '/election') return send(res, 200, election);
   if (req.method === 'GET' && path === '/resolve') {
     if (!resolveOk()) return send(res, 429, { error: 'slow down' });
     let q = ''; try { q = new URL(req.url, 'http://x').searchParams.get('q') || ''; } catch (e) { }
