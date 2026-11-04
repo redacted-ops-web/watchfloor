@@ -2091,7 +2091,7 @@ body { margin: 0; }
             tp.innerHTML = '<button class="x" aria-label="Close">×</button><span class="rg">Election night</span><h3>' + esc(q[1]) + '</h3>'
               + '<p class="tkm">' + (done ? 'Polls have closed (last polls about ' + hm(q[4]) + ').' : 'Polls still open until about ' + hm(q[4]) + '.') + ' Times are approximate.</p>'
               + '<p class="tkm">No vote counts here. Results are published by the state; unofficial tallies come from news organizations.</p>'
-              + '<div class="acts"><a class="top-btn" target="_blank" rel="noopener" href="https://www.usa.gov/election-results">Official results sites</a> <a class="top-btn" target="_blank" rel="noopener" href="https://ballotpedia.org/Elections_in_' + encodeURIComponent(q[1].replace(/ /g, '_')) + ',_2026">Ballotpedia</a></div>';
+              + '<div class="acts"><a class="top-btn" target="_blank" rel="noopener" href="https://www.pbs.org/newshour/elections-2026/results">Live results (PBS/AP)</a> <a class="top-btn" target="_blank" rel="noopener" href="https://www.usa.gov/election-results">Official state sites</a> <a class="top-btn" target="_blank" rel="noopener" href="https://ballotpedia.org/Elections_in_' + encodeURIComponent(q[1].replace(/ /g, '_')) + ',_2026">Ballotpedia</a></div>';
             tp.hidden = false; tp.querySelector('.x').addEventListener('click', function () { tp.hidden = true; });
             var pw = Math.min(300, cw - 16), ph = tp.offsetHeight || 150, mx = (node.x - vb.x) / vb.w * cw, my = (node.y - vb.y) / vb.h * ch;
             tp.style.left = Math.max(8, Math.min(cw - pw - 8, mx - pw / 2)) + 'px';
@@ -2100,7 +2100,7 @@ body { margin: 0; }
           root.appendChild(g); trkNodes.vote.push(node);
         });
         setInterval(paint, 60000);
-        var st = $('#rstatus'); st.textContent = 'Election night: amber means polls still open, green means closed. Times are approximate and there are no vote counts yet. Tap a state for official results links. Zoom to the Americas to see the states.'; st.hidden = false; setTimeout(function () { st.hidden = true; }, 12000);
+        var st = $('#rstatus'); st.textContent = 'Election night: amber means polls still open, green means closed. Times are approximate and there are no vote counts yet. Tap a state for live results (PBS, Associated Press data) and official links. Zoom to the Americas to see the states.'; st.hidden = false; setTimeout(function () { st.hidden = true; }, 12000);
       }
       paint(); scaleMarkers();
     };
